@@ -2,7 +2,11 @@
 name = "rusvid"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+resvg = "0.23.0"
+tiny-skia = "0.7.0"
+usvg = "0.23.0"
