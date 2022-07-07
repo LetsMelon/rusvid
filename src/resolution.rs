@@ -1,12 +1,13 @@
 pub type ResolutionType = (usize, usize);
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Resolution {
     HD,
     FHD,
     UHD,
     FourK,
-    Custom(ResolutionType),
+    /// width, height
+    Custom(usize, usize),
 }
 
 impl Resolution {
@@ -16,8 +17,16 @@ impl Resolution {
             Resolution::FHD => (1920, 1080),
             Resolution::UHD => (3840, 2160),
             Resolution::FourK => (4096, 2160),
-            Resolution::Custom(res) => *res,
+            Resolution::Custom(w, h) => (*w, *h),
         }
+    }
+
+    pub fn width(&self) -> usize {
+        self.value().0
+    }
+
+    pub fn height(&self) -> usize {
+        self.value().1
     }
 
     pub fn calculate_pixels(&self) -> usize {

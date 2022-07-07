@@ -8,5 +8,7 @@ license = "Apache-2.0"
 
 [dependencies]
 resvg = "0.23.0"
-tiny-skia = "0.7.0"
+tiny-skia = "0.6.5"
 usvg = "0.23.0"
+debug-ignore = "1.0.2"
+anyhow = "1.0.58"
