@@ -1,12 +1,13 @@
-use crate::object::Object;
-use crate::resolution::Resolution;
 use anyhow::Result;
 use debug_ignore::DebugIgnore;
 use resvg::render;
+use std::fs;
 use std::ops::{Deref, DerefMut};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tiny_skia::{Pixmap, Transform};
 use usvg::{AspectRatio, FitTo, Size, Svg, Tree, ViewBox};
+
+use crate::resolution::Resolution;
 
 #[derive(Debug)]
 pub struct Composition {
@@ -58,7 +59,7 @@ impl Composition {
         })
     }
 
-    pub fn save_single(&self, path: &Path) -> Result<()> {
+    pub fn render_single(&self, path: &Path) -> Result<()> {
         let pixmap_size = self.rtree().svg_node().size.to_screen_size();
 
         let mut pixmap = Pixmap::new(pixmap_size.width(), pixmap_size.height())
@@ -74,6 +75,25 @@ impl Composition {
         pixmap.save_png(path)?;
 
         Ok(())
+    }
+
+    pub fn render(&self, path: &Path) -> Result<Vec<PathBuf>> {
+        fs::create_dir(path);
+
+        let mut frames_array = Vec::new();
+
+        for i in 0..self.calculate_frames() {
+            println!("{}", i);
+
+            let filename = format!("frame_{i}.png");
+            let file_path = path.join(Path::new(&filename));
+            self.render_single(file_path.as_path());
+            frames_array.push(file_path);
+        }
+
+        todo!("Make video");
+
+        Ok(frames_array)
     }
 }
 

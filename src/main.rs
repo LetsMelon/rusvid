@@ -1,5 +1,4 @@
 mod composition;
-mod object;
 mod resolution;
 
 use std::convert::Infallible;
@@ -64,7 +63,9 @@ fn main() {
             ..usvg::Path::default()
         }));
 
-    composition
-        .save_single(Path::new("./out.png"))
-        .expect("Error: while saving as png");
+    let paths = composition
+        .render(Path::new("./out"))
+        .expect("Error: while rendering as png");
+
+    println!("{:?}", paths);
 }
