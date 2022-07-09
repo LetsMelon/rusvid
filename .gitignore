@@ -2,5 +2,6 @@
 .idea/
 **.DS_Store
 **.svg
+**.mp4
 out.png
 out/

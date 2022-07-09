@@ -1,11 +1,15 @@
+use crate::renderer::build_command;
 use anyhow::Result;
 use debug_ignore::DebugIgnore;
 use resvg::render;
+use std::ffi::OsStr;
 use std::fs;
 use std::ops::{Deref, DerefMut};
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::process::Command;
+use std::rc::Rc;
 use tiny_skia::{Pixmap, Transform};
-use usvg::{AspectRatio, FitTo, Size, Svg, Tree, ViewBox};
+use usvg::{AspectRatio, FitTo, PathData, Size, Svg, Transform as UsvgTransform, Tree, ViewBox};
 
 use crate::resolution::Resolution;
 
@@ -15,7 +19,7 @@ pub struct Composition {
     resolution: Resolution,
 
     /// The fixed framerate of the composition in `frames per seconds`
-    pub framerate: f32,
+    pub framerate: u8,
 
     /// The duration of the composition in seconds
     pub duration: u16,
@@ -77,23 +81,46 @@ impl Composition {
         Ok(())
     }
 
-    pub fn render(&self, path: &Path) -> Result<Vec<PathBuf>> {
-        fs::create_dir(path);
-
-        let mut frames_array = Vec::new();
+    pub fn render(
+        &self,
+        out_path: &Path,
+        tmp_path: &Path,
+        mut box_position: Rc<PathData>,
+    ) -> Result<()> {
+        let exists = fs::try_exists(tmp_path)?;
+        if exists {
+            fs::remove_dir_all(tmp_path)?;
+        }
+        fs::create_dir(tmp_path)?;
 
         for i in 0..self.calculate_frames() {
             println!("{}", i);
 
-            let filename = format!("frame_{i}.png");
-            let file_path = path.join(Path::new(&filename));
-            self.render_single(file_path.as_path());
-            frames_array.push(file_path);
+            let filename = format!("{}.png", i + 1);
+            let file_path = tmp_path.join(Path::new(&filename));
+            self.render_single(file_path.as_path())?;
+
+            // TODO: make safe
+            // Test 1:
+            // let mut reference_position = box_position.borrow_mut();
+            // reference_position.transform(UsvgTransform::new_translate(5.0, 4.0));
+            unsafe {
+                let pd = Rc::get_mut_unchecked(&mut box_position);
+                pd.transform(UsvgTransform::new_translate(5.0, 4.0));
+            }
         }
 
-        todo!("Make video");
+        let mut command = build_command(tmp_path, out_path, self.framerate)?;
 
-        Ok(frames_array)
+        let exists = fs::try_exists(out_path)?;
+        if exists {
+            fs::remove_file(out_path)?;
+        }
+
+        command.output()?;
+        println!("Saved as: {}", out_path.to_str().unwrap());
+
+        Ok(())
     }
 }
 
@@ -103,7 +130,7 @@ impl Default for Composition {
 
         Composition {
             resolution: res,
-            framerate: 24.0,
+            framerate: 60,
             duration: 10,
             name: "UNKNOWN".to_string(),
             rtree: DebugIgnore(Composition::create_tree_from_resolution(res.clone())),
@@ -114,7 +141,7 @@ impl Default for Composition {
 // Metrics
 impl Composition {
     pub fn calculate_frames(&self) -> usize {
-        (self.framerate * self.duration as f32) as usize
+        (self.framerate as u16 * self.duration) as usize
     }
 
     pub fn calculate_bytes(&self) -> usize {
