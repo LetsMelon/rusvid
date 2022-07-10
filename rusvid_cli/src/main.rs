@@ -1,3 +1,5 @@
+#![feature(fs_try_exists)]
+
 use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;
 use rusvid_lib::resolution::Resolution;
