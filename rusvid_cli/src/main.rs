@@ -4,7 +4,7 @@ use rusvid_lib::resolution::Resolution;
 use rusvid_lib::utils::color_from_hex;
 use std::path::Path;
 use std::rc::Rc;
-use usvg::{NodeExt, PathData};
+use usvg::NodeExt;
 
 fn main() {
     let mut composition = Composition::new("my_first".to_string(), Resolution::FHD);

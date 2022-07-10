@@ -7,8 +7,4 @@ edition = "2021"
 
 [dependencies]
 rusvid_lib = { path = "../rusvid_lib"}
-resvg = "0.23.0"
-tiny-skia = "0.6.5"
 usvg = "0.23.0"
-debug-ignore = "1.0.2"
-anyhow = "1.0.58"
