@@ -9,6 +9,7 @@ use std::rc::Rc;
 use tiny_skia::{Pixmap, Transform};
 use usvg::{AspectRatio, FitTo, PathData, Size, Svg, Transform as UsvgTransform, Tree, ViewBox};
 
+use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
 
 #[derive(Debug)]
@@ -90,9 +91,9 @@ impl Composition {
         }
         fs::create_dir(tmp_path)?;
 
-        let frames = self.calculate_frames();
+        let frames = self.frames();
         for i in 0..frames {
-            println!("{}/{}", i + 1, frames);
+            println!("{:03}/{:03}", i + 1, frames);
 
             let filename = format!("{}.png", i + 1);
             let file_path = tmp_path.join(Path::new(&filename));
@@ -135,15 +136,20 @@ impl Default for Composition {
     }
 }
 
-// Metrics
-impl Composition {
-    pub fn calculate_frames(&self) -> usize {
+impl MetricsVideo for Composition {
+    fn frames(&self) -> usize {
         (self.framerate as u16 * self.duration) as usize
     }
 
-    pub fn calculate_bytes(&self) -> usize {
-        let frames = self.calculate_frames();
-        let per_frame_bytes = self.resolution.calculate_bytes(3);
+    fn pixels(&self) -> usize {
+        self.frames() * self.resolution.pixels()
+    }
+}
+
+impl MetricsSize for Composition {
+    fn bytes(&self) -> usize {
+        let frames = self.frames();
+        let per_frame_bytes = self.resolution.bytes();
 
         frames * per_frame_bytes
     }

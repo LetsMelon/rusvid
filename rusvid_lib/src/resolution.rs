@@ -1,3 +1,5 @@
+use crate::metrics::{MetricsSize, MetricsVideo};
+
 pub type ResolutionType = (usize, usize);
 
 #[derive(Debug, Copy, Clone)]
@@ -28,17 +30,25 @@ impl Resolution {
     pub fn height(&self) -> usize {
         self.value().1
     }
+}
 
-    pub fn calculate_pixels(&self) -> usize {
+impl MetricsVideo for Resolution {
+    fn frames(&self) -> usize {
+        1
+    }
+
+    fn pixels(&self) -> usize {
         let res = self.value();
 
         res.0 * res.1
     }
+}
 
-    pub fn calculate_bytes(&self, pixel_depth: usize) -> usize {
-        let pixels = self.calculate_pixels();
+impl MetricsSize for Resolution {
+    fn bytes(&self) -> usize {
+        let pixels = self.pixels();
 
-        pixels * pixel_depth
+        pixels * 3
     }
 }
 
