@@ -279,7 +279,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "rusvid"
+name = "rusvid_cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "debug-ignore",
+ "resvg",
+ "rusvid_lib",
+ "tiny-skia",
+ "usvg",
+]
+
+[[package]]
+name = "rusvid_lib"
 version = "0.1.0"
 dependencies = [
  "anyhow",

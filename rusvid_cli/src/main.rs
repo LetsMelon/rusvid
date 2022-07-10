@@ -1,24 +1,13 @@
-#![feature(path_try_exists)]
-#![feature(get_mut_unchecked)]
-
-mod composition;
-mod figures;
-mod renderer;
-mod resolution;
-mod utils;
-
+use rusvid_lib::composition::Composition;
+use rusvid_lib::figures::circle::circle;
+use rusvid_lib::resolution::Resolution;
+use rusvid_lib::utils::color_from_hex;
 use std::path::Path;
 use std::rc::Rc;
-
-use usvg::{NodeExt, PathData, PathSegment};
-
-use crate::composition::Composition;
-use crate::figures::circle::circle;
-use crate::resolution::Resolution;
-use crate::utils::color_from_hex;
+use usvg::{NodeExt, PathData};
 
 fn main() {
-    let mut composition = Composition::new("Test".to_string(), Resolution::FourK);
+    let mut composition = Composition::new("my_first".to_string(), Resolution::FHD);
 
     composition
         .rtree_mut()
