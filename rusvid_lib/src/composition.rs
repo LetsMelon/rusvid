@@ -28,14 +28,76 @@ pub struct Composition {
     rtree: DebugIgnore<Tree>,
 }
 
-impl Composition {
-    pub fn new(name: String, resolution: Resolution) -> Composition {
-        Composition {
-            name,
-            rtree: DebugIgnore(Composition::create_tree_from_resolution(resolution)),
-            resolution,
-            ..Composition::default()
+#[derive(Debug)]
+pub struct CompositionBuilder {
+    resolution: Resolution,
+    framerate: u8,
+    duration: u16,
+    name: String,
+}
+
+impl Default for CompositionBuilder {
+    fn default() -> Self {
+        let res = Resolution::default();
+
+        CompositionBuilder {
+            resolution: res,
+            framerate: 30,
+            duration: 10,
+            name: "UNKNOWN".to_string(),
         }
+    }
+}
+
+impl CompositionBuilder {
+    fn create_tree_from_resolution(resolution: Resolution) -> Tree {
+        let size = Size::new(resolution.width() as f64, resolution.height() as f64).unwrap();
+
+        Tree::create(Svg {
+            size,
+            view_box: ViewBox {
+                rect: size.to_rect(0.0, 0.0),
+                aspect: AspectRatio::default(),
+            },
+        })
+    }
+
+    pub fn build(self) -> Composition {
+        Composition {
+            resolution: self.resolution,
+            framerate: self.framerate,
+            duration: self.duration,
+            name: self.name,
+            rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(
+                self.resolution,
+            )),
+        }
+    }
+
+    pub fn framerate(mut self, framerate: u8) -> Self {
+        self.framerate = framerate;
+        self
+    }
+
+    pub fn resolution(mut self, resolution: Resolution) -> Self {
+        self.resolution = resolution;
+        self
+    }
+
+    pub fn duration(mut self, duration: u16) -> Self {
+        self.duration = duration;
+        self
+    }
+
+    pub fn name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+}
+
+impl Composition {
+    pub fn builder() -> CompositionBuilder {
+        CompositionBuilder::default()
     }
 
     pub fn resolution(&self) -> Resolution {
@@ -48,18 +110,6 @@ impl Composition {
 
     pub fn rtree_mut(&mut self) -> &mut Tree {
         self.rtree.deref_mut()
-    }
-
-    fn create_tree_from_resolution(resolution: Resolution) -> Tree {
-        let size = Size::new(resolution.width() as f64, resolution.height() as f64).unwrap();
-
-        Tree::create(Svg {
-            size,
-            view_box: ViewBox {
-                rect: size.to_rect(0.0, 0.0),
-                aspect: AspectRatio::default(),
-            },
-        })
     }
 
     pub fn render_single(&self, path: &Path) -> Result<()> {
@@ -124,15 +174,7 @@ impl Composition {
 
 impl Default for Composition {
     fn default() -> Self {
-        let res = Resolution::default();
-
-        Composition {
-            resolution: res,
-            framerate: 30,
-            duration: 10,
-            name: "UNKNOWN".to_string(),
-            rtree: DebugIgnore(Composition::create_tree_from_resolution(res)),
-        }
+        Composition::builder().build()
     }
 }
 
@@ -152,5 +194,26 @@ impl MetricsSize for Composition {
         let per_frame_bytes = self.resolution.bytes();
 
         frames * per_frame_bytes
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::composition::Composition;
+    use crate::resolution::Resolution;
+
+    #[test]
+    fn takes_arguments_and_build_composition() {
+        let comp = Composition::builder()
+            .name("test")
+            .resolution(Resolution::HD)
+            .duration(15)
+            .framerate(5)
+            .build();
+
+        assert_eq!(comp.resolution, Resolution::HD);
+        assert_eq!(comp.framerate, 5);
+        assert_eq!(comp.duration, 15);
+        assert_eq!(comp.name, "test".to_string());
     }
 }

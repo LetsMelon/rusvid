@@ -2,7 +2,7 @@ use crate::metrics::{MetricsSize, MetricsVideo};
 
 pub type ResolutionType = (usize, usize);
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Resolution {
     HD,
     FHD,

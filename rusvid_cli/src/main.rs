@@ -9,7 +9,11 @@ use std::rc::Rc;
 use usvg::{NodeExt, Transform};
 
 fn main() {
-    let mut composition = Composition::new("my_first".to_string(), Resolution::FHD);
+    let mut composition = Composition::builder()
+        .resolution(Resolution::FHD)
+        .framerate(30)
+        .duration(5)
+        .build();
 
     composition
         .rtree_mut()
