@@ -1,11 +1,12 @@
 use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;
 use rusvid_lib::figures::rect::rect;
+use rusvid_lib::figures::triangle::equilateral_triangle;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::utils::color_from_hex;
 use std::path::Path;
 use std::rc::Rc;
-use usvg::NodeExt;
+use usvg::{NodeExt, Transform};
 
 fn main() {
     let mut composition = Composition::new("my_first".to_string(), Resolution::FHD);
@@ -75,6 +76,22 @@ fn main() {
         .append_kind(usvg::NodeKind::Path(usvg::Path {
             fill,
             data: Rc::new(circle(700.0, 850.0, 600.0)),
+            ..usvg::Path::default()
+        }));
+
+    let fill = Some(usvg::Fill {
+        paint: usvg::Paint::Link("lg1".into()),
+        ..usvg::Fill::default()
+    });
+
+    let mut path = equilateral_triangle(400.0, 400.0, 350.0);
+    path.transform(Transform::new_rotate(2.5));
+    composition
+        .rtree()
+        .root()
+        .append_kind(usvg::NodeKind::Path(usvg::Path {
+            fill,
+            data: Rc::new(path),
             ..usvg::Path::default()
         }));
 
