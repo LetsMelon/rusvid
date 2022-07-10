@@ -85,8 +85,7 @@ impl Composition {
         tmp_path: &Path,
         mut box_position: Rc<PathData>,
     ) -> Result<()> {
-        let exists = fs::try_exists(tmp_path)?;
-        if exists {
+        if tmp_path.exists() {
             fs::remove_dir_all(tmp_path)?;
         }
         fs::create_dir(tmp_path)?;
@@ -111,8 +110,7 @@ impl Composition {
 
         let mut command = build_command(tmp_path, out_path, self.framerate)?;
 
-        let exists = fs::try_exists(out_path)?;
-        if exists {
+        if out_path.exists() {
             fs::remove_file(out_path)?;
         }
 

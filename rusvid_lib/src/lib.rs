@@ -1,4 +1,3 @@
-#![feature(path_try_exists)]
 #![feature(get_mut_unchecked)]
 
 pub mod composition;
