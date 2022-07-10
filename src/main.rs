@@ -2,6 +2,7 @@
 #![feature(get_mut_unchecked)]
 
 mod composition;
+mod figures;
 mod renderer;
 mod resolution;
 mod utils;
@@ -9,9 +10,10 @@ mod utils;
 use std::path::Path;
 use std::rc::Rc;
 
-use usvg::NodeExt;
+use usvg::{NodeExt, PathData, PathSegment};
 
 use crate::composition::Composition;
+use crate::figures::circle::circle;
 use crate::resolution::Resolution;
 use crate::utils::color_from_hex;
 
@@ -77,20 +79,14 @@ fn main() {
         ..usvg::Fill::default()
     });
 
+    let mut path = PathData::with_capacity(9);
+    path.extend_from_slice(&circle(700.0, 850.0, 600.0));
     composition
         .rtree()
         .root()
         .append_kind(usvg::NodeKind::Path(usvg::Path {
             fill,
-            data: Rc::new(usvg::PathData::from_rect(
-                usvg::Rect::new(
-                    composition.resolution().width() as f64 / 2.0,
-                    composition.resolution().height() as f64 / 3.0,
-                    200.0,
-                    150.0,
-                )
-                .unwrap(),
-            )),
+            data: Rc::new(path),
             ..usvg::Path::default()
         }));
 

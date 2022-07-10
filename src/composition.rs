@@ -93,8 +93,9 @@ impl Composition {
         }
         fs::create_dir(tmp_path)?;
 
-        for i in 0..self.calculate_frames() {
-            println!("{}", i);
+        let frames = self.calculate_frames();
+        for i in 0..frames {
+            println!("{}/{}", i + 1, frames);
 
             let filename = format!("{}.png", i + 1);
             let file_path = tmp_path.join(Path::new(&filename));
@@ -130,7 +131,7 @@ impl Default for Composition {
 
         Composition {
             resolution: res,
-            framerate: 60,
+            framerate: 30,
             duration: 10,
             name: "UNKNOWN".to_string(),
             rtree: DebugIgnore(Composition::create_tree_from_resolution(res.clone())),
