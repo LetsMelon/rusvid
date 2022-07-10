@@ -1,4 +1,5 @@
-use usvg::PathSegment;
+use crate::utils::equal_delta;
+use usvg::{PathData, PathSegment};
 
 #[inline]
 fn sin_radius(angle: f64, radius: f64) -> f64 {
@@ -10,11 +11,20 @@ fn cos_radius(angle: f64, radius: f64) -> f64 {
     angle.cos() * radius
 }
 
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Point2d {
     x: f64,
     y: f64,
 }
 
+impl PartialEq for Point2d {
+    fn eq(&self, other: &Self) -> bool {
+        equal_delta(self.x, other.x, 0.1) && equal_delta(self.y, other.y, 0.1)
+    }
+}
+impl Eq for Point2d {}
+
+#[inline]
 pub fn arc_segment(c_x: f64, c_y: f64, radius: f64, a1: f64, a2: f64) -> (PathSegment, Point2d) {
     let start_angle = a1 * (std::f64::consts::PI / 180.0);
     let end_angle = a2 * (std::f64::consts::PI / 180.0);
@@ -43,6 +53,7 @@ pub fn arc_segment(c_x: f64, c_y: f64, radius: f64, a1: f64, a2: f64) -> (PathSe
     )
 }
 
+#[inline]
 pub fn arc(c_x: f64, c_y: f64, radius: f64, start_angle: f64, end_angle: f64) -> Vec<PathSegment> {
     let mut segments = Vec::new();
 
@@ -75,12 +86,20 @@ pub fn arc(c_x: f64, c_y: f64, radius: f64, start_angle: f64, end_angle: f64) ->
     segments
 }
 
-pub fn circle(c_x: f64, c_y: f64, radius: f64) -> Vec<PathSegment> {
+#[inline]
+pub fn circle_raw(c_x: f64, c_y: f64, radius: f64) -> Vec<PathSegment> {
     let mut segments = arc(c_x, c_y, radius, 0.0, 360.0);
 
     segments.push(PathSegment::ClosePath);
 
     segments
+}
+
+#[inline]
+pub fn circle(c_x: f64, c_y: f64, radius: f64) -> PathData {
+    let mut path = PathData::with_capacity(9);
+    path.extend_from_slice(&circle_raw(c_x, c_y, radius));
+    path
 }
 
 #[cfg(test)]
@@ -128,7 +147,7 @@ mod tests {
 
     #[test]
     fn calculate_circle() {
-        let circle = circle(0.0, 0.0, 100.0);
+        let circle = circle_raw(0.0, 0.0, 100.0);
 
         assert_eq!(circle.len(), 9);
 

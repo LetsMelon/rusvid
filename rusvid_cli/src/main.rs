@@ -68,14 +68,12 @@ fn main() {
         ..usvg::Fill::default()
     });
 
-    let mut path = PathData::with_capacity(9);
-    path.extend_from_slice(&circle(700.0, 850.0, 600.0));
     composition
         .rtree()
         .root()
         .append_kind(usvg::NodeKind::Path(usvg::Path {
             fill,
-            data: Rc::new(path),
+            data: Rc::new(circle(700.0, 850.0, 600.0)),
             ..usvg::Path::default()
         }));
 
