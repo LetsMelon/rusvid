@@ -92,6 +92,7 @@ fn main() {
 
     let fill = Some(usvg::Fill {
         paint: usvg::Paint::Link("lg1".into()),
+        opacity: usvg::Opacity::new(0.75),
         ..usvg::Fill::default()
     });
 
