@@ -2,11 +2,9 @@ use crate::renderer::build_command;
 use anyhow::Result;
 use debug_ignore::DebugIgnore;
 use resvg::render;
-use std::ffi::OsStr;
 use std::fs;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
-use std::process::Command;
 use std::rc::Rc;
 use tiny_skia::{Pixmap, Transform};
 use usvg::{AspectRatio, FitTo, PathData, Size, Svg, Transform as UsvgTransform, Tree, ViewBox};
@@ -69,7 +67,7 @@ impl Composition {
         let mut pixmap = Pixmap::new(pixmap_size.width(), pixmap_size.height())
             .expect("Error while creating pixmap");
         render(
-            &self.rtree(),
+            self.rtree(),
             FitTo::Original,
             Transform::default(),
             pixmap.as_mut(),
@@ -134,7 +132,7 @@ impl Default for Composition {
             framerate: 30,
             duration: 10,
             name: "UNKNOWN".to_string(),
-            rtree: DebugIgnore(Composition::create_tree_from_resolution(res.clone())),
+            rtree: DebugIgnore(Composition::create_tree_from_resolution(res)),
         }
     }
 }

@@ -85,7 +85,7 @@ fn main() {
         ..usvg::Fill::default()
     });
 
-    let mut position = Rc::new(usvg::PathData::from_rect(
+    let position = Rc::new(usvg::PathData::from_rect(
         usvg::Rect::new(
             20.0,
             20.0,

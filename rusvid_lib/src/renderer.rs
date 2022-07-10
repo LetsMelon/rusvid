@@ -3,7 +3,7 @@ use std::ffi::OsStr;
 use std::path::Path;
 use std::process::Command;
 
-pub fn build_command(tmp_path: &Path, out_path: &Path, framerate: u8) -> Result<Command> {
+pub fn build_command(_tmp_path: &Path, out_path: &Path, framerate: u8) -> Result<Command> {
     // I have no idea from ffmpeg
     // https://stackoverflow.com/questions/39887869/ffmpeg-whatsapp-video-format-not-supported
     // https://stackoverflow.com/questions/3561715/using-ffmpeg-to-encode-a-high-quality-video

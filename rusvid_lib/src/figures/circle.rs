@@ -46,12 +46,12 @@ pub fn arc_segment(c_x: f64, c_y: f64, radius: f64, a1: f64, a2: f64) -> (PathSe
 pub fn arc(c_x: f64, c_y: f64, radius: f64, start_angle: f64, end_angle: f64) -> Vec<PathSegment> {
     let mut segments = Vec::new();
 
-    let mut a2 = 0.0;
+    let mut a2;
     let mut a1 = start_angle;
 
-    let mut totalAngle = (360.0_f64).min(end_angle - start_angle);
-    while totalAngle > 0.0 {
-        a2 = a1 + totalAngle.min(90.0);
+    let mut total_angle = (360.0_f64).min(end_angle - start_angle);
+    while total_angle > 0.0 {
+        a2 = a1 + total_angle.min(90.0);
 
         let (segment, point_2d) = arc_segment(c_x, c_y, radius, a1, a2);
         let point = if a1 == start_angle {
@@ -68,7 +68,7 @@ pub fn arc(c_x: f64, c_y: f64, radius: f64, start_angle: f64, end_angle: f64) ->
         segments.push(point);
         segments.push(segment);
 
-        totalAngle -= (a2 - a1).abs();
+        total_angle -= (a2 - a1).abs();
         a1 = a2;
     }
 
