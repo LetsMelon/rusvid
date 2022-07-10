@@ -1,5 +1,6 @@
 use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;
+use rusvid_lib::figures::rect::rect;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::utils::color_from_hex;
 use std::path::Path;
@@ -83,14 +84,11 @@ fn main() {
         ..usvg::Fill::default()
     });
 
-    let position = Rc::new(usvg::PathData::from_rect(
-        usvg::Rect::new(
-            20.0,
-            20.0,
-            composition.resolution().width() as f64 / 2.0,
-            composition.resolution().height() as f64 / 3.0,
-        )
-        .unwrap(),
+    let position = Rc::new(rect(
+        20.0,
+        20.0,
+        composition.resolution().width() as f64 / 2.0,
+        composition.resolution().height() as f64 / 3.0,
     ));
 
     composition
