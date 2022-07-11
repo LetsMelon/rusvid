@@ -2,7 +2,7 @@ use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;
 use rusvid_lib::figures::rect::rect;
 use rusvid_lib::figures::triangle::equilateral_triangle;
-use rusvid_lib::renderer::ffmpeg::FFmpegRenderer;
+use rusvid_lib::renderer::ffmpeg::FfmpegRenderer;
 use rusvid_lib::renderer::Renderer;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::usvg::{
@@ -106,7 +106,8 @@ fn main() {
         ..Path::default()
     }));
 
-    let renderer = FFmpegRenderer::default();
+    let mut renderer = FfmpegRenderer::default();
+    renderer.framerate = composition.framerate;
     renderer
         .render(
             composition,
