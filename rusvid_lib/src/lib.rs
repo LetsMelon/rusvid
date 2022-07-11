@@ -5,4 +5,5 @@ pub mod figures;
 mod metrics;
 pub mod renderer;
 pub mod resolution;
+pub mod types;
 pub mod utils;

@@ -7,10 +7,14 @@ use std::ops::{Deref, DerefMut};
 use std::path::Path;
 use std::rc::Rc;
 use tiny_skia::{Pixmap, Transform};
-use usvg::{AspectRatio, FitTo, PathData, Size, Svg, Transform as UsvgTransform, Tree, ViewBox};
+use usvg::{
+    AspectRatio, Fill, FitTo, NodeExt, Paint, PathData, Size, Svg, Transform as UsvgTransform,
+    Tree, ViewBox,
+};
 
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
+use crate::types::{Node, NodeKind};
 
 #[derive(Debug)]
 pub struct Composition {
@@ -96,18 +100,22 @@ impl CompositionBuilder {
 }
 
 impl Composition {
+    #[inline(always)]
     pub fn builder() -> CompositionBuilder {
         CompositionBuilder::default()
     }
 
+    #[inline(always)]
     pub fn resolution(&self) -> Resolution {
         self.resolution
     }
 
+    #[inline(always)]
     pub fn rtree(&self) -> &Tree {
         self.rtree.deref()
     }
 
+    #[inline(always)]
     pub fn rtree_mut(&mut self) -> &mut Tree {
         self.rtree.deref_mut()
     }
@@ -156,6 +164,7 @@ impl Composition {
             unsafe {
                 let pd = Rc::get_mut_unchecked(&mut box_position);
                 pd.transform(UsvgTransform::new_translate(5.0, 4.0));
+                pd.transform(UsvgTransform::new_rotate(65.0 / (frames as f64)));
             }
         }
 
@@ -169,6 +178,26 @@ impl Composition {
         println!("Saved as: {}", out_path.to_str().unwrap());
 
         Ok(())
+    }
+
+    #[inline]
+    pub fn add_to_defs(&mut self, kind: NodeKind) -> Node {
+        self.rtree_mut().append_to_defs(kind)
+    }
+
+    #[inline]
+    pub fn add_to_root(&self, kind: NodeKind) -> Node {
+        self.rtree().root().append_kind(kind)
+    }
+
+    #[inline]
+    pub fn fill_with_link(&self, id: &str) -> Option<Fill> {
+        // TODO add check if the paint is in the defs?
+
+        Some(Fill {
+            paint: Paint::Link(id.to_string()),
+            ..Fill::default()
+        })
     }
 }
 
