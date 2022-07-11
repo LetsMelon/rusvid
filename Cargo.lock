@@ -283,7 +283,6 @@ name = "rusvid_cli"
 version = "0.1.0"
 dependencies = [
  "rusvid_lib",
- "usvg",
 ]
 
 [[package]]

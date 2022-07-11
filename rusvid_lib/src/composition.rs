@@ -4,11 +4,10 @@ use resvg::render;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
 use tiny_skia::{Pixmap, Transform};
-use usvg::{AspectRatio, Fill, FitTo, NodeExt, Paint, Size, Svg, Tree, ViewBox};
+use usvg::{AspectRatio, Fill, FitTo, Node, NodeExt, NodeKind, Paint, Size, Svg, Tree, ViewBox};
 
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
-use crate::types::{Node, NodeKind};
 
 #[derive(Debug)]
 pub struct Composition {
