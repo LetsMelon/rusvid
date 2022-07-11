@@ -1,16 +1,10 @@
-use crate::renderer::build_command;
 use anyhow::Result;
 use debug_ignore::DebugIgnore;
 use resvg::render;
-use std::fs;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
-use std::rc::Rc;
 use tiny_skia::{Pixmap, Transform};
-use usvg::{
-    AspectRatio, Fill, FitTo, NodeExt, Paint, PathData, Size, Svg, Transform as UsvgTransform,
-    Tree, ViewBox,
-};
+use usvg::{AspectRatio, Fill, FitTo, NodeExt, Paint, Size, Svg, Tree, ViewBox};
 
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
@@ -134,48 +128,6 @@ impl Composition {
         .expect("Error while rendering");
 
         pixmap.save_png(path)?;
-
-        Ok(())
-    }
-
-    pub fn render(
-        &self,
-        out_path: &Path,
-        tmp_path: &Path,
-        mut box_position: Rc<PathData>,
-    ) -> Result<()> {
-        if tmp_path.exists() {
-            fs::remove_dir_all(tmp_path)?;
-        }
-        fs::create_dir(tmp_path)?;
-
-        let frames = self.frames();
-        for i in 0..frames {
-            println!("{:03}/{:03}", i + 1, frames);
-
-            let filename = format!("{}.png", i + 1);
-            let file_path = tmp_path.join(Path::new(&filename));
-            self.render_single(file_path.as_path())?;
-
-            // TODO: make safe
-            // Test 1:
-            // let mut reference_position = box_position.borrow_mut();
-            // reference_position.transform(UsvgTransform::new_translate(5.0, 4.0));
-            unsafe {
-                let pd = Rc::get_mut_unchecked(&mut box_position);
-                pd.transform(UsvgTransform::new_translate(5.0, 4.0));
-                pd.transform(UsvgTransform::new_rotate(65.0 / (frames as f64)));
-            }
-        }
-
-        let mut command = build_command(tmp_path, out_path, self.framerate)?;
-
-        if out_path.exists() {
-            fs::remove_file(out_path)?;
-        }
-
-        command.output()?;
-        println!("Saved as: {}", out_path.to_str().unwrap());
 
         Ok(())
     }

@@ -2,17 +2,19 @@ use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;
 use rusvid_lib::figures::rect::rect;
 use rusvid_lib::figures::triangle::equilateral_triangle;
+use rusvid_lib::renderer::ffmpeg::FFmpegRenderer;
+use rusvid_lib::renderer::Renderer;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::types::NodeKind;
 use rusvid_lib::utils::color_from_hex;
 use std::path::Path;
 use std::rc::Rc;
-use usvg::{Fill, NodeExt, Paint, ShapeRendering, Stroke, StrokeWidth, Transform};
+use usvg::{NodeExt, Paint, Stroke, StrokeWidth, Transform};
 
 fn main() {
     let mut composition = Composition::builder()
-        .resolution(Resolution::FHD)
-        .framerate(30)
+        .resolution(Resolution::FourK)
+        .framerate(60)
         .duration(5)
         .build();
 
@@ -103,7 +105,13 @@ fn main() {
         ..rusvid_lib::types::Path::default()
     }));
 
-    composition
-        .render(Path::new("out.mp4"), Path::new("./out"), position)
-        .unwrap();
+    let renderer = FFmpegRenderer::default();
+    renderer
+        .render(
+            composition,
+            Path::new("out.mp4"),
+            Path::new("./out"),
+            position,
+        )
+        .unwrap()
 }
