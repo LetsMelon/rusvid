@@ -13,6 +13,6 @@ pub trait Renderer {
         composition: Composition,
         out_path: P,
         tmp_path: P,
-        position: Rc<PathData>,
+        position: Rc<PathData>, // TODO remove this and add a `animation` trait/struct/... in Composition
     ) -> Result<()>;
 }
