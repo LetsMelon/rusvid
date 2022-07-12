@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::ffi::OsString;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::rc::Rc;
 use usvg::PathData;
@@ -55,9 +55,7 @@ impl Renderer for FfmpegRenderer {
         for i in 0..frames {
             println!("{:03}/{:03}", i + 1, frames);
 
-            let filename = format!("{}.png", i + 1);
-            let file_path = tmp_path.join(Path::new(&filename));
-            composition.render_single(file_path.as_path())?;
+            self.render_single(&composition, &tmp_path, i + 1);
 
             // TODO: make safe
             // Test 1:

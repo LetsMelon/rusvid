@@ -1,10 +1,6 @@
-use anyhow::Result;
 use debug_ignore::DebugIgnore;
-use resvg::render;
 use std::ops::{Deref, DerefMut};
-use std::path::Path;
-use tiny_skia::{Pixmap, Transform};
-use usvg::{AspectRatio, Fill, FitTo, Node, NodeExt, NodeKind, Paint, Size, Svg, Tree, ViewBox};
+use usvg::{AspectRatio, Fill, Node, NodeExt, NodeKind, Paint, Size, Svg, Tree, ViewBox};
 
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
@@ -111,24 +107,6 @@ impl Composition {
     #[inline(always)]
     pub fn rtree_mut(&mut self) -> &mut Tree {
         self.rtree.deref_mut()
-    }
-
-    pub fn render_single(&self, path: &Path) -> Result<()> {
-        let pixmap_size = self.rtree().svg_node().size.to_screen_size();
-
-        let mut pixmap = Pixmap::new(pixmap_size.width(), pixmap_size.height())
-            .expect("Error while creating pixmap");
-        render(
-            self.rtree(),
-            FitTo::Original,
-            Transform::default(),
-            pixmap.as_mut(),
-        )
-        .expect("Error while rendering");
-
-        pixmap.save_png(path)?;
-
-        Ok(())
     }
 
     #[inline]
