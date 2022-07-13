@@ -1,8 +1,10 @@
 use crate::composition::Composition;
 use std::ffi::OsString;
 use std::process::Command;
+use tiny_skia::Pixmap;
 
 pub mod ffmpeg;
+pub mod png;
 
 pub trait Renderer {
     fn render<P: Into<std::path::PathBuf>>(
@@ -12,24 +14,12 @@ pub trait Renderer {
         tmp_path: P,
         position: std::rc::Rc<usvg::PathData>, // TODO remove this and add a `animation` trait/struct/... in Composition
     ) -> anyhow::Result<()>;
+}
 
-    fn generate_filepath<P: Into<std::path::PathBuf>>(
-        tmp_dir_path: P,
-        frame_count: usize,
-    ) -> std::path::PathBuf {
-        let tmp_dir_path: std::path::PathBuf = tmp_dir_path.into();
-        let filename = format!("{}.png", frame_count);
-        tmp_dir_path.join(std::path::Path::new(&filename))
-    }
+pub trait ImageRender {
+    fn generate_filepath(&self, frame_count: usize) -> std::path::PathBuf;
 
-    fn render_single<P: Into<std::path::PathBuf>>(
-        &self,
-        composition: &Composition,
-        tmp_dir_path: P,
-        frame_number: usize,
-    ) -> anyhow::Result<()> {
-        let file_path = Self::generate_filepath(tmp_dir_path, frame_number);
-
+    fn render_pixmap(&self, composition: &Composition) -> anyhow::Result<Pixmap> {
         let pixmap_size = composition.rtree().svg_node().size.to_screen_size();
 
         let mut pixmap = tiny_skia::Pixmap::new(pixmap_size.width(), pixmap_size.height())
@@ -42,10 +32,10 @@ pub trait Renderer {
         )
         .expect("Error while rendering");
 
-        pixmap.save_png(file_path)?;
-
-        Ok(())
+        Ok(pixmap)
     }
+
+    fn render(&self, composition: &Composition, frame_number: usize) -> anyhow::Result<()>;
 }
 
 pub trait CliArgument {

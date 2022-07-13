@@ -10,7 +10,8 @@ use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
 use crate::renderer::ffmpeg::codec::VideoCodec;
 use crate::renderer::ffmpeg::pixel_formats::PixelFormats;
-use crate::renderer::{CliArgument, CliCommand, Renderer};
+use crate::renderer::png::PngRender;
+use crate::renderer::{CliArgument, CliCommand, ImageRender, Renderer};
 
 pub mod codec;
 pub mod h264;
@@ -51,11 +52,13 @@ impl Renderer for FfmpegRenderer {
         }
         fs::create_dir(&tmp_path)?;
 
+        let image_render = PngRender::new(&tmp_path);
+
         let frames = composition.frames();
         for i in 0..frames {
             println!("{:03}/{:03}", i + 1, frames);
 
-            self.render_single(&composition, &tmp_path, i + 1);
+            image_render.render(&composition, i + 1)?;
 
             // TODO: make safe
             // Test 1:
