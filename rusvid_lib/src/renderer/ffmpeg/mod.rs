@@ -1,6 +1,9 @@
 use anyhow::Result;
+use debug_ignore::DebugIgnore;
 use std::ffi::OsString;
+use std::fmt::Debug;
 use std::fs;
+use std::ops::Deref;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::rc::Rc;
@@ -23,6 +26,7 @@ pub struct FfmpegRenderer {
     pub codec_video: VideoCodec,
     pub pixel_format: Option<PixelFormats>,
     pub framerate: u8,
+    pub image_render: DebugIgnore<Box<dyn ImageRender>>,
 }
 
 impl Default for FfmpegRenderer {
@@ -32,7 +36,18 @@ impl Default for FfmpegRenderer {
             codec_video: VideoCodec::default(),
             pixel_format: Some(PixelFormats::default()),
             framerate: Composition::default().framerate,
+            image_render: DebugIgnore(Box::new(PngRender::new(&PathBuf::new()))),
         }
+    }
+}
+
+impl FfmpegRenderer {
+    fn image_render(&self) -> &Box<dyn ImageRender> {
+        self.image_render.deref()
+    }
+
+    pub fn set_image_render(&mut self, image_render: Box<dyn ImageRender>) {
+        self.image_render = DebugIgnore(image_render);
     }
 }
 
@@ -52,13 +67,12 @@ impl Renderer for FfmpegRenderer {
         }
         fs::create_dir(&tmp_path)?;
 
-        let image_render = PngRender::new(&tmp_path);
-
         let frames = composition.frames();
         for i in 0..frames {
             println!("{:03}/{:03}", i + 1, frames);
 
-            image_render.render(&composition, i + 1)?;
+            // image_render.render(&composition, i + 1)?;
+            self.image_render().render(&composition, i);
 
             // TODO: make safe
             // Test 1:
@@ -97,7 +111,7 @@ impl CliCommand for FfmpegRenderer {
             OsString::from("-framerate"),
             OsString::from(self.framerate.to_string().as_str()),
             OsString::from("-i"),
-            OsString::from("./out/%d.png"), // TODO use tmp_path and prefix
+            OsString::from(format!("./out/%d.{}", self.image_render().file_extension())), // TODO use tmp_path
         ]);
 
         command.args([OsString::from("-c:a"), OsString::from(self.codec.as_str())]);

@@ -1,4 +1,5 @@
 #![feature(get_mut_unchecked)]
+#![feature(portable_simd)]
 
 mod metrics;
 

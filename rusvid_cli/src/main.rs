@@ -3,6 +3,7 @@ use rusvid_lib::figures::circle::circle;
 use rusvid_lib::figures::rect::rect;
 use rusvid_lib::figures::triangle::equilateral_triangle;
 use rusvid_lib::renderer::ffmpeg::FfmpegRenderer;
+use rusvid_lib::renderer::png::PngRender;
 use rusvid_lib::renderer::Renderer;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::usvg::{
@@ -10,6 +11,7 @@ use rusvid_lib::usvg::{
     StopOffset, Stroke, StrokeWidth, Transform, Units,
 };
 use rusvid_lib::utils::color_from_hex;
+
 use std::rc::Rc;
 
 fn main() {
@@ -106,14 +108,13 @@ fn main() {
         ..Path::default()
     }));
 
+    let out_path = std::path::Path::new("out.mp4");
+    let tmp_path = std::path::Path::new("./out");
+
     let mut renderer = FfmpegRenderer::default();
     renderer.framerate = composition.framerate;
+    renderer.set_image_render(Box::new(PngRender::new(&tmp_path.to_path_buf())));
     renderer
-        .render(
-            composition,
-            std::path::Path::new("out.mp4"),
-            std::path::Path::new("./out"),
-            position,
-        )
+        .render(composition, out_path, tmp_path, position)
         .unwrap()
 }

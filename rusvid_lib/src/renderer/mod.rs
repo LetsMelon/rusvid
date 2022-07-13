@@ -5,6 +5,7 @@ use tiny_skia::Pixmap;
 
 pub mod ffmpeg;
 pub mod png;
+pub mod raw;
 
 pub trait Renderer {
     fn render<P: Into<std::path::PathBuf>>(
@@ -18,6 +19,8 @@ pub trait Renderer {
 
 pub trait ImageRender {
     fn generate_filepath(&self, frame_count: usize) -> std::path::PathBuf;
+    fn file_extension(&self) -> String;
+    fn render(&self, composition: &Composition, frame_number: usize) -> anyhow::Result<()>;
 
     fn render_pixmap(&self, composition: &Composition) -> anyhow::Result<Pixmap> {
         let pixmap_size = composition.rtree().svg_node().size.to_screen_size();
@@ -34,8 +37,6 @@ pub trait ImageRender {
 
         Ok(pixmap)
     }
-
-    fn render(&self, composition: &Composition, frame_number: usize) -> anyhow::Result<()>;
 }
 
 pub trait CliArgument {
