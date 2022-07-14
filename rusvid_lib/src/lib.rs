@@ -1,8 +1,7 @@
 #![feature(get_mut_unchecked)]
 #![feature(portable_simd)]
 
-mod metrics;
-
+pub mod metrics;
 pub mod composition;
 pub mod figures;
 pub mod renderer;

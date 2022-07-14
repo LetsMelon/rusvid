@@ -111,6 +111,7 @@ fn main() {
     let out_path = std::path::Path::new("out.mp4");
     let tmp_path = std::path::Path::new("./out");
 
+    // TODO add builder pattern for video- & image-render
     let mut renderer = FfmpegRenderer::default();
     renderer.framerate = composition.framerate;
     renderer.set_image_render(Box::new(PngRender::new(&tmp_path.to_path_buf())));
