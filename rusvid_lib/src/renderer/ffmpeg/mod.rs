@@ -15,6 +15,7 @@ use crate::renderer::ffmpeg::codec::VideoCodec;
 use crate::renderer::ffmpeg::pixel_formats::PixelFormats;
 use crate::renderer::png::PngRender;
 use crate::renderer::{CliArgument, CliCommand, ImageRender, Renderer};
+use crate::types::FPS;
 
 pub mod codec;
 pub mod h264;
@@ -25,7 +26,7 @@ pub struct FfmpegRenderer {
     pub codec: String, // TODO enum
     pub codec_video: VideoCodec,
     pub pixel_format: Option<PixelFormats>,
-    pub framerate: u8,
+    pub framerate: FPS,
     pub image_render: DebugIgnore<Box<dyn ImageRender>>,
     out_path: PathBuf,
     tmp_dir_path: PathBuf,
