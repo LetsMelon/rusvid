@@ -1,28 +1,24 @@
 use crate::composition::Composition;
 use image::{ImageBuffer, RgbaImage};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tiny_skia::{PremultipliedColorU8, ALPHA_U8_OPAQUE};
 
 use crate::renderer::ImageRender;
 
 #[derive(Debug)]
-pub struct RawRender {
-    tmp_dir_path: PathBuf,
-}
+pub struct RawRender {}
 
 impl RawRender {
-    pub fn new(tmp_dir_path: &PathBuf) -> Self {
-        RawRender {
-            tmp_dir_path: tmp_dir_path.clone(),
-        }
+    pub fn new() -> Self {
+        RawRender {}
     }
 }
 
 impl ImageRender for RawRender {
     #[inline]
-    fn generate_filepath(&self, frame_count: usize) -> PathBuf {
+    fn generate_filepath(&self, tmp_dir_path: &Path, frame_count: usize) -> PathBuf {
         let filename = format!("{}.bmp", frame_count);
-        self.tmp_dir_path.join(std::path::Path::new(&filename))
+        tmp_dir_path.join(std::path::Path::new(&filename))
     }
 
     #[inline]
@@ -30,8 +26,13 @@ impl ImageRender for RawRender {
         "bmp".to_string()
     }
 
-    fn render(&self, composition: &Composition, frame_number: usize) -> anyhow::Result<()> {
-        let file_path = self.generate_filepath(frame_number);
+    fn render(
+        &self,
+        composition: &Composition,
+        tmp_dir_path: &Path,
+        frame_number: usize,
+    ) -> anyhow::Result<()> {
+        let file_path = self.generate_filepath(tmp_dir_path, frame_number);
 
         let pixmap = self.render_pixmap(&composition)?;
 
