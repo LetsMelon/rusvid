@@ -1,5 +1,8 @@
-use anyhow::Result;
+use crate::animation::position_animation::PositionAnimation;
+use crate::animation::Animation;
+use anyhow::{bail, Result};
 use debug_ignore::DebugIgnore;
+use std::borrow::BorrowMut;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
@@ -22,7 +25,10 @@ pub mod h264;
 pub mod pixel_formats;
 
 #[derive(Debug)]
-pub struct FfmpegRenderer {
+pub struct FfmpegRenderer<T>
+where
+    T: std::fmt::Debug,
+{
     pub codec: String, // TODO enum
     pub codec_video: VideoCodec,
     pub pixel_format: Option<PixelFormats>,
@@ -30,9 +36,10 @@ pub struct FfmpegRenderer {
     pub image_render: DebugIgnore<Box<dyn ImageRender>>,
     out_path: PathBuf,
     tmp_dir_path: PathBuf,
+    animation: Option<PositionAnimation<T>>,
 }
 
-impl Default for FfmpegRenderer {
+impl<T: std::fmt::Debug> Default for FfmpegRenderer<T> {
     fn default() -> Self {
         FfmpegRenderer {
             codec: "copy".to_string(),
@@ -42,11 +49,12 @@ impl Default for FfmpegRenderer {
             image_render: DebugIgnore(Box::new(PngRender::new())),
             out_path: PathBuf::new(),
             tmp_dir_path: PathBuf::new(),
+            animation: None,
         }
     }
 }
 
-impl FfmpegRenderer {
+impl<T: std::fmt::Debug> FfmpegRenderer<T> {
     pub fn new(out_path: PathBuf, tmp_dir_path: PathBuf) -> Self {
         FfmpegRenderer {
             out_path,
@@ -62,14 +70,18 @@ impl FfmpegRenderer {
     pub fn set_image_render(&mut self, image_render: Box<dyn ImageRender>) {
         self.image_render = DebugIgnore(image_render);
     }
+
+    pub fn set_animation(&mut self, animation: PositionAnimation<T>) {
+        self.animation = Some(animation);
+    }
 }
 
-impl Renderer for FfmpegRenderer {
-    fn render(&mut self, composition: Composition, mut position: Rc<PathData>) -> Result<()> {
+impl<T: std::fmt::Debug> Renderer for FfmpegRenderer<T> {
+    fn render(&mut self, composition: Composition) -> Result<()> {
         self.framerate = composition.framerate;
 
-        let out_path = self.out_path();
-        let tmp_path = self.tmp_dir_path();
+        let out_path = self.out_path().to_path_buf();
+        let tmp_path = self.tmp_dir_path().to_path_buf();
 
         if tmp_path.exists() {
             fs::remove_dir_all(&tmp_path)?;
@@ -80,16 +92,14 @@ impl Renderer for FfmpegRenderer {
         for i in 0..frames {
             println!("{:03}/{:03}", i + 1, frames);
 
-            self.image_render().render(&composition, &tmp_path, i);
+            self.image_render().render(&composition, &tmp_path, i)?;
 
             // TODO: make safe
             // Test 1:
             // let mut reference_position = box_position.borrow_mut();
             // reference_position.transform(UsvgTransform::new_translate(5.0, 4.0));
             unsafe {
-                let pd = Rc::get_mut_unchecked(&mut position);
-                pd.transform(usvg::Transform::new_translate(5.0, 4.0));
-                pd.transform(usvg::Transform::new_rotate(65.0 / (frames as f64)));
+                let _ = &self.update(&i)?;
             }
         }
 
@@ -110,6 +120,13 @@ impl Renderer for FfmpegRenderer {
         Ok(())
     }
 
+    unsafe fn update(&mut self, frame_count: &usize) -> Result<()> {
+        if let Some(animation) = &mut self.animation {
+            animation.update(frame_count.clone())?;
+        }
+        Ok(())
+    }
+
     #[inline]
     fn out_path(&self) -> &Path {
         self.out_path.as_path()
@@ -121,7 +138,7 @@ impl Renderer for FfmpegRenderer {
     }
 }
 
-impl CliCommand for FfmpegRenderer {
+impl<T: std::fmt::Debug> CliCommand for FfmpegRenderer<T> {
     fn build_command(&self, out_path: &std::path::Path, _tmp_path: &std::path::Path) -> Command {
         let mut command = Command::new(OsString::from("ffmpeg"));
 

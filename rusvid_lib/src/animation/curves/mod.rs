@@ -1,4 +1,5 @@
 use anyhow::Result;
+use std::fmt::{Debug, Formatter};
 
 pub mod linear;
 
@@ -39,5 +40,13 @@ pub trait Function {
             return self.end();
         }
         self.calc_raw(frame_number)
+    }
+
+    fn internal_debug(&self, f: &mut Formatter<'_>) -> std::fmt::Result;
+}
+
+impl<T> Debug for dyn Function<Value = T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.internal_debug(f)
     }
 }

@@ -12,7 +12,12 @@ use rusvid_lib::usvg::{
 use rusvid_lib::utils::color_from_hex;
 use std::path::PathBuf;
 
+use rusvid_lib::animation::curves::linear::Linear;
+use rusvid_lib::animation::curves::Function;
+use rusvid_lib::animation::position_animation::PositionAnimation;
+use rusvid_lib::renderer::png::PngRender;
 use rusvid_lib::renderer::raw::RawRender;
+use rusvid_lib::types::Point2d;
 use std::rc::Rc;
 
 fn main() {
@@ -90,9 +95,11 @@ fn main() {
         ..Path::default()
     }));
 
+    let pixel_position: Point2d = (20.0, 20.0);
+
     let position = Rc::new(rect(
-        20.0,
-        20.0,
+        pixel_position.0,
+        pixel_position.1,
         composition.resolution().width() as f64 / 2.0,
         composition.resolution().height() as f64 / 3.0,
     ));
@@ -113,7 +120,14 @@ fn main() {
     let tmp_path = PathBuf::from("./out");
 
     // TODO add builder pattern for video- & image-render
+
+    let animation_curve: Linear<Point2d> =
+        Linear::new(0, 90, pixel_position, (100.0, 100.0)).unwrap();
+    let position_animation: PositionAnimation<Point2d> =
+        PositionAnimation::new(position, Box::new(animation_curve));
+
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path.clone());
     renderer.set_image_render(Box::new(RawRender::new()));
-    renderer.render(composition, position).unwrap()
+    renderer.set_animation(position_animation);
+    renderer.render(composition).unwrap()
 }

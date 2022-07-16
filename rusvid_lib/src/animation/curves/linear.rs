@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use std::fmt::{Formatter, Pointer};
 
 use crate::animation::curves::Function;
 use crate::types::Point2d;
@@ -64,6 +65,10 @@ impl Function for Linear<f64> {
     fn calc_raw(&self, frame_number: usize) -> Self::Value {
         self.k * (frame_number as f64) + self.d
     }
+
+    fn internal_debug(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.fmt(f)
+    }
 }
 
 impl Function for Linear<Point2d> {
@@ -122,6 +127,10 @@ impl Function for Linear<Point2d> {
             self.k.0 * (frame_number as f64) + self.d.0,
             self.k.1 * (frame_number as f64) + self.d.1,
         )
+    }
+
+    fn internal_debug(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.fmt(f)
     }
 }
 
