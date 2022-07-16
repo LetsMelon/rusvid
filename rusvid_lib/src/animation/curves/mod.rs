@@ -26,5 +26,18 @@ pub trait Function {
     where
         Self: Sized;
 
-    fn calc(&self, frame_number: usize) -> Self::Value;
+    fn start_frame(&self) -> usize;
+    fn end_frame(&self) -> usize;
+    fn start(&self) -> Self::Value;
+    fn end(&self) -> Self::Value;
+
+    fn calc_raw(&self, frame_number: usize) -> Self::Value;
+    fn calc(&self, frame_number: usize) -> Self::Value {
+        if frame_number < self.start_frame() {
+            return self.start();
+        } else if frame_number > self.end_frame() {
+            return self.end();
+        }
+        self.calc_raw(frame_number)
+    }
 }
