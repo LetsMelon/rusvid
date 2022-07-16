@@ -4,6 +4,7 @@ use usvg::{AspectRatio, Fill, Node, NodeExt, NodeKind, Paint, Size, Svg, Tree, V
 
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
+use crate::types::FPS;
 
 #[derive(Debug)]
 pub struct Composition {
@@ -11,7 +12,7 @@ pub struct Composition {
     resolution: Resolution,
 
     /// The fixed framerate of the composition in `frames per seconds`
-    pub framerate: u8,
+    pub framerate: FPS,
 
     /// The duration of the composition in seconds
     pub duration: u16,
@@ -24,7 +25,7 @@ pub struct Composition {
 #[derive(Debug)]
 pub struct CompositionBuilder {
     resolution: Resolution,
-    framerate: u8,
+    framerate: FPS,
     duration: u16,
     name: String,
 }
@@ -67,7 +68,7 @@ impl CompositionBuilder {
         }
     }
 
-    pub fn framerate(mut self, framerate: u8) -> Self {
+    pub fn framerate(mut self, framerate: FPS) -> Self {
         self.framerate = framerate;
         self
     }

@@ -10,6 +10,9 @@ use rusvid_lib::usvg::{
     StopOffset, Stroke, StrokeWidth, Transform, Units,
 };
 use rusvid_lib::utils::color_from_hex;
+use std::path::PathBuf;
+
+use rusvid_lib::renderer::raw::RawRender;
 use std::rc::Rc;
 
 fn main() {
@@ -106,14 +109,11 @@ fn main() {
         ..Path::default()
     }));
 
-    let mut renderer = FfmpegRenderer::default();
-    renderer.framerate = composition.framerate;
-    renderer
-        .render(
-            composition,
-            std::path::Path::new("out.mp4"),
-            std::path::Path::new("./out"),
-            position,
-        )
-        .unwrap()
+    let out_path = PathBuf::from("out.mp4");
+    let tmp_path = PathBuf::from("./out");
+
+    // TODO add builder pattern for video- & image-render
+    let mut renderer = FfmpegRenderer::new(out_path, tmp_path.clone());
+    renderer.set_image_render(Box::new(RawRender::new()));
+    renderer.render(composition, position).unwrap()
 }

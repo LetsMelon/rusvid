@@ -48,7 +48,8 @@ impl MetricsSize for Resolution {
     fn bytes(&self) -> usize {
         let pixels = self.pixels();
 
-        pixels * 3
+        // We use RGBA
+        pixels * 4
     }
 }
 

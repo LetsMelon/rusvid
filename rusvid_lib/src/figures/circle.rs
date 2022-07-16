@@ -1,5 +1,6 @@
-use crate::utils::equal_delta;
 use usvg::{PathData, PathSegment};
+
+use crate::utils::equal_delta;
 
 #[inline]
 fn sin_radius(angle: f64, radius: f64) -> f64 {
