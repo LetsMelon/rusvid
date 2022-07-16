@@ -1,85 +1,23 @@
 use anyhow::{bail, Result};
-use std::fmt::{Formatter, Pointer};
+use std::fmt::{Debug, Formatter, Pointer};
 
-use crate::animation::curves::Function;
-use crate::types::Point2d;
+use crate::animation::curves::Points::*;
+use crate::animation::curves::{Function, Points};
 
 #[derive(Debug, Copy, Clone)]
-pub struct Linear<T> {
+pub struct Linear {
     start_frame: usize,
     end_frame: usize,
-    start: T,
-    end: T,
+    start: Points,
+    end: Points,
 
     // f(x) = kx+d
-    k: T,
-    d: T,
+    k: Points,
+    d: Points,
 }
 
-impl Function for Linear<f64> {
-    type Value = f64;
-
-    fn new(
-        start_frame: usize,
-        end_frame: usize,
-        start: Self::Value,
-        end: Self::Value,
-    ) -> Result<Self> {
-        if start_frame > end_frame {
-            bail!("`start_frame` has to be smaller than `end_frame`");
-        }
-
-        let d = 0.0;
-        let k = start / start_frame as f64;
-
-        Ok(Linear {
-            start_frame,
-            end_frame,
-            start,
-            end,
-            d,
-            k,
-        })
-    }
-
-    #[inline]
-    fn start_frame(&self) -> usize {
-        self.start_frame
-    }
-
-    #[inline]
-    fn end_frame(&self) -> usize {
-        self.end_frame
-    }
-
-    #[inline]
-    fn start(&self) -> Self::Value {
-        self.start
-    }
-
-    #[inline]
-    fn end(&self) -> Self::Value {
-        self.end
-    }
-
-    fn calc_raw(&self, frame_number: usize) -> Self::Value {
-        self.k * (frame_number as f64) + self.d
-    }
-
-    fn internal_debug(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.fmt(f)
-    }
-}
-
-impl Function for Linear<Point2d> {
-    type Value = Point2d;
-
-    fn new(
-        start_frame: usize,
-        end_frame: usize,
-        start: Self::Value,
-        end: Self::Value,
-    ) -> Result<Self>
+impl Function for Linear {
+    fn new(start_frame: usize, end_frame: usize, start: Points, end: Points) -> Result<Self>
     where
         Self: Sized,
     {
@@ -87,10 +25,11 @@ impl Function for Linear<Point2d> {
             bail!("`start_frame` has to be smaller than `end_frame`");
         }
 
-        let d = (0.0, 0.0);
-        let mut k = (0.0, 0.0);
-        k.0 = start.0 / start_frame as f64;
-        k.1 = start.1 / start_frame as f64;
+        let start_frame_point = Point2d(start_frame as f64, start_frame as f64);
+        let end_frame_point = Point2d(end_frame as f64, end_frame as f64);
+
+        let k = (end - start) / (end_frame_point - start_frame_point);
+        let d = end - k * end_frame_point;
 
         Ok(Linear {
             start_frame,
@@ -113,20 +52,24 @@ impl Function for Linear<Point2d> {
     }
 
     #[inline]
-    fn start(&self) -> Self::Value {
+    fn start(&self) -> Points {
         self.start
     }
 
     #[inline]
-    fn end(&self) -> Self::Value {
+    fn end(&self) -> Points {
         self.end
     }
 
-    fn calc_raw(&self, frame_number: usize) -> Self::Value {
-        (
-            self.k.0 * (frame_number as f64) + self.d.0,
-            self.k.1 * (frame_number as f64) + self.d.1,
-        )
+    #[inline]
+    fn calc_raw(&self, frame_number: usize) -> Points {
+        let frame_number = frame_number as f64;
+        let frame_number_point = Point2d(frame_number, frame_number);
+        self.k * frame_number_point + self.d
+    }
+
+    fn delta_raw(&self, _frame_number: usize) -> Points {
+        self.k
     }
 
     fn internal_debug(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -136,100 +79,84 @@ impl Function for Linear<Point2d> {
 
 #[cfg(test)]
 mod tests {
+    use super::Linear;
+    use crate::animation::curves::Function;
+    use crate::animation::curves::Points::*;
 
-    mod f64 {
-        use crate::animation::curves::linear::Linear;
-        use crate::animation::curves::Function;
-        use crate::utils::equal_delta;
+    const DELTA: f64 = 0.1;
 
-        #[test]
-        fn just_works() {
-            let linear: Linear<f64> = Linear::new(30, 90, 100.0, 300.0).unwrap();
+    #[test]
+    fn new() {
+        let linear = Linear::new(30, 90, Point1d(100.0), Point1d(300.0));
 
-            assert_eq!(linear.calc(30), 100.0);
-            assert_eq!(linear.calc_raw(30), 100.0);
-            assert_eq!(linear.calc(60), 200.0);
-            assert_eq!(linear.calc_raw(60), 200.0);
-            assert_eq!(linear.calc(90), 300.0);
-            assert_eq!(linear.calc_raw(90), 300.0);
-
-            assert_eq!(linear.calc(20), 100.0);
-            assert!(equal_delta(linear.calc_raw(20), 66.66, 0.1));
-            assert_eq!(linear.calc(100), 300.0);
-            assert!(equal_delta(linear.calc_raw(100), 333.33, 0.1));
-        }
-
-        mod error {
-            use super::Linear;
-            use crate::animation::curves::Function;
-            use anyhow::Result;
-
-            #[test]
-            fn in_constructor() {
-                let linear: Result<Linear<f64>> = Linear::new(90, 30, 100.0, 300.0);
-
-                assert_eq!(
-                    linear.err().unwrap().to_string(),
-                    "`start_frame` has to be smaller than `end_frame`"
-                );
-            }
+        match linear {
+            Ok(_) => assert!(true),
+            Err(_) => assert!(false),
         }
     }
 
-    mod Point2d {
-        use crate::animation::curves::linear::Linear;
-        use crate::animation::curves::Function;
-        use crate::types::Point2d;
+    #[test]
+    fn calc() {
+        let linear = Linear::new(30, 90, Point2d(100.0, 100.0), Point2d(300.0, 300.0)).unwrap();
 
-        macro_rules! point {
-            ($value:expr) => {
-                ($value, $value)
-            };
-            ($v1:expr, $v2:expr) => {
-                ($v1, $v2)
-            };
-        }
+        assert_eq!(linear.calc(30), Point2d(100.0, 100.0));
+        assert_eq!(linear.calc_raw(30), Point2d(100.0, 100.0));
+        assert_eq!(linear.calc(60), Point2d(200.0, 200.0));
+        assert_eq!(linear.calc_raw(60), Point2d(200.0, 200.0));
+        assert_eq!(linear.calc(90), Point2d(300.0, 300.0));
+        assert_eq!(linear.calc_raw(90), Point2d(300.0, 300.0));
 
-        fn equal_delta(p1: Point2d, p2: Point2d, delta: f64) -> bool {
-            use crate::utils::equal_delta as e_d;
+        assert_eq!(linear.calc(20), Point2d(100.0, 100.0));
+        assert!(linear
+            .calc_raw(20)
+            .equal_delta(&Point2d(66.66, 66.66), DELTA));
+        assert_eq!(linear.calc(100), Point2d(300.0, 300.0));
+        assert!(linear
+            .calc_raw(100)
+            .equal_delta(&Point2d(333.33, 333.33), DELTA));
+    }
 
-            e_d(p1.0, p2.0, delta) && e_d(p1.1, p2.1, delta)
-        }
+    #[test]
+    fn delta() {
+        let linear = Linear::new(30, 90, Point1d(100.0), Point1d(100.0)).unwrap();
 
-        #[test]
-        fn just_works() {
-            let linear: Linear<Point2d> =
-                Linear::new(30, 90, point!(100.0), point!(300.0)).unwrap();
+        assert_eq!(linear.delta(30), Point1d(0.0));
+        assert_eq!(linear.delta_raw(30), Point1d(0.0));
+        assert_eq!(linear.delta(80), Point1d(0.0));
+        assert_eq!(linear.delta_raw(80), Point1d(0.0));
 
-            assert_eq!(linear.calc(30), point!(100.0));
-            assert_eq!(linear.calc_raw(30), point!(100.0));
-            assert_eq!(linear.calc(60), point!(200.0));
-            assert_eq!(linear.calc_raw(60), point!(200.0));
-            assert_eq!(linear.calc(90), point!(300.0));
-            assert_eq!(linear.calc_raw(90), point!(300.0));
+        assert_eq!(linear.delta(20), Point1d(0.0));
+        assert_eq!(linear.delta_raw(20), Point1d(0.0));
+        assert_eq!(linear.delta(100), Point1d(0.0));
+        assert_eq!(linear.delta_raw(100), Point1d(0.0));
 
-            assert_eq!(linear.calc(20), point!(100.0));
-            assert!(equal_delta(linear.calc_raw(20), point!(66.66), 0.1));
-            assert_eq!(linear.calc(100), point!(300.0));
-            assert!(equal_delta(linear.calc_raw(100), point!(333.33), 0.1));
-        }
+        let linear = Linear::new(30, 90, Point2d(100.0, 100.0), Point2d(300.0, 500.0)).unwrap();
 
-        mod error {
-            use crate::animation::curves::linear::Linear;
-            use crate::animation::curves::Function;
-            use crate::types::Point2d;
-            use anyhow::Result;
+        assert!(linear.delta(30).equal_delta(&Point2d(3.33, 6.66), DELTA));
+        assert!(linear
+            .delta_raw(30)
+            .equal_delta(&Point2d(3.33, 6.66), DELTA));
+        assert!(linear.delta(80).equal_delta(&Point2d(3.33, 6.66), DELTA));
+        assert!(linear
+            .delta_raw(80)
+            .equal_delta(&Point2d(3.33, 6.66), DELTA));
 
-            #[test]
-            fn in_constructor() {
-                let linear: Result<Linear<Point2d>> =
-                    Linear::new(90, 30, point!(100.0), point!(300.0));
+        assert_eq!(linear.delta(20), Point2d(0.0, 0.0));
+        assert!(linear
+            .delta_raw(20)
+            .equal_delta(&Point2d(3.33, 6.66), DELTA));
+        assert_eq!(linear.delta(100), Point2d(0.0, 0.0));
+        assert!(linear
+            .delta_raw(100)
+            .equal_delta(&Point2d(3.33, 6.66), DELTA));
+    }
 
-                assert_eq!(
-                    linear.err().unwrap().to_string(),
-                    "`start_frame` has to be smaller than `end_frame`"
-                );
-            }
-        }
+    #[test]
+    fn zero_error() {
+        let linear = Linear::new(0, 10, Point1d(10.0), Point1d(20.0)).unwrap();
+
+        assert_eq!(linear.calc(0), Point1d(10.0));
+        assert_eq!(linear.calc(5), Point1d(15.0));
+        assert_eq!(linear.calc(10), Point1d(20.0));
     }
 }

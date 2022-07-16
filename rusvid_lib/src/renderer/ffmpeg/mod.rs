@@ -1,17 +1,14 @@
-use crate::animation::position_animation::PositionAnimation;
-use crate::animation::Animation;
-use anyhow::{bail, Result};
+use anyhow::Result;
 use debug_ignore::DebugIgnore;
-use std::borrow::BorrowMut;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::rc::Rc;
-use usvg::PathData;
 
+use crate::animation::position_animation::PositionAnimation;
+use crate::animation::Animation;
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
 use crate::renderer::ffmpeg::codec::VideoCodec;
@@ -25,10 +22,7 @@ pub mod h264;
 pub mod pixel_formats;
 
 #[derive(Debug)]
-pub struct FfmpegRenderer<T>
-where
-    T: std::fmt::Debug,
-{
+pub struct FfmpegRenderer {
     pub codec: String, // TODO enum
     pub codec_video: VideoCodec,
     pub pixel_format: Option<PixelFormats>,
@@ -36,10 +30,10 @@ where
     pub image_render: DebugIgnore<Box<dyn ImageRender>>,
     out_path: PathBuf,
     tmp_dir_path: PathBuf,
-    animation: Option<PositionAnimation<T>>,
+    animation: Option<PositionAnimation>,
 }
 
-impl<T: std::fmt::Debug> Default for FfmpegRenderer<T> {
+impl Default for FfmpegRenderer {
     fn default() -> Self {
         FfmpegRenderer {
             codec: "copy".to_string(),
@@ -54,7 +48,7 @@ impl<T: std::fmt::Debug> Default for FfmpegRenderer<T> {
     }
 }
 
-impl<T: std::fmt::Debug> FfmpegRenderer<T> {
+impl FfmpegRenderer {
     pub fn new(out_path: PathBuf, tmp_dir_path: PathBuf) -> Self {
         FfmpegRenderer {
             out_path,
@@ -71,12 +65,12 @@ impl<T: std::fmt::Debug> FfmpegRenderer<T> {
         self.image_render = DebugIgnore(image_render);
     }
 
-    pub fn set_animation(&mut self, animation: PositionAnimation<T>) {
+    pub fn set_animation(&mut self, animation: PositionAnimation) {
         self.animation = Some(animation);
     }
 }
 
-impl<T: std::fmt::Debug> Renderer for FfmpegRenderer<T> {
+impl Renderer for FfmpegRenderer {
     fn render(&mut self, composition: Composition) -> Result<()> {
         self.framerate = composition.framerate;
 
@@ -138,7 +132,7 @@ impl<T: std::fmt::Debug> Renderer for FfmpegRenderer<T> {
     }
 }
 
-impl<T: std::fmt::Debug> CliCommand for FfmpegRenderer<T> {
+impl CliCommand for FfmpegRenderer {
     fn build_command(&self, out_path: &std::path::Path, _tmp_path: &std::path::Path) -> Command {
         let mut command = Command::new(OsString::from("ffmpeg"));
 

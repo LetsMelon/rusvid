@@ -1,21 +1,16 @@
-use std::borrow::Borrow;
-use std::fmt::{Debug, Formatter, Pointer};
+use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
 use usvg::PathData;
 
 use crate::animation::curves::Function;
 use crate::animation::Animation;
-use crate::types::Point2d;
 
-pub struct PositionAnimation<T>
-where
-    T: Debug,
-{
+pub struct PositionAnimation {
     position: Rc<PathData>,
-    meta: Box<dyn Function<Value = T>>,
+    meta: Box<dyn Function>,
 }
 
-impl<T: std::fmt::Debug> Debug for PositionAnimation<T> {
+impl Debug for PositionAnimation {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("Position Animation { ")?;
         Debug::fmt(&self.position, f)?;
@@ -25,21 +20,19 @@ impl<T: std::fmt::Debug> Debug for PositionAnimation<T> {
     }
 }
 
-impl<T: std::fmt::Debug> PositionAnimation<T> {
-    pub fn new(position: Rc<PathData>, meta: Box<dyn Function<Value = T>>) -> Self {
+impl PositionAnimation {
+    pub fn new(position: Rc<PathData>, meta: Box<dyn Function>) -> Self {
         PositionAnimation { position, meta }
     }
 }
 
-impl<T: std::fmt::Debug> Animation for PositionAnimation<T> {
+impl Animation for PositionAnimation {
     unsafe fn update(&mut self, frame_count: usize) -> anyhow::Result<()> {
         if frame_count > self.meta.start_frame() && frame_count < self.meta.end_frame() {
             let pd = Rc::get_mut_unchecked(&mut self.position);
-            pd.transform(usvg::Transform::new_translate(5.0, 4.0));
 
-            println!("{:?}", self.meta.calc(frame_count));
-
-            // pd.transform(usvg::Transform::new_rotate(65.0 / (frame_count as f64)));
+            let delta = self.meta.delta(frame_count);
+            pd.transform(usvg::Transform::new_translate(delta.x(), delta.y()));
         }
         Ok(())
     }

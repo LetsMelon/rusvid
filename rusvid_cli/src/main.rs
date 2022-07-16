@@ -15,7 +15,7 @@ use std::path::PathBuf;
 use rusvid_lib::animation::curves::linear::Linear;
 use rusvid_lib::animation::curves::Function;
 use rusvid_lib::animation::position_animation::PositionAnimation;
-use rusvid_lib::renderer::png::PngRender;
+
 use rusvid_lib::renderer::raw::RawRender;
 use rusvid_lib::types::Point2d;
 use std::rc::Rc;
@@ -120,11 +120,9 @@ fn main() {
     let tmp_path = PathBuf::from("./out");
 
     // TODO add builder pattern for video- & image-render
-
-    let animation_curve: Linear<Point2d> =
-        Linear::new(0, 90, pixel_position, (100.0, 100.0)).unwrap();
-    let position_animation: PositionAnimation<Point2d> =
-        PositionAnimation::new(position, Box::new(animation_curve));
+    let animation_curve =
+        Linear::new(0, 200, pixel_position.into(), (1250.0, 500.0).into()).unwrap();
+    let position_animation = PositionAnimation::new(position, Box::new(animation_curve));
 
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path.clone());
     renderer.set_image_render(Box::new(RawRender::new()));
