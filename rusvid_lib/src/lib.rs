@@ -1,5 +1,6 @@
 #![feature(get_mut_unchecked)]
 
+pub mod animation;
 pub mod composition;
 pub mod figures;
 pub mod metrics;
