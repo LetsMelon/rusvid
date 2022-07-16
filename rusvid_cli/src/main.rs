@@ -1,18 +1,10 @@
-use rusvid_lib::composition::Composition;
-use rusvid_lib::figures::circle::circle;
-use rusvid_lib::figures::rect::rect;
-use rusvid_lib::figures::triangle::equilateral_triangle;
-use rusvid_lib::renderer::ffmpeg::FfmpegRenderer;
-use rusvid_lib::renderer::Renderer;
-use rusvid_lib::resolution::Resolution;
+use rusvid_lib::prelude::*;
 use rusvid_lib::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
     StopOffset, Stroke, StrokeWidth, Transform, Units,
 };
 use rusvid_lib::utils::color_from_hex;
 use std::path::PathBuf;
-
-use rusvid_lib::renderer::raw::RawRender;
 use std::rc::Rc;
 
 fn main() {
@@ -78,11 +70,11 @@ fn main() {
             ..Stroke::default()
         }),
         rendering_mode: Default::default(),
-        data: Rc::new(circle(700.0, 850.0, 600.0)),
+        data: Rc::new(figures::circle(700.0, 850.0, 600.0)),
         ..Path::default()
     }));
 
-    let mut path = equilateral_triangle(400.0, 400.0, 350.0);
+    let mut path = figures::equilateral_triangle(400.0, 400.0, 350.0);
     path.transform(Transform::new_rotate(2.5));
     composition.add_to_root(NodeKind::Path(Path {
         fill: composition.fill_with_link("lg1"),
@@ -90,7 +82,7 @@ fn main() {
         ..Path::default()
     }));
 
-    let position = Rc::new(rect(
+    let position = Rc::new(figures::rect(
         20.0,
         20.0,
         composition.resolution().width() as f64 / 2.0,
