@@ -3,7 +3,6 @@ use rusvid_lib::figures::circle::circle;
 use rusvid_lib::figures::rect::rect;
 use rusvid_lib::figures::triangle::equilateral_triangle;
 use rusvid_lib::renderer::ffmpeg::FfmpegRenderer;
-use rusvid_lib::renderer::png::PngRender;
 use rusvid_lib::renderer::Renderer;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::usvg::{

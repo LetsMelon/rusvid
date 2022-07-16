@@ -1,8 +1,8 @@
-use crate::composition::Composition;
 use image::{ImageBuffer, RgbaImage};
 use std::path::{Path, PathBuf};
 use tiny_skia::{PremultipliedColorU8, ALPHA_U8_OPAQUE};
 
+use crate::composition::Composition;
 use crate::renderer::ImageRender;
 
 #[derive(Debug)]

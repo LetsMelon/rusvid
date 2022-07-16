@@ -1,6 +1,7 @@
+use std::ffi::OsString;
+
 use crate::renderer::ffmpeg::h264::H264Settings;
 use crate::renderer::CliArgument;
-use std::ffi::OsString;
 
 #[derive(Debug)]
 #[repr(u8)]

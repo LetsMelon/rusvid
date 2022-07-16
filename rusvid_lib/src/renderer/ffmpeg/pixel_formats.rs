@@ -1,5 +1,6 @@
-use crate::renderer::CliArgument;
 use std::ffi::OsString;
+
+use crate::renderer::CliArgument;
 
 #[derive(Debug)]
 #[repr(u8)]

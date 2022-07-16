@@ -1,8 +1,9 @@
-use crate::composition::Composition;
 use std::ffi::OsString;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 use tiny_skia::Pixmap;
+
+use crate::composition::Composition;
 
 pub mod ffmpeg;
 pub mod png;
