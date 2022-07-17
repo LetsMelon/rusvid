@@ -187,12 +187,14 @@ mod tests {
 
         #[test]
         fn div() {
-            todo!()
+            assert_eq!(Point1d(100.0) / Point2d(50.0, 20.0), Point2d(2.0, 20.0));
         }
 
         #[test]
         fn mul() {
-            todo!()
+            assert_eq!(Point1d(100.0) * Point1d(0.0), Point1d(0.0));
+            assert_eq!(Point1d(100.0) * Point1d(1.0), Point1d(100.0));
+            assert_eq!(Point2d(200.0, 50.0) * Point1d(0.0), Point2d(0.0, 50.0));
         }
     }
 }
