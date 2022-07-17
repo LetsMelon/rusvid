@@ -3,11 +3,10 @@ use debug_ignore::DebugIgnore;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-use crate::animation::position_animation::PositionAnimation;
 use crate::animation::Animation;
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
@@ -30,7 +29,7 @@ pub struct FfmpegRenderer {
     pub image_render: DebugIgnore<Box<dyn ImageRender>>,
     out_path: PathBuf,
     tmp_dir_path: PathBuf,
-    animation: Option<PositionAnimation>,
+    animation: DebugIgnore<Vec<Box<dyn Animation>>>,
 }
 
 impl Default for FfmpegRenderer {
@@ -43,7 +42,7 @@ impl Default for FfmpegRenderer {
             image_render: DebugIgnore(Box::new(PngRender::new())),
             out_path: PathBuf::new(),
             tmp_dir_path: PathBuf::new(),
-            animation: None,
+            animation: DebugIgnore(Vec::new()),
         }
     }
 }
@@ -65,8 +64,8 @@ impl FfmpegRenderer {
         self.image_render = DebugIgnore(image_render);
     }
 
-    pub fn set_animation(&mut self, animation: PositionAnimation) {
-        self.animation = Some(animation);
+    pub fn add_animation(&mut self, animation: Box<dyn Animation>) {
+        self.animation.push(animation)
     }
 }
 
@@ -115,7 +114,7 @@ impl Renderer for FfmpegRenderer {
     }
 
     unsafe fn update(&mut self, frame_count: &usize) -> Result<()> {
-        if let Some(animation) = &mut self.animation {
+        for animation in self.animation.deref_mut() {
             animation.update(frame_count.clone())?;
         }
         Ok(())

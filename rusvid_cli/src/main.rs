@@ -1,8 +1,13 @@
+use rusvid_lib::animation::curves::linear::Linear;
+use rusvid_lib::animation::curves::Points::Point2d;
+use rusvid_lib::animation::curves::{Function, Points};
+use rusvid_lib::animation::position_animation::PositionAnimation;
 use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;
 use rusvid_lib::figures::rect::rect;
 use rusvid_lib::figures::triangle::equilateral_triangle;
 use rusvid_lib::renderer::ffmpeg::FfmpegRenderer;
+use rusvid_lib::renderer::raw::RawRender;
 use rusvid_lib::renderer::Renderer;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::usvg::{
@@ -11,13 +16,6 @@ use rusvid_lib::usvg::{
 };
 use rusvid_lib::utils::color_from_hex;
 use std::path::PathBuf;
-
-use rusvid_lib::animation::curves::linear::Linear;
-use rusvid_lib::animation::curves::Function;
-use rusvid_lib::animation::position_animation::PositionAnimation;
-
-use rusvid_lib::renderer::raw::RawRender;
-use rusvid_lib::types::Point2d;
 use std::rc::Rc;
 
 fn main() {
@@ -76,6 +74,9 @@ fn main() {
         },
     }));
 
+    let circle_position = Points::Point2d(700.0, 850.0);
+    let circle_path = Rc::new(circle(circle_position.x(), circle_position.y(), 600.0));
+
     composition.add_to_root(NodeKind::Path(Path {
         stroke: Some(Stroke {
             paint: Paint::Link("lg2".into()),
@@ -83,7 +84,7 @@ fn main() {
             ..Stroke::default()
         }),
         rendering_mode: Default::default(),
-        data: Rc::new(circle(700.0, 850.0, 600.0)),
+        data: circle_path.clone(),
         ..Path::default()
     }));
 
@@ -95,11 +96,11 @@ fn main() {
         ..Path::default()
     }));
 
-    let pixel_position: Point2d = (20.0, 20.0);
+    let pixel_position = Points::Point2d(20.0, 20.0);
 
     let position = Rc::new(rect(
-        pixel_position.0,
-        pixel_position.1,
+        pixel_position.x(),
+        pixel_position.y(),
         composition.resolution().width() as f64 / 2.0,
         composition.resolution().height() as f64 / 3.0,
     ));
@@ -122,10 +123,31 @@ fn main() {
     // TODO add builder pattern for video- & image-render
     let animation_curve =
         Linear::new(0, 200, pixel_position.into(), (1250.0, 500.0).into()).unwrap();
-    let position_animation = PositionAnimation::new(position, Box::new(animation_curve));
+    let animation_1 = PositionAnimation::new(position.clone(), Box::new(animation_curve));
+    let animation_2 = PositionAnimation::new(
+        position,
+        Box::new(Linear::new(220, 300, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap()),
+    );
+    let animation_3 = PositionAnimation::new(
+        circle_path,
+        Box::new(
+            Linear::new(
+                30,
+                120,
+                circle_position.into(),
+                Point2d(
+                    composition.resolution().width() as f64 / 2.0,
+                    composition.resolution().height() as f64 / 2.0,
+                ),
+            )
+            .unwrap(),
+        ),
+    );
 
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path.clone());
     renderer.set_image_render(Box::new(RawRender::new()));
-    renderer.set_animation(position_animation);
+    renderer.add_animation(Box::new(animation_1));
+    renderer.add_animation(Box::new(animation_2));
+    renderer.add_animation(Box::new(animation_3));
     renderer.render(composition).unwrap()
 }
