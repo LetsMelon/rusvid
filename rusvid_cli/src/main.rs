@@ -1,4 +1,5 @@
 use rusvid_lib::animation::curves::linear::Linear;
+use rusvid_lib::animation::curves::s::S;
 use rusvid_lib::animation::curves::Points::Point2d;
 use rusvid_lib::animation::curves::{Function, Points};
 use rusvid_lib::animation::position_animation::PositionAnimation;
@@ -7,7 +8,8 @@ use rusvid_lib::figures::circle::circle;
 use rusvid_lib::figures::rect::rect;
 use rusvid_lib::figures::triangle::equilateral_triangle;
 use rusvid_lib::renderer::ffmpeg::FfmpegRenderer;
-use rusvid_lib::renderer::raw::RawRender;
+use rusvid_lib::renderer::png::PngRender;
+
 use rusvid_lib::renderer::Renderer;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::usvg::{
@@ -121,19 +123,20 @@ fn main() {
     let tmp_path = PathBuf::from("./out");
 
     // TODO add builder pattern for video- & image-render
-    let animation_curve =
-        Linear::new(0, 200, pixel_position.into(), (1250.0, 500.0).into()).unwrap();
-    let animation_1 = PositionAnimation::new(position.clone(), Box::new(animation_curve));
+    let animation_1 = PositionAnimation::new(
+        position.clone(),
+        Box::new(Linear::new(0, 200, pixel_position.into(), (1250.0, 500.0).into()).unwrap()),
+    );
     let animation_2 = PositionAnimation::new(
         position,
-        Box::new(Linear::new(220, 300, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap()),
+        Box::new(Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap()),
     );
     let animation_3 = PositionAnimation::new(
         circle_path,
         Box::new(
-            Linear::new(
-                30,
-                120,
+            S::new(
+                0,
+                90,
                 circle_position.into(),
                 Point2d(
                     composition.resolution().width() as f64 / 2.0,
@@ -145,7 +148,7 @@ fn main() {
     );
 
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path.clone());
-    renderer.set_image_render(Box::new(RawRender::new()));
+    renderer.set_image_render(Box::new(PngRender::new()));
     renderer.add_animation(Box::new(animation_1));
     renderer.add_animation(Box::new(animation_2));
     renderer.add_animation(Box::new(animation_3));

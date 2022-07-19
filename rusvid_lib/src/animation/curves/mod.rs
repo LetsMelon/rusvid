@@ -1,8 +1,9 @@
 use anyhow::Result;
 use std::fmt::{Debug, Formatter};
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 pub mod linear;
+pub mod s;
 
 /// ```rust
 /// use rusvid_lib::animation::curves::linear::Linear;
@@ -27,9 +28,9 @@ pub trait Function {
 
     fn calc_raw(&self, frame_number: usize) -> Points;
     fn calc(&self, frame_number: usize) -> Points {
-        if frame_number < self.start_frame() {
+        if frame_number <= self.start_frame() {
             return self.start();
-        } else if frame_number > self.end_frame() {
+        } else if frame_number >= self.end_frame() {
             return self.end();
         }
         self.calc_raw(frame_number)
@@ -38,9 +39,9 @@ pub trait Function {
     /// Raw instantaneous rate of change at the point `frame_number`
     fn delta_raw(&self, frame_number: usize) -> Points;
     fn delta(&self, frame_number: usize) -> Points {
-        if frame_number < self.start_frame() {
+        if frame_number <= self.start_frame() {
             return Points::default();
-        } else if frame_number > self.end_frame() {
+        } else if frame_number >= self.end_frame() {
             return Points::default();
         }
         self.delta_raw(frame_number)
@@ -98,6 +99,32 @@ impl Points {
             Points::Point2d(_, y) => *y,
         }
     }
+
+    pub fn pow(self, exp: Points) -> Points {
+        let x = if self.x() == 0.0 || exp.x() == 0.0 {
+            0.0
+        } else {
+            self.x().powf(exp.x())
+        };
+        let y = if self.y() == 0.0 || exp.y() == 0.0 {
+            0.0
+        } else {
+            self.y().powf(exp.y())
+        };
+        Points::Point2d(x, y)
+    }
+
+    pub fn zero_2d() -> Self {
+        Points::Point2d(0.0, 0.0)
+    }
+
+    pub fn one_2d() -> Self {
+        Points::Point2d(1.0, 1.0)
+    }
+
+    pub fn two_2d() -> Self {
+        Points::Point2d(2.0, 2.0)
+    }
 }
 
 impl From<(f64, f64)> for Points {
@@ -135,10 +162,40 @@ impl Div for Points {
 
     fn div(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
-            (Points::Point1d(x1), Points::Point1d(x2)) => Points::Point1d(x1 / x2),
-            (Points::Point2d(x1, y1), Points::Point2d(x2, y2)) => Points::Point2d(x1 / x2, y1 / y2),
-            (Points::Point1d(x1), Points::Point2d(x2, y2)) => Points::Point2d(x1 / x2, y2),
-            (Points::Point2d(x1, y1), Points::Point1d(x2)) => Points::Point2d(x1 / x2, y1),
+            (Points::Point1d(x1), Points::Point1d(x2)) => {
+                if x1 == 0.0 || x2 == 0.0 {
+                    Points::Point2d(0.0, 0.0)
+                } else {
+                    Points::Point2d(x1 / x2, 0.0)
+                }
+            }
+            (Points::Point2d(x1, y1), Points::Point2d(x2, y2)) => {
+                let mut x = 0.0;
+                let mut y = 0.0;
+
+                if x1 != 0.0 && x2 != 0.0 {
+                    x = x1 / x2;
+                }
+                if y1 != 0.0 && y2 != 0.0 {
+                    y = y1 / y2;
+                }
+
+                Points::Point2d(x, y)
+            }
+            (Points::Point1d(x1), Points::Point2d(x2, y2)) => {
+                if x1 == 0.0 || x2 == 0.0 {
+                    Points::Point2d(0.0, y2)
+                } else {
+                    Points::Point2d(x1 / x2, y2)
+                }
+            }
+            (Points::Point2d(x1, y1), Points::Point1d(x2)) => {
+                if x1 == 0.0 || x2 == 0.0 {
+                    Points::Point2d(0.0, y1)
+                } else {
+                    Points::Point2d(x1 / x2, y1)
+                }
+            }
         }
     }
 }
@@ -152,6 +209,13 @@ impl Mul for Points {
             (Points::Point1d(x1), Points::Point2d(x2, y2)) => Points::Point2d(x1 * x2, y2),
             (Points::Point2d(x1, y1), Points::Point1d(x2)) => Points::Point2d(x1 * x2, y1),
         }
+    }
+}
+impl Neg for Points {
+    type Output = Points;
+
+    fn neg(self) -> Self::Output {
+        self * Points::Point2d(-1.0, -1.0)
     }
 }
 

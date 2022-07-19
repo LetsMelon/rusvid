@@ -28,10 +28,11 @@ impl PositionAnimation {
 
 impl Animation for PositionAnimation {
     unsafe fn update(&mut self, frame_count: usize) -> anyhow::Result<()> {
-        if frame_count > self.meta.start_frame() && frame_count < self.meta.end_frame() {
+        if frame_count >= self.meta.start_frame() && frame_count < self.meta.end_frame() {
             let pd = Rc::get_mut_unchecked(&mut self.position);
 
             let delta = self.meta.delta(frame_count);
+            println!("{} -> {:?}", frame_count, delta);
             pd.transform(usvg::Transform::new_translate(delta.x(), delta.y()));
         }
         Ok(())

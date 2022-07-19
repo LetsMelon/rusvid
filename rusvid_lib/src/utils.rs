@@ -16,6 +16,10 @@ pub fn equal_delta(v1: f64, v2: f64, delta: f64) -> bool {
     diff <= delta.abs()
 }
 
+pub fn map(value: f64, low1: f64, high1: f64, low2: f64, high2: f64) -> f64 {
+    low2 + (value - low1) * (high2 - low2) / (high1 - low1)
+}
+
 #[cfg(test)]
 mod tests {
     mod equal_delta {
@@ -39,6 +43,16 @@ mod tests {
             assert!(equal_delta(10.0, 15.0, 6.5));
             assert!(equal_delta(10.0, 4.78, 6.5));
             assert_eq!(equal_delta(10.0, std::f64::consts::PI, 6.5), false);
+        }
+    }
+
+    mod map {
+        use crate::utils::map;
+
+        #[test]
+        fn just_works() {
+            assert_eq!(map(10.0, 0.0, 100.0, 0.0, 1.0), 0.1);
+            assert_eq!(map(10.0, 0.0, 10.0, 0.0, 1.0), 1.0);
         }
     }
 }
