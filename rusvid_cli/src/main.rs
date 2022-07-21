@@ -63,6 +63,13 @@ fn main() {
         },
     }));
 
+    let circle_position = animation::Points::Point2d(700.0, 850.0);
+    let circle_path = Rc::new(figures::circle(
+        circle_position.x(),
+        circle_position.y(),
+        600.0,
+    ));
+
     composition.add_to_root(NodeKind::Path(Path {
         stroke: Some(Stroke {
             paint: Paint::Link("lg2".into()),
@@ -82,9 +89,11 @@ fn main() {
         ..Path::default()
     }));
 
+    let pixel_position = animation::Points::Point2d(20.0, 20.0);
+
     let position = Rc::new(figures::rect(
-        20.0,
-        20.0,
+        pixel_position.x(),
+        pixel_position.y(),
         composition.resolution().width() as f64 / 2.0,
         composition.resolution().height() as f64 / 3.0,
     ));
@@ -105,7 +114,45 @@ fn main() {
     let tmp_path = PathBuf::from("./out");
 
     // TODO add builder pattern for video- & image-render
+    let animation_1 = animation::PositionAnimation::new(
+        position.clone(),
+        Box::new(
+            animation::functions::Linear::new(
+                0,
+                200,
+                pixel_position.into(),
+                (1250.0, 500.0).into(),
+            )
+            .unwrap(),
+        ),
+    );
+    let animation_2 = animation::PositionAnimation::new(
+        position,
+        Box::new(
+            animation::functions::Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into())
+                .unwrap(),
+        ),
+    );
+    let animation_3 = animation::PositionAnimation::new(
+        circle_path,
+        Box::new(
+            animation::functions::S::new(
+                0,
+                90,
+                circle_position.into(),
+                animation::Points::Point2d(
+                    composition.resolution().width() as f64 / 2.0,
+                    composition.resolution().height() as f64 / 2.0,
+                ),
+            )
+            .unwrap(),
+        ),
+    );
+
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path.clone());
-    renderer.set_image_render(Box::new(RawRender::new()));
-    renderer.render(composition, position).unwrap()
+    renderer.set_image_render(Box::new(PngRender::new()));
+    renderer.add_animation(Box::new(animation_1));
+    renderer.add_animation(Box::new(animation_2));
+    renderer.add_animation(Box::new(animation_3));
+    renderer.render(composition).unwrap()
 }

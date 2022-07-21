@@ -10,11 +10,8 @@ pub mod png;
 pub mod raw;
 
 pub trait Renderer {
-    fn render(
-        &mut self,
-        composition: Composition,
-        position: std::rc::Rc<usvg::PathData>, // TODO remove this and add a `animation` trait/struct/... in Composition
-    ) -> anyhow::Result<()>;
+    fn render(&mut self, composition: Composition) -> anyhow::Result<()>;
+    unsafe fn update(&mut self, frame_count: &usize) -> anyhow::Result<()>;
 
     fn out_path(&self) -> &Path;
     fn tmp_dir_path(&self) -> &Path;

@@ -3,12 +3,11 @@ use debug_ignore::DebugIgnore;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::rc::Rc;
-use usvg::PathData;
 
+use crate::animation::Animation;
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
 use crate::renderer::ffmpeg::codec::VideoCodec;
@@ -30,6 +29,7 @@ pub struct FfmpegRenderer {
     pub image_render: DebugIgnore<Box<dyn ImageRender>>,
     out_path: PathBuf,
     tmp_dir_path: PathBuf,
+    animation: DebugIgnore<Vec<Box<dyn Animation>>>,
 }
 
 impl Default for FfmpegRenderer {
@@ -42,6 +42,7 @@ impl Default for FfmpegRenderer {
             image_render: DebugIgnore(Box::new(PngRender::new())),
             out_path: PathBuf::new(),
             tmp_dir_path: PathBuf::new(),
+            animation: DebugIgnore(Vec::new()),
         }
     }
 }
@@ -62,14 +63,18 @@ impl FfmpegRenderer {
     pub fn set_image_render(&mut self, image_render: Box<dyn ImageRender>) {
         self.image_render = DebugIgnore(image_render);
     }
+
+    pub fn add_animation(&mut self, animation: Box<dyn Animation>) {
+        self.animation.push(animation)
+    }
 }
 
 impl Renderer for FfmpegRenderer {
-    fn render(&mut self, composition: Composition, mut position: Rc<PathData>) -> Result<()> {
+    fn render(&mut self, composition: Composition) -> Result<()> {
         self.framerate = composition.framerate;
 
-        let out_path = self.out_path();
-        let tmp_path = self.tmp_dir_path();
+        let out_path = self.out_path().to_path_buf();
+        let tmp_path = self.tmp_dir_path().to_path_buf();
 
         if tmp_path.exists() {
             fs::remove_dir_all(&tmp_path)?;
@@ -80,16 +85,14 @@ impl Renderer for FfmpegRenderer {
         for i in 0..frames {
             println!("{:03}/{:03}", i + 1, frames);
 
-            self.image_render().render(&composition, &tmp_path, i);
+            self.image_render().render(&composition, &tmp_path, i)?;
 
             // TODO: make safe
             // Test 1:
             // let mut reference_position = box_position.borrow_mut();
             // reference_position.transform(UsvgTransform::new_translate(5.0, 4.0));
             unsafe {
-                let pd = Rc::get_mut_unchecked(&mut position);
-                pd.transform(usvg::Transform::new_translate(5.0, 4.0));
-                pd.transform(usvg::Transform::new_rotate(65.0 / (frames as f64)));
+                let _ = &self.update(&i)?;
             }
         }
 
@@ -107,6 +110,13 @@ impl Renderer for FfmpegRenderer {
             .output()?;
         println!("Saved as: {:?}", &out_path);
 
+        Ok(())
+    }
+
+    unsafe fn update(&mut self, frame_count: &usize) -> Result<()> {
+        for animation in self.animation.deref_mut() {
+            animation.update(frame_count.clone())?;
+        }
         Ok(())
     }
 
