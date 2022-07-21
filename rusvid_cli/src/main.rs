@@ -1,8 +1,3 @@
-use rusvid_lib::animation::curves::linear::Linear;
-use rusvid_lib::animation::curves::s::S;
-use rusvid_lib::animation::curves::Points::Point2d;
-use rusvid_lib::animation::curves::{Function, Points};
-use rusvid_lib::animation::position_animation::PositionAnimation;
 use rusvid_lib::prelude::*;
 use rusvid_lib::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
@@ -68,7 +63,7 @@ fn main() {
         },
     }));
 
-    let circle_position = Points::Point2d(700.0, 850.0);
+    let circle_position = animation::Points::Point2d(700.0, 850.0);
     let circle_path = Rc::new(figures::circle(
         circle_position.x(),
         circle_position.y(),
@@ -94,7 +89,7 @@ fn main() {
         ..Path::default()
     }));
 
-    let pixel_position = Points::Point2d(20.0, 20.0);
+    let pixel_position = animation::Points::Point2d(20.0, 20.0);
 
     let position = Rc::new(figures::rect(
         pixel_position.x(),
@@ -119,22 +114,33 @@ fn main() {
     let tmp_path = PathBuf::from("./out");
 
     // TODO add builder pattern for video- & image-render
-    let animation_1 = PositionAnimation::new(
+    let animation_1 = animation::PositionAnimation::new(
         position.clone(),
-        Box::new(Linear::new(0, 200, pixel_position.into(), (1250.0, 500.0).into()).unwrap()),
+        Box::new(
+            animation::functions::Linear::new(
+                0,
+                200,
+                pixel_position.into(),
+                (1250.0, 500.0).into(),
+            )
+            .unwrap(),
+        ),
     );
-    let animation_2 = PositionAnimation::new(
+    let animation_2 = animation::PositionAnimation::new(
         position,
-        Box::new(Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap()),
+        Box::new(
+            animation::functions::Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into())
+                .unwrap(),
+        ),
     );
-    let animation_3 = PositionAnimation::new(
+    let animation_3 = animation::PositionAnimation::new(
         circle_path,
         Box::new(
-            S::new(
+            animation::functions::S::new(
                 0,
                 90,
                 circle_position.into(),
-                Point2d(
+                animation::Points::Point2d(
                     composition.resolution().width() as f64 / 2.0,
                     composition.resolution().height() as f64 / 2.0,
                 ),
