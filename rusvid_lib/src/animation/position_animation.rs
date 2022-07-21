@@ -4,6 +4,7 @@ use usvg::PathData;
 
 use crate::animation::curves::Function;
 use crate::animation::Animation;
+use crate::utils::set_path;
 
 pub struct PositionAnimation {
     position: Rc<PathData>,
@@ -34,6 +35,9 @@ impl Animation for PositionAnimation {
             let delta = self.meta.delta(frame_count);
             println!("{} -> {:?}", frame_count, delta);
             pd.transform(usvg::Transform::new_translate(delta.x(), delta.y()));
+            // let pos = self.meta.calc(frame_count);
+            // println!("{} -> {:?}", frame_count, pos);
+            // set_path(&mut pd, pos);
         }
         Ok(())
     }
