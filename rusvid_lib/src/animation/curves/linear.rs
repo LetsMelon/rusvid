@@ -132,7 +132,7 @@ mod tests {
 
         let linear = Linear::new(30, 90, Point2d(100.0, 100.0), Point2d(300.0, 500.0)).unwrap();
 
-        assert!(linear.delta(30).equal_delta(&Point2d(3.33, 6.66), DELTA));
+        assert!(linear.delta(30).equal_delta(&Point2d(0.0, 0.0), DELTA));
         assert!(linear
             .delta_raw(30)
             .equal_delta(&Point2d(3.33, 6.66), DELTA));
