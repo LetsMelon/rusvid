@@ -3,15 +3,7 @@ use rusvid_lib::animation::curves::s::S;
 use rusvid_lib::animation::curves::Points::Point2d;
 use rusvid_lib::animation::curves::{Function, Points};
 use rusvid_lib::animation::position_animation::PositionAnimation;
-use rusvid_lib::composition::Composition;
-use rusvid_lib::figures::circle::circle;
-use rusvid_lib::figures::rect::rect;
-use rusvid_lib::figures::triangle::equilateral_triangle;
-use rusvid_lib::renderer::ffmpeg::FfmpegRenderer;
-use rusvid_lib::renderer::png::PngRender;
-
-use rusvid_lib::renderer::Renderer;
-use rusvid_lib::resolution::Resolution;
+use rusvid_lib::prelude::*;
 use rusvid_lib::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
     StopOffset, Stroke, StrokeWidth, Transform, Units,
@@ -77,7 +69,11 @@ fn main() {
     }));
 
     let circle_position = Points::Point2d(700.0, 850.0);
-    let circle_path = Rc::new(circle(circle_position.x(), circle_position.y(), 600.0));
+    let circle_path = Rc::new(figures::circle(
+        circle_position.x(),
+        circle_position.y(),
+        600.0,
+    ));
 
     composition.add_to_root(NodeKind::Path(Path {
         stroke: Some(Stroke {
@@ -86,11 +82,11 @@ fn main() {
             ..Stroke::default()
         }),
         rendering_mode: Default::default(),
-        data: circle_path.clone(),
+        data: Rc::new(figures::circle(700.0, 850.0, 600.0)),
         ..Path::default()
     }));
 
-    let mut path = equilateral_triangle(400.0, 400.0, 350.0);
+    let mut path = figures::equilateral_triangle(400.0, 400.0, 350.0);
     path.transform(Transform::new_rotate(2.5));
     composition.add_to_root(NodeKind::Path(Path {
         fill: composition.fill_with_link("lg1"),
@@ -100,7 +96,7 @@ fn main() {
 
     let pixel_position = Points::Point2d(20.0, 20.0);
 
-    let position = Rc::new(rect(
+    let position = Rc::new(figures::rect(
         pixel_position.x(),
         pixel_position.y(),
         composition.resolution().width() as f64 / 2.0,

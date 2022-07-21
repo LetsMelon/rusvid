@@ -4,7 +4,6 @@ use usvg::PathData;
 
 use crate::animation::curves::Function;
 use crate::animation::Animation;
-use crate::utils::set_path;
 
 pub struct PositionAnimation {
     position: Rc<PathData>,
