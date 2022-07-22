@@ -1,6 +1,9 @@
+use crate::animation::manager::AnimationManager;
 use debug_ignore::DebugIgnore;
+use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
-use usvg::{Fill, Node, NodeExt, NodeKind, Paint, Tree};
+use std::rc::Rc;
+use usvg::{Fill, Node, NodeExt, NodeKind, Paint, PathData, Tree};
 
 use crate::composition::CompositionBuilder;
 use crate::metrics::{MetricsSize, MetricsVideo};
@@ -21,6 +24,8 @@ pub struct Composition {
     pub name: String,
 
     pub(crate) rtree: DebugIgnore<Tree>,
+
+    pub animations: AnimationManager,
 }
 
 impl Composition {
@@ -50,7 +55,14 @@ impl Composition {
     }
 
     #[inline]
-    pub fn add_to_root(&self, kind: NodeKind) -> Node {
+    pub fn add_to_root(&mut self, kind: NodeKind) -> Node {
+        match &kind {
+            NodeKind::Path(path) => {
+                self.animations
+                    .add_reference(path.id.clone(), path.data.clone());
+            }
+            _ => {}
+        }
         self.rtree().root().append_kind(kind)
     }
 

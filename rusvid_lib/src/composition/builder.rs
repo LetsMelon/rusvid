@@ -1,4 +1,6 @@
+use crate::animation::manager::AnimationManager;
 use debug_ignore::DebugIgnore;
+use std::collections::HashMap;
 use usvg::{AspectRatio, Size, Svg, Tree, ViewBox};
 
 use crate::composition::Composition;
@@ -48,6 +50,7 @@ impl CompositionBuilder {
             rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(
                 self.resolution,
             )),
+            animations: AnimationManager::new(),
         }
     }
 

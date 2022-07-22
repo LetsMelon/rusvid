@@ -11,7 +11,6 @@ pub mod raw;
 
 pub trait Renderer {
     fn render(&mut self, composition: Composition) -> anyhow::Result<()>;
-    unsafe fn update(&mut self, frame_count: &usize) -> anyhow::Result<()>;
 
     fn out_path(&self) -> &Path;
     fn tmp_dir_path(&self) -> &Path;

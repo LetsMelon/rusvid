@@ -29,7 +29,6 @@ pub struct FfmpegRenderer {
     pub image_render: DebugIgnore<Box<dyn ImageRender>>,
     out_path: PathBuf,
     tmp_dir_path: PathBuf,
-    animation: DebugIgnore<Vec<Box<dyn Animation>>>,
 }
 
 impl Default for FfmpegRenderer {
@@ -42,7 +41,6 @@ impl Default for FfmpegRenderer {
             image_render: DebugIgnore(Box::new(PngRender::new())),
             out_path: PathBuf::new(),
             tmp_dir_path: PathBuf::new(),
-            animation: DebugIgnore(Vec::new()),
         }
     }
 }
@@ -63,14 +61,10 @@ impl FfmpegRenderer {
     pub fn set_image_render(&mut self, image_render: Box<dyn ImageRender>) {
         self.image_render = DebugIgnore(image_render);
     }
-
-    pub fn add_animation(&mut self, animation: Box<dyn Animation>) {
-        self.animation.push(animation)
-    }
 }
 
 impl Renderer for FfmpegRenderer {
-    fn render(&mut self, composition: Composition) -> Result<()> {
+    fn render(&mut self, mut composition: Composition) -> Result<()> {
         self.framerate = composition.framerate;
 
         let out_path = self.out_path().to_path_buf();
@@ -85,15 +79,11 @@ impl Renderer for FfmpegRenderer {
         for i in 0..frames {
             println!("{:03}/{:03}", i + 1, frames);
 
-            self.image_render().render(&composition, &tmp_path, i)?;
-
-            // TODO: make safe
-            // Test 1:
-            // let mut reference_position = box_position.borrow_mut();
-            // reference_position.transform(UsvgTransform::new_translate(5.0, 4.0));
             unsafe {
-                let _ = &self.update(&i)?;
+                let _ = &composition.animations.update(*&i)?;
             }
+
+            self.image_render().render(&composition, &tmp_path, i)?;
         }
 
         let mut command = self.build_command(&out_path, &tmp_path);
@@ -110,13 +100,6 @@ impl Renderer for FfmpegRenderer {
             .output()?;
         println!("Saved as: {:?}", &out_path);
 
-        Ok(())
-    }
-
-    unsafe fn update(&mut self, frame_count: &usize) -> Result<()> {
-        for animation in self.animation.deref_mut() {
-            animation.update(*frame_count)?;
-        }
         Ok(())
     }
 

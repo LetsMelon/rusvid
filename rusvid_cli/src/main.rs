@@ -1,3 +1,4 @@
+use rusvid_lib::animation::manager::AnimationManager;
 use rusvid_lib::prelude::*;
 use rusvid_lib::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
@@ -71,19 +72,21 @@ fn main() {
     ));
 
     composition.add_to_root(NodeKind::Path(Path {
+        id: "circle".to_string(),
         stroke: Some(Stroke {
             paint: Paint::Link("lg2".into()),
             width: StrokeWidth::new(10.0),
             ..Stroke::default()
         }),
         rendering_mode: Default::default(),
-        data: Rc::new(figures::circle(700.0, 850.0, 600.0)),
+        data: circle_path.clone(),
         ..Path::default()
     }));
 
     let mut path = figures::equilateral_triangle(400.0, 400.0, 350.0);
     path.transform(Transform::new_rotate(2.5));
     composition.add_to_root(NodeKind::Path(Path {
+        id: "triangle".to_string(),
         fill: composition.fill_with_link("lg1"),
         data: Rc::new(path),
         ..Path::default()
@@ -99,6 +102,7 @@ fn main() {
     ));
 
     composition.add_to_root(NodeKind::Path(Path {
+        id: "rect".to_string(),
         fill: match composition.fill_with_link("lg1") {
             None => None,
             Some(mut f) => {
@@ -115,21 +119,21 @@ fn main() {
 
     // TODO add builder pattern for video- & image-render
     let animation_1 = animation::PositionAnimation::new(
-        position.clone(),
+        "rect".to_string(),
         Box::new(
             animation::functions::Linear::new(0, 200, pixel_position, (1250.0, 500.0).into())
                 .unwrap(),
         ),
     );
     let animation_2 = animation::PositionAnimation::new(
-        position,
+        "rect".to_string(),
         Box::new(
             animation::functions::Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into())
                 .unwrap(),
         ),
     );
     let animation_3 = animation::PositionAnimation::new(
-        circle_path,
+        "circle".to_string(),
         Box::new(
             animation::functions::S::new(
                 0,
@@ -146,8 +150,9 @@ fn main() {
 
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path);
     renderer.set_image_render(Box::new(PngRender::new()));
-    renderer.add_animation(Box::new(animation_1));
-    renderer.add_animation(Box::new(animation_2));
-    renderer.add_animation(Box::new(animation_3));
+
+    composition.animations.add_animation(animation_1);
+    composition.animations.add_animation(animation_2);
+    composition.animations.add_animation(animation_3);
     renderer.render(composition).unwrap()
 }
