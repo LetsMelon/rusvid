@@ -51,11 +51,8 @@ pub fn set_path(segments: &mut [PathSegment], cords: Points) {
 #[inline]
 fn apply_to(x: &mut f64, y: &mut f64, cords: &Points) {
     *x = cords.x();
-    match cords {
-        Points::Point2d(_, _) => {
-            *y = cords.y();
-        }
-        _ => {}
+    if let Points::Point2d(_, _) = cords {
+        *y = cords.y();
     }
 }
 

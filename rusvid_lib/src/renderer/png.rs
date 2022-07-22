@@ -32,7 +32,7 @@ impl ImageRender for PngRender {
     ) -> anyhow::Result<()> {
         let file_path = self.generate_filepath(tmp_dir_path, frame_number);
 
-        let pixmap = self.render_pixmap(&composition)?;
+        let pixmap = self.render_pixmap(composition)?;
 
         pixmap.save_png(file_path)?;
 

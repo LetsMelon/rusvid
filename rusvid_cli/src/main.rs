@@ -117,13 +117,8 @@ fn main() {
     let animation_1 = animation::PositionAnimation::new(
         position.clone(),
         Box::new(
-            animation::functions::Linear::new(
-                0,
-                200,
-                pixel_position.into(),
-                (1250.0, 500.0).into(),
-            )
-            .unwrap(),
+            animation::functions::Linear::new(0, 200, pixel_position, (1250.0, 500.0).into())
+                .unwrap(),
         ),
     );
     let animation_2 = animation::PositionAnimation::new(
@@ -139,7 +134,7 @@ fn main() {
             animation::functions::S::new(
                 0,
                 90,
-                circle_position.into(),
+                circle_position,
                 animation::Points::Point2d(
                     composition.resolution().width() as f64 / 2.0,
                     composition.resolution().height() as f64 / 2.0,
@@ -149,7 +144,7 @@ fn main() {
         ),
     );
 
-    let mut renderer = FfmpegRenderer::new(out_path, tmp_path.clone());
+    let mut renderer = FfmpegRenderer::new(out_path, tmp_path);
     renderer.set_image_render(Box::new(PngRender::new()));
     renderer.add_animation(Box::new(animation_1));
     renderer.add_animation(Box::new(animation_2));

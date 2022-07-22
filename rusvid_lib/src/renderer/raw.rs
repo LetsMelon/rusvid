@@ -34,7 +34,7 @@ impl ImageRender for RawRender {
     ) -> anyhow::Result<()> {
         let file_path = self.generate_filepath(tmp_dir_path, frame_number);
 
-        let pixmap = self.render_pixmap(&composition)?;
+        let pixmap = self.render_pixmap(composition)?;
 
         let width = composition.resolution().width() as u32;
         let height = composition.resolution().height() as u32;
@@ -46,7 +46,7 @@ impl ImageRender for RawRender {
 
             let c = c.get();
 
-            let mut r = ((c >> 0) & 0xFF) as u8;
+            let mut r = (c & 0xFF) as u8;
             let mut g = ((c >> 8) & 0xFF) as u8;
             let mut b = ((c >> 16) & 0xFF) as u8;
             let a = ((c >> 24) & 0xFF) as u8;

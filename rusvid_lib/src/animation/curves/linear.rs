@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use std::fmt::{Debug, Formatter, Pointer};
+use std::fmt::{Debug, Formatter};
 
 use crate::animation::curves::Points::*;
 use crate::animation::curves::{Function, Points};

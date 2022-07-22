@@ -115,7 +115,7 @@ impl Renderer for FfmpegRenderer {
 
     unsafe fn update(&mut self, frame_count: &usize) -> Result<()> {
         for animation in self.animation.deref_mut() {
-            animation.update(frame_count.clone())?;
+            animation.update(*frame_count)?;
         }
         Ok(())
     }
