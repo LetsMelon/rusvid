@@ -1,4 +1,3 @@
-use rusvid_lib::animation::manager::AnimationManager;
 use rusvid_lib::prelude::*;
 use rusvid_lib::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,

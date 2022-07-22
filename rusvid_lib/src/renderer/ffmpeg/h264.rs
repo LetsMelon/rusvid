@@ -84,21 +84,11 @@ impl CliArgument for H264Tune {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct H264Settings {
     constant_rate_factor: Option<usize>,
     preset: Option<H264Preset>,
     tune: Option<H264Tune>,
-}
-
-impl Default for H264Settings {
-    fn default() -> Self {
-        Self {
-            constant_rate_factor: None,
-            preset: None,
-            tune: None,
-        }
-    }
 }
 
 impl CliArgument for H264Settings {

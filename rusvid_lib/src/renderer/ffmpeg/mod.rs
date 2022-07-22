@@ -3,11 +3,10 @@ use debug_ignore::DebugIgnore;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-use crate::animation::Animation;
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
 use crate::renderer::ffmpeg::codec::VideoCodec;
@@ -79,9 +78,7 @@ impl Renderer for FfmpegRenderer {
         for i in 0..frames {
             println!("{:03}/{:03}", i + 1, frames);
 
-            unsafe {
-                let _ = &composition.animations.update(*&i)?;
-            }
+            let _ = &composition.animations.update(i)?;
 
             self.image_render().render(&composition, &tmp_path, i)?;
         }

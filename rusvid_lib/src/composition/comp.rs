@@ -1,10 +1,8 @@
-use crate::animation::manager::AnimationManager;
 use debug_ignore::DebugIgnore;
-use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
-use std::rc::Rc;
-use usvg::{Fill, Node, NodeExt, NodeKind, Paint, PathData, Tree};
+use usvg::{Fill, Node, NodeExt, NodeKind, Paint, Tree};
 
+use crate::animation::manager::AnimationManager;
 use crate::composition::CompositionBuilder;
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
@@ -56,12 +54,9 @@ impl Composition {
 
     #[inline]
     pub fn add_to_root(&mut self, kind: NodeKind) -> Node {
-        match &kind {
-            NodeKind::Path(path) => {
-                self.animations
-                    .add_reference(path.id.clone(), path.data.clone());
-            }
-            _ => {}
+        if let NodeKind::Path(path) = &kind {
+            self.animations
+                .add_reference(path.id.clone(), path.data.clone());
         }
         self.rtree().root().append_kind(kind)
     }

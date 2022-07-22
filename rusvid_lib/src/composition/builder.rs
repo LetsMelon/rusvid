@@ -1,8 +1,7 @@
-use crate::animation::manager::AnimationManager;
 use debug_ignore::DebugIgnore;
-use std::collections::HashMap;
 use usvg::{AspectRatio, Size, Svg, Tree, ViewBox};
 
+use crate::animation::manager::AnimationManager;
 use crate::composition::Composition;
 use crate::resolution::Resolution;
 use crate::types::FPS;

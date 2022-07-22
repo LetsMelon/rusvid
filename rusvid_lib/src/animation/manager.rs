@@ -1,7 +1,6 @@
 use anyhow::Result;
 use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
-use std::ops::Deref;
 use std::rc::Rc;
 use usvg::PathData;
 
@@ -14,7 +13,7 @@ pub struct AnimationManager {
 }
 
 impl Debug for dyn Animation {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
         todo!()
     }
 }
@@ -45,7 +44,7 @@ impl AnimationManager {
 
             if let Some(pd) = rc {
                 unsafe {
-                    let _ = animation.update(pd.clone(), &frame_count)?;
+                    animation.update(pd.clone(), &frame_count)?;
                 }
             }
         }
