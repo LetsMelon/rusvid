@@ -16,6 +16,7 @@ pub use usvg;
 pub mod prelude {
     pub use crate::animation::curves::Function;
     pub use crate::composition::Composition;
+    pub use crate::composition::CompositionBuilder;
     pub use crate::renderer::ffmpeg::FfmpegRenderer;
     pub use crate::renderer::png::PngRender;
     pub use crate::renderer::raw::RawRender;
