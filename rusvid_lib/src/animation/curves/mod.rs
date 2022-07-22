@@ -16,7 +16,7 @@ pub mod s;
 /// assert_eq!(linear.calc(60), Point1d(200.0));
 /// assert_eq!(linear.calc(90), Point1d(300.0));
 /// ```
-pub trait Function {
+pub trait Function: std::fmt::Debug {
     fn new(start_frame: usize, end_frame: usize, start: Points, end: Points) -> Result<Self>
     where
         Self: Sized;

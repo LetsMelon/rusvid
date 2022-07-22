@@ -12,12 +12,6 @@ pub struct AnimationManager {
     animations: Vec<Box<dyn Animation>>,
 }
 
-impl Debug for dyn Animation {
-    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
-        todo!()
-    }
-}
-
 impl AnimationManager {
     pub fn new() -> AnimationManager {
         AnimationManager {

@@ -5,15 +5,10 @@ use usvg::PathData;
 use crate::animation::curves::Function;
 use crate::animation::Animation;
 
+#[derive(Debug)]
 pub struct PositionAnimation {
     curve: Box<dyn Function>,
     object_id: String,
-}
-
-impl Debug for PositionAnimation {
-    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
-        todo!()
-    }
 }
 
 impl PositionAnimation {
