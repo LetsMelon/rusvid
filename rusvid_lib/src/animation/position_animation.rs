@@ -6,7 +6,7 @@ use crate::animation::curves::Function;
 use crate::animation::Animation;
 
 pub struct PositionAnimation {
-    meta: Box<dyn Function>,
+    curve: Box<dyn Function>,
     object_id: String,
 }
 
@@ -17,9 +17,9 @@ impl Debug for PositionAnimation {
 }
 
 impl PositionAnimation {
-    pub fn new(id: String, meta: Box<dyn Function>) -> Self {
+    pub fn new<T: Function + 'static>(id: String, curve: T) -> Self {
         PositionAnimation {
-            meta,
+            curve: Box::new(curve),
             object_id: id,
         }
     }
@@ -27,10 +27,10 @@ impl PositionAnimation {
 
 impl Animation for PositionAnimation {
     unsafe fn update(&mut self, mut path: Rc<PathData>, frame_count: &usize) -> anyhow::Result<()> {
-        if *frame_count >= self.meta.start_frame() && *frame_count < self.meta.end_frame() {
+        if *frame_count >= self.curve.start_frame() && *frame_count < self.curve.end_frame() {
             let pd = Rc::get_mut_unchecked(&mut path);
 
-            let delta = self.meta.delta(*frame_count);
+            let delta = self.curve.delta(*frame_count);
             println!("{} -> {:?}", frame_count, delta);
             pd.transform(usvg::Transform::new_translate(delta.x(), delta.y()));
             // let pos = self.meta.calc(frame_count);

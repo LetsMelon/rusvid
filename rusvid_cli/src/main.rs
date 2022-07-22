@@ -120,32 +120,25 @@ fn main() {
     // TODO add builder pattern for video- & image-render
     let animation_1 = animation::PositionAnimation::new(
         "rect".to_string(),
-        Box::new(
-            animation::functions::Linear::new(0, 200, pixel_position, (1250.0, 500.0).into())
-                .unwrap(),
-        ),
+        animation::functions::Linear::new(0, 200, pixel_position, (1250.0, 500.0).into()).unwrap(),
     );
     let animation_2 = animation::PositionAnimation::new(
         "rect".to_string(),
-        Box::new(
-            animation::functions::Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into())
-                .unwrap(),
-        ),
+        animation::functions::Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into())
+            .unwrap(),
     );
     let animation_3 = animation::PositionAnimation::new(
         "circle".to_string(),
-        Box::new(
-            animation::functions::S::new(
-                0,
-                90,
-                circle_position,
-                animation::Points::Point2d(
-                    composition.resolution().width() as f64 / 2.0,
-                    composition.resolution().height() as f64 / 2.0,
-                ),
-            )
-            .unwrap(),
-        ),
+        animation::functions::S::new(
+            0,
+            90,
+            circle_position,
+            animation::Points::Point2d(
+                composition.resolution().width() as f64 / 2.0,
+                composition.resolution().height() as f64 / 2.0,
+            ),
+        )
+        .unwrap(),
     );
 
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path);
