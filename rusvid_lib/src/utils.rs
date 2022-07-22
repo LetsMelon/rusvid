@@ -3,7 +3,11 @@ use usvg::{Color, PathSegment};
 use crate::animation::curves::Points;
 
 pub fn color_from_hex(hex_color: String) -> Option<Color> {
-    if !(hex_color.len() != 6 || hex_color.len() != 8) {
+    println!("{:?}", hex_color.len() == 6);
+    println!("{:?}", hex_color.len() == 8);
+    println!("{:?}", !(hex_color.len() == 6 || hex_color.len() == 8));
+
+    if !(hex_color.len() == 6 || hex_color.len() == 8) {
         return None;
     }
     let r = u8::from_str_radix(&hex_color[0..2], 16).ok()?;
@@ -58,6 +62,51 @@ fn apply_to(x: &mut f64, y: &mut f64, cords: &Points) {
 
 #[cfg(test)]
 mod tests {
+    mod color_from_hex {
+        use crate::utils::color_from_hex;
+        use std::num::ParseIntError;
+        use usvg::Color;
+
+        #[test]
+        fn just_works() {
+            assert_eq!(
+                color_from_hex("000000".to_string()).unwrap(),
+                Color::black()
+            );
+            assert_eq!(
+                color_from_hex("FFFFFF".to_string()).unwrap(),
+                Color::white()
+            );
+
+            assert_eq!(
+                color_from_hex("FF0000".to_string()).unwrap(),
+                Color::new_rgb(255, 0, 0)
+            );
+            assert_eq!(
+                color_from_hex("00FF00".to_string()).unwrap(),
+                Color::new_rgb(0, 255, 0)
+            );
+            assert_eq!(
+                color_from_hex("0000FF".to_string()).unwrap(),
+                Color::new_rgb(0, 0, 255)
+            );
+
+            assert_eq!(
+                color_from_hex("de8107".to_string()).unwrap(),
+                Color::new_rgb(222, 129, 7)
+            );
+        }
+
+        #[test]
+        fn parse_error() {
+            assert_eq!(color_from_hex("".to_string()), None);
+            assert_eq!(color_from_hex("FFF".to_string()), None);
+            assert_eq!(color_from_hex("FFFFFFFFF".to_string()), None);
+
+            assert_eq!(color_from_hex("GG00FF".to_string()), None);
+        }
+    }
+
     mod equal_delta {
         use crate::utils::equal_delta;
 
