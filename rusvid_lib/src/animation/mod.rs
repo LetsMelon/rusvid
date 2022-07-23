@@ -1,5 +1,4 @@
 use anyhow::Result;
-use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
 use usvg::PathData;
 
