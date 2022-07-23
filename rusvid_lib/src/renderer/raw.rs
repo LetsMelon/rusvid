@@ -1,3 +1,4 @@
+use anyhow::Result;
 use image::{ImageBuffer, RgbaImage};
 use std::path::{Path, PathBuf};
 use tiny_skia::{PremultipliedColorU8, ALPHA_U8_OPAQUE};
@@ -12,28 +13,9 @@ impl RawRender {
     pub fn new() -> Self {
         RawRender {}
     }
-}
-
-impl ImageRender for RawRender {
-    #[inline]
-    fn generate_filepath(&self, tmp_dir_path: &Path, frame_count: usize) -> PathBuf {
-        let filename = format!("{}.bmp", frame_count);
-        tmp_dir_path.join(std::path::Path::new(&filename))
-    }
 
     #[inline]
-    fn file_extension(&self) -> String {
-        "bmp".to_string()
-    }
-
-    fn render(
-        &self,
-        composition: &Composition,
-        tmp_dir_path: &Path,
-        frame_number: usize,
-    ) -> anyhow::Result<()> {
-        let file_path = self.generate_filepath(tmp_dir_path, frame_number);
-
+    pub fn calculate_image_buffer(&self, composition: &Composition) -> Result<RgbaImage> {
         let pixmap = self.render_pixmap(composition)?;
 
         let width = composition.resolution().width() as u32;
@@ -61,6 +43,31 @@ impl ImageRender for RawRender {
             image::Rgba([r, g, b, a])
         });
 
+        Ok(image_buffer)
+    }
+}
+
+impl ImageRender for RawRender {
+    #[inline]
+    fn generate_filepath(&self, tmp_dir_path: &Path, frame_count: usize) -> PathBuf {
+        let filename = format!("{}.bmp", frame_count);
+        tmp_dir_path.join(std::path::Path::new(&filename))
+    }
+
+    #[inline]
+    fn file_extension(&self) -> String {
+        "bmp".to_string()
+    }
+
+    fn render(
+        &self,
+        composition: &Composition,
+        tmp_dir_path: &Path,
+        frame_number: usize,
+    ) -> anyhow::Result<()> {
+        let file_path = self.generate_filepath(tmp_dir_path, frame_number);
+
+        let image_buffer = self.calculate_image_buffer(composition)?;
         image_buffer.save(file_path)?;
 
         Ok(())
