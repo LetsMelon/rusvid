@@ -41,7 +41,7 @@ pub trait Function: std::fmt::Debug {
     fn delta(&self, frame_number: usize) -> Points {
         if frame_number <= self.start_frame() {
             return Points::default();
-        } else if frame_number >= self.end_frame() {
+        } else if frame_number > self.end_frame() {
             return Points::default();
         }
         self.delta_raw(frame_number)

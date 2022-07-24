@@ -22,7 +22,7 @@ impl PositionAnimation {
 
 impl Animation for PositionAnimation {
     unsafe fn update(&mut self, mut path: Rc<PathData>, frame_count: &usize) -> anyhow::Result<()> {
-        if *frame_count >= self.curve.start_frame() && *frame_count < self.curve.end_frame() {
+        if *frame_count >= self.curve.start_frame() && *frame_count <= self.curve.end_frame() {
             let pd = Rc::get_mut_unchecked(&mut path);
 
             let delta = self.curve.delta(*frame_count);
