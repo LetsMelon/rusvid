@@ -64,12 +64,6 @@ fn main() {
     }));
 
     let circle_position = animation::Points::Point2d(700.0, 850.0);
-    let circle_path = Rc::new(figures::circle(
-        circle_position.x(),
-        circle_position.y(),
-        600.0,
-    ));
-
     composition.add_to_root(NodeKind::Path(Path {
         id: "circle".to_string(),
         stroke: Some(Stroke {
@@ -78,7 +72,11 @@ fn main() {
             ..Stroke::default()
         }),
         rendering_mode: Default::default(),
-        data: circle_path.clone(),
+        data: Rc::new(figures::circle(
+            circle_position.x(),
+            circle_position.y(),
+            600.0,
+        )),
         ..Path::default()
     }));
 
@@ -92,14 +90,6 @@ fn main() {
     }));
 
     let pixel_position = animation::Points::Point2d(20.0, 20.0);
-
-    let position = Rc::new(figures::rect(
-        pixel_position.x(),
-        pixel_position.y(),
-        composition.resolution().width() as f64 / 2.0,
-        composition.resolution().height() as f64 / 3.0,
-    ));
-
     composition.add_to_root(NodeKind::Path(Path {
         id: "rect".to_string(),
         fill: match composition.fill_with_link("lg1") {
@@ -109,7 +99,12 @@ fn main() {
                 Some(f)
             }
         },
-        data: Rc::clone(&position),
+        data: Rc::new(figures::rect(
+            pixel_position.x(),
+            pixel_position.y(),
+            composition.resolution().width() as f64 / 2.0,
+            composition.resolution().height() as f64 / 3.0,
+        )),
         ..Path::default()
     }));
 
