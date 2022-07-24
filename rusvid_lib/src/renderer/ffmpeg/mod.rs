@@ -57,8 +57,8 @@ impl FfmpegRenderer {
         self.image_render.deref()
     }
 
-    pub fn set_image_render(&mut self, image_render: Box<dyn ImageRender>) {
-        self.image_render = DebugIgnore(image_render);
+    pub fn set_image_render<T: ImageRender + 'static>(&mut self, image_render: T) {
+        self.image_render = DebugIgnore(Box::new(image_render));
     }
 }
 

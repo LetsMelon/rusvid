@@ -141,7 +141,7 @@ fn main() {
     );
 
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path);
-    renderer.set_image_render(Box::new(PngRender::new()));
+    renderer.set_image_render(PngRender::new());
 
     composition.animations.add_animation(animation_1);
     composition.animations.add_animation(animation_2);
