@@ -1,6 +1,5 @@
 use usvg::{PathData, PathSegment};
-
-use crate::utils::equal_delta;
+use utils::equal_delta;
 
 #[inline]
 fn sin_radius(angle: f64, radius: f64) -> f64 {
@@ -106,7 +105,7 @@ pub fn circle(c_x: f64, c_y: f64, radius: f64) -> PathData {
 #[cfg(test)]
 mod tests {
     use crate::figures::circle::*;
-    use crate::utils::equal_delta;
+    use utils::equal_delta;
 
     fn equal_path_segment(p1: PathSegment, p2: PathSegment) -> bool {
         match (p1, p2) {

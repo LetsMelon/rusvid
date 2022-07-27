@@ -627,6 +627,7 @@ dependencies = [
  "resvg",
  "tiny-skia",
  "usvg",
+ "utils",
 ]
 
 [[package]]
@@ -817,6 +818,13 @@ dependencies = [
  "unicode-script",
  "unicode-vo",
  "xmlwriter",
+]
+
+[[package]]
+name = "utils"
+version = "0.1.0"
+dependencies = [
+ "usvg",
 ]
 
 [[package]]

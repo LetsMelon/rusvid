@@ -75,7 +75,7 @@ impl Eq for Points {}
 
 impl Points {
     pub fn equal_delta(&self, other: &Points, delta: f64) -> bool {
-        use crate::utils::equal_delta as eq_d;
+        use utils::equal_delta as eq_d;
 
         match (*self, *other) {
             (Points::Point1d(x1), Points::Point1d(x2)) => eq_d(x1, x2, delta),

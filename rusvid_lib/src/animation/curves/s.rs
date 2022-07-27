@@ -1,10 +1,9 @@
 use anyhow::bail;
-
 use std::fmt::{Debug, Formatter};
+use utils::map;
 
 use crate::animation::curves::Points::Point2d;
 use crate::animation::curves::{Function, Points};
-use crate::utils::map;
 
 #[derive(Debug, Copy, Clone)]
 /// Formula:
