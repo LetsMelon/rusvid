@@ -11,6 +11,7 @@ utils = { path = "../libs/utils" }
 figures = { path = "../crates/figures" }
 shared = { path = "../libs/shared" }
 animation = { path = "../crates/animation" }
+composition = { path = "../crates/composition" }
 resvg = "0.23.0"
 tiny-skia = "0.6.5"
 usvg = "0.23.0"

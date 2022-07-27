@@ -1,4 +1,3 @@
-pub mod composition;
 pub mod renderer;
 
 mod point_utils;
@@ -8,6 +7,7 @@ mod point_utils;
 pub use usvg;
 
 pub use animation;
+pub use composition;
 pub use shared;
 
 pub mod utils {

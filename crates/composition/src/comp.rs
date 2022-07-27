@@ -1,3 +1,4 @@
+use animation::manager::AnimationManager;
 use debug_ignore::DebugIgnore;
 use shared::metrics::{MetricsSize, MetricsVideo};
 use shared::resolution::Resolution;
@@ -5,8 +6,7 @@ use shared::types::FPS;
 use std::ops::{Deref, DerefMut};
 use usvg::{Fill, Node, NodeExt, NodeKind, Paint, Tree};
 
-use crate::animation::manager::AnimationManager;
-use crate::composition::CompositionBuilder;
+use crate::CompositionBuilder;
 
 #[derive(Debug)]
 pub struct Composition {

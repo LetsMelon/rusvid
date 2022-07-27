@@ -1,4 +1,5 @@
 use anyhow::Result;
+use composition::Composition;
 use debug_ignore::DebugIgnore;
 use shared::metrics::MetricsVideo;
 use shared::types::FPS;
@@ -9,7 +10,6 @@ use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-use crate::composition::Composition;
 use crate::renderer::ffmpeg::codec::VideoCodec;
 use crate::renderer::ffmpeg::pixel_formats::PixelFormats;
 use crate::renderer::png::PngRender;

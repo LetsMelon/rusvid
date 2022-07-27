@@ -3,4 +3,5 @@ members = [
     "rusvid_lib",
     "rusvid_cli",
     "libs/*",
+    "crates/*"
 ]
