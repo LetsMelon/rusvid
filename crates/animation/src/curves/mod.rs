@@ -6,9 +6,9 @@ pub mod linear;
 pub mod s;
 
 /// ```rust
-/// use rusvid_lib::animation::curves::linear::Linear;
-/// use rusvid_lib::animation::curves::Function;
-/// use rusvid_lib::animation::curves::Points::Point1d;
+/// use animation::curves::linear::Linear;
+/// use animation::curves::Function;
+/// use animation::curves::Points::Point1d;
 ///
 /// let linear = Linear::new(30, 90, Point1d(100.0), Point1d(300.0)).unwrap();
 ///
@@ -222,7 +222,7 @@ impl Neg for Points {
 #[cfg(test)]
 mod tests {
     mod Points {
-        use crate::animation::curves::Points::*;
+        use crate::curves::Points::*;
 
         #[test]
         fn add() {

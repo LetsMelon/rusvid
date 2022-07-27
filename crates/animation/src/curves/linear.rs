@@ -1,8 +1,8 @@
 use anyhow::{bail, Result};
 use std::fmt::{Debug, Formatter};
 
-use crate::animation::curves::Points::*;
-use crate::animation::curves::{Function, Points};
+use crate::curves::Points::*;
+use crate::curves::{Function, Points};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Linear {
@@ -80,8 +80,8 @@ impl Function for Linear {
 #[cfg(test)]
 mod tests {
     use super::Linear;
-    use crate::animation::curves::Function;
-    use crate::animation::curves::Points::*;
+    use crate::curves::Function;
+    use crate::curves::Points::*;
 
     const DELTA: f64 = 0.1;
 

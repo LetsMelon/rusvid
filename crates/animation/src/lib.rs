@@ -1,3 +1,5 @@
+#![feature(get_mut_unchecked)]
+
 use anyhow::Result;
 use std::rc::Rc;
 use usvg::PathData;

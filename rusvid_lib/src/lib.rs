@@ -1,6 +1,3 @@
-#![feature(get_mut_unchecked)]
-
-pub mod animation;
 pub mod composition;
 pub mod renderer;
 
@@ -10,6 +7,7 @@ mod point_utils;
 /// and so that the user always uses the same `usvg` like the library
 pub use usvg;
 
+pub use animation;
 pub use shared;
 
 pub mod utils {

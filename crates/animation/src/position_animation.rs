@@ -2,8 +2,8 @@ use std::fmt::Debug;
 use std::rc::Rc;
 use usvg::PathData;
 
-use crate::animation::curves::Function;
-use crate::animation::Animation;
+use crate::curves::Function;
+use crate::Animation;
 
 #[derive(Debug)]
 pub struct PositionAnimation {

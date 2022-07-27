@@ -2,8 +2,8 @@ use anyhow::bail;
 use std::fmt::{Debug, Formatter};
 use utils::map;
 
-use crate::animation::curves::Points::Point2d;
-use crate::animation::curves::{Function, Points};
+use crate::curves::Points::Point2d;
+use crate::curves::{Function, Points};
 
 #[derive(Debug, Copy, Clone)]
 /// Formula:
@@ -161,8 +161,8 @@ mod tests {
 
     mod calc {
         use super::S;
-        use crate::animation::curves::Function;
-        use crate::animation::curves::Points::*;
+        use crate::curves::Function;
+        use crate::curves::Points::*;
 
         #[test]
         fn has_boundaries() {
@@ -181,7 +181,7 @@ mod tests {
     }
 
     mod derivative {
-        use crate::animation::curves::s::S;
+        use crate::curves::s::S;
 
         #[test]
         fn is_b() {
