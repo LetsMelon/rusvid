@@ -8,6 +8,7 @@ license = "Apache-2.0"
 
 [dependencies]
 utils = { path = "../libs/utils"}
+figures = { path = "../crates/figures"}
 resvg = "0.23.0"
 tiny-skia = "0.6.5"
 usvg = "0.23.0"

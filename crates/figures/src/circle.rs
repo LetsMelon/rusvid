@@ -104,7 +104,7 @@ pub fn circle(c_x: f64, c_y: f64, radius: f64) -> PathData {
 
 #[cfg(test)]
 mod tests {
-    use crate::figures::circle::*;
+    use crate::circle::*;
     use utils::equal_delta;
 
     fn equal_path_segment(p1: PathSegment, p2: PathSegment) -> bool {

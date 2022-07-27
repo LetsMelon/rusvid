@@ -2,7 +2,6 @@
 
 pub mod animation;
 pub mod composition;
-pub mod figures;
 pub mod metrics;
 pub mod renderer;
 pub mod resolution;
@@ -17,6 +16,10 @@ pub use usvg;
 pub mod utils {
     pub use crate::point_utils::*;
     pub use utils::*;
+}
+
+pub mod figures {
+    pub use figures::*;
 }
 
 pub mod prelude {
