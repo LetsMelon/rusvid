@@ -1,10 +1,10 @@
 use debug_ignore::DebugIgnore;
+use shared::resolution::Resolution;
+use shared::types::FPS;
 use usvg::{AspectRatio, Size, Svg, Tree, ViewBox};
 
 use crate::animation::manager::AnimationManager;
 use crate::composition::Composition;
-use crate::resolution::Resolution;
-use crate::types::FPS;
 
 #[derive(Debug)]
 pub struct CompositionBuilder {

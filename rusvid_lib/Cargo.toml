@@ -7,8 +7,9 @@ license = "Apache-2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-utils = { path = "../libs/utils"}
-figures = { path = "../crates/figures"}
+utils = { path = "../libs/utils" }
+figures = { path = "../crates/figures" }
+shared = { path = "../libs/shared" }
 resvg = "0.23.0"
 tiny-skia = "0.6.5"
 usvg = "0.23.0"

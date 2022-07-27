@@ -1,5 +1,7 @@
 use anyhow::Result;
 use debug_ignore::DebugIgnore;
+use shared::metrics::MetricsVideo;
+use shared::types::FPS;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
@@ -8,12 +10,10 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use crate::composition::Composition;
-use crate::metrics::MetricsVideo;
 use crate::renderer::ffmpeg::codec::VideoCodec;
 use crate::renderer::ffmpeg::pixel_formats::PixelFormats;
 use crate::renderer::png::PngRender;
 use crate::renderer::{CliArgument, CliCommand, ImageRender, Renderer};
-use crate::types::FPS;
 
 pub mod codec;
 pub mod h264;

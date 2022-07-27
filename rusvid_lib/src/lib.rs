@@ -2,16 +2,15 @@
 
 pub mod animation;
 pub mod composition;
-pub mod metrics;
 pub mod renderer;
-pub mod resolution;
-pub mod types;
 
 mod point_utils;
 
 /// Repackage the usvg library so the end-user don't have to install `rusvid-lib` and `usvg`
 /// and so that the user always uses the same `usvg` like the library
 pub use usvg;
+
+pub use shared;
 
 pub mod utils {
     pub use crate::point_utils::*;
@@ -30,7 +29,7 @@ pub mod prelude {
     pub use crate::renderer::png::PngRender;
     pub use crate::renderer::raw::RawRender;
     pub use crate::renderer::Renderer;
-    pub use crate::resolution::Resolution;
+    pub use crate::shared::resolution::Resolution;
 
     pub mod figures {
         pub use crate::figures::circle::circle;

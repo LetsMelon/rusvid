@@ -1,6 +1,5 @@
 use crate::metrics::{MetricsSize, MetricsVideo};
-
-pub type ResolutionType = (usize, usize);
+use crate::types::ResolutionType;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Resolution {
