@@ -39,9 +39,7 @@ pub trait Function: std::fmt::Debug {
     /// Raw instantaneous rate of change at the point `frame_number`
     fn delta_raw(&self, frame_number: usize) -> Points;
     fn delta(&self, frame_number: usize) -> Points {
-        if frame_number <= self.start_frame() {
-            return Points::default();
-        } else if frame_number > self.end_frame() {
+        if frame_number <= self.start_frame() || frame_number > self.end_frame() {
             return Points::default();
         }
         self.delta_raw(frame_number)
@@ -221,7 +219,7 @@ impl Neg for Points {
 
 #[cfg(test)]
 mod tests {
-    mod Points {
+    mod points {
         use crate::animation::curves::Points::*;
 
         #[test]
