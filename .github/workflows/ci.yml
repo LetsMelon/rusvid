@@ -51,3 +51,6 @@ jobs:
 
       - name: Test
         run: cargo test
+
+#      - name: Bench
+#        run: cargo bench
