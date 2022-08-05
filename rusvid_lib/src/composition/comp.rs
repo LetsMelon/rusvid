@@ -4,6 +4,7 @@ use usvg::{Fill, Node, NodeExt, NodeKind, Paint, Tree};
 
 use crate::animation::manager::AnimationManager;
 use crate::composition::CompositionBuilder;
+use crate::layer::Layer;
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
 use crate::types::FPS;
@@ -21,9 +22,7 @@ pub struct Composition {
 
     pub name: String,
 
-    pub(crate) rtree: DebugIgnore<Tree>,
-
-    pub animations: AnimationManager,
+    pub(crate) layers: Vec<Layer>,
 }
 
 impl Composition {
@@ -37,38 +36,14 @@ impl Composition {
         self.resolution
     }
 
-    #[inline(always)]
-    pub fn rtree(&self) -> &Tree {
-        self.rtree.deref()
-    }
-
-    #[inline(always)]
-    pub fn rtree_mut(&mut self) -> &mut Tree {
-        self.rtree.deref_mut()
+    #[inline]
+    pub fn add_layer(&mut self, layer: Layer) {
+        self.layers.push(layer);
     }
 
     #[inline]
-    pub fn add_to_defs(&mut self, kind: NodeKind) -> Node {
-        self.rtree_mut().append_to_defs(kind)
-    }
-
-    #[inline]
-    pub fn add_to_root(&mut self, kind: NodeKind) -> Node {
-        if let NodeKind::Path(path) = &kind {
-            self.animations
-                .add_reference(path.id.clone(), path.data.clone());
-        }
-        self.rtree().root().append_kind(kind)
-    }
-
-    #[inline]
-    pub fn fill_with_link(&self, id: &str) -> Option<Fill> {
-        // TODO add check if the paint is in the defs?
-
-        Some(Fill {
-            paint: Paint::Link(id.to_string()),
-            ..Fill::default()
-        })
+    pub fn get_layers(&mut self) -> &Vec<Layer> {
+        &self.layers
     }
 }
 
@@ -92,7 +67,8 @@ impl MetricsSize for Composition {
     fn bytes(&self) -> usize {
         let frames = self.frames();
         let per_frame_bytes = self.resolution.bytes();
+        let layers = self.layers.len();
 
-        frames * per_frame_bytes
+        frames * per_frame_bytes * layers
     }
 }

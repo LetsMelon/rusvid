@@ -6,6 +6,7 @@ use rusvid_lib::usvg::{
 use rusvid_lib::utils::color_from_hex;
 use std::path::PathBuf;
 use std::rc::Rc;
+use rusvid_lib::layer::Layer;
 
 fn main() {
     let mut composition = Composition::builder()
@@ -14,7 +15,9 @@ fn main() {
         .duration(5)
         .build();
 
-    composition.add_to_defs(NodeKind::LinearGradient(LinearGradient {
+    let mut layer = Layer::new(composition.resolution());
+
+    layer.add_to_defs(NodeKind::LinearGradient(LinearGradient {
         id: "lg1".into(),
         x1: 0.0,
         y1: 0.0,
@@ -38,7 +41,7 @@ fn main() {
             ],
         },
     }));
-    composition.add_to_defs(NodeKind::LinearGradient(LinearGradient {
+    layer.add_to_defs(NodeKind::LinearGradient(LinearGradient {
         id: "lg2".into(),
         x1: 0.0,
         y1: 0.0,
@@ -64,7 +67,7 @@ fn main() {
     }));
 
     let circle_position = animation::Points::Point2d(700.0, 850.0);
-    composition.add_to_root(NodeKind::Path(Path {
+    layer.add_to_root(NodeKind::Path(Path {
         id: "circle".to_string(),
         stroke: Some(Stroke {
             paint: Paint::Link("lg2".into()),
@@ -82,17 +85,17 @@ fn main() {
 
     let mut path = figures::equilateral_triangle(400.0, 400.0, 350.0);
     path.transform(Transform::new_rotate(2.5));
-    composition.add_to_root(NodeKind::Path(Path {
+    layer.add_to_root(NodeKind::Path(Path {
         id: "triangle".to_string(),
-        fill: composition.fill_with_link("lg1"),
+        fill: layer.fill_with_link("lg1"),
         data: Rc::new(path),
         ..Path::default()
     }));
 
     let pixel_position = animation::Points::Point2d(20.0, 20.0);
-    composition.add_to_root(NodeKind::Path(Path {
+    layer.add_to_root(NodeKind::Path(Path {
         id: "rect".to_string(),
-        fill: match composition.fill_with_link("lg1") {
+        fill: match layer.fill_with_link("lg1") {
             None => None,
             Some(mut f) => {
                 f.opacity = Opacity::new(0.75);
@@ -135,11 +138,13 @@ fn main() {
         .unwrap(),
     );
 
+    layer.add_animation(animation_1);
+    layer.add_animation(animation_2);
+    layer.add_animation(animation_3);
+
+    composition.add_layer(layer);
+
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path);
     renderer.set_image_render(PngRender::new());
-
-    composition.animations.add_animation(animation_1);
-    composition.animations.add_animation(animation_2);
-    composition.animations.add_animation(animation_3);
     renderer.render(composition).unwrap()
 }

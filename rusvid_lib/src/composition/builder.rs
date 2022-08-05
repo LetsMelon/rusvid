@@ -3,6 +3,7 @@ use usvg::{AspectRatio, Size, Svg, Tree, ViewBox};
 
 use crate::animation::manager::AnimationManager;
 use crate::composition::Composition;
+use crate::layer::Layer;
 use crate::resolution::Resolution;
 use crate::types::FPS;
 
@@ -12,6 +13,7 @@ pub struct CompositionBuilder {
     framerate: FPS,
     duration: u16,
     name: String,
+    layers: Vec<Layer>,
 }
 
 impl Default for CompositionBuilder {
@@ -23,12 +25,13 @@ impl Default for CompositionBuilder {
             framerate: 30,
             duration: 10,
             name: "UNKNOWN".to_string(),
+            layers: Vec::new(),
         }
     }
 }
 
 impl CompositionBuilder {
-    fn create_tree_from_resolution(resolution: Resolution) -> Tree {
+    pub(crate) fn create_tree_from_resolution(resolution: Resolution) -> Tree {
         let size = Size::new(resolution.width() as f64, resolution.height() as f64).unwrap();
 
         Tree::create(Svg {
@@ -45,11 +48,12 @@ impl CompositionBuilder {
             resolution: self.resolution,
             framerate: self.framerate,
             duration: self.duration,
-            name: self.name,
+            name: self.name, /*
             rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(
                 self.resolution,
             )),
-            animations: AnimationManager::new(),
+            animations: AnimationManager::new(), */
+            layers: self.layers,
         }
     }
 
@@ -70,6 +74,11 @@ impl CompositionBuilder {
 
     pub fn name(mut self, name: &str) -> Self {
         self.name = name.to_string();
+        self
+    }
+
+    pub fn add_layer(mut self, layer: Layer) -> Self {
+        self.layers.push(layer);
         self
     }
 }
