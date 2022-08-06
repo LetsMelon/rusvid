@@ -1,7 +1,5 @@
-use debug_ignore::DebugIgnore;
 use usvg::{AspectRatio, Size, Svg, Tree, ViewBox};
 
-use crate::animation::manager::AnimationManager;
 use crate::composition::Composition;
 use crate::layer::Layer;
 use crate::resolution::Resolution;
@@ -49,10 +47,10 @@ impl CompositionBuilder {
             framerate: self.framerate,
             duration: self.duration,
             name: self.name, /*
-            rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(
-                self.resolution,
-            )),
-            animations: AnimationManager::new(), */
+                             rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(
+                                 self.resolution,
+                             )),
+                             animations: AnimationManager::new(), */
             layers: self.layers,
         }
     }

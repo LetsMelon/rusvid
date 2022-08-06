@@ -78,7 +78,7 @@ impl Renderer for FfmpegRenderer {
         for i in 0..frames {
             println!("{:03}/{:03}", i + 1, frames);
 
-            let _ = &composition.animations.update(i)?;
+            let _ = &composition.update(i)?;
 
             self.image_render().render(&composition, &tmp_path, i)?;
         }

@@ -1,9 +1,10 @@
-use std::ops::{Deref, DerefMut};
+use anyhow::Result;
 use debug_ignore::DebugIgnore;
+use std::ops::{Deref, DerefMut};
 use usvg::{Fill, Node, NodeExt, NodeKind, Paint, Tree};
-use crate::animation::Animation;
 
 use crate::animation::manager::AnimationManager;
+use crate::animation::Animation;
 use crate::composition::CompositionBuilder;
 use crate::resolution::Resolution;
 
@@ -17,12 +18,11 @@ pub struct Layer {
 }
 
 impl Layer {
+    #[inline(always)]
     pub fn new(resolution: Resolution) -> Self {
         Layer {
-            name: "layer_1".to_string(),
-            rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(
-                resolution,
-            )),
+            name: "layer_0".to_string(),
+            rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(resolution)),
             animations: AnimationManager::new(),
         }
     }
@@ -51,7 +51,7 @@ impl Layer {
         self.rtree().root().append_kind(kind)
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn fill_with_link(&self, id: &str) -> Option<Fill> {
         // TODO add check if the paint is in the defs?
 
@@ -61,8 +61,13 @@ impl Layer {
         })
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
         self.animations.add_animation(animation);
+    }
+
+    #[inline(always)]
+    pub fn update(&mut self, frame_count: usize) -> Result<()> {
+        self.animations.update(frame_count)
     }
 }

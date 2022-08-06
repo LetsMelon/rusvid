@@ -1,3 +1,4 @@
+use rusvid_lib::layer::Layer;
 use rusvid_lib::prelude::*;
 use rusvid_lib::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
@@ -6,7 +7,6 @@ use rusvid_lib::usvg::{
 use rusvid_lib::utils::color_from_hex;
 use std::path::PathBuf;
 use std::rc::Rc;
-use rusvid_lib::layer::Layer;
 
 fn main() {
     let mut composition = Composition::builder()
@@ -16,31 +16,6 @@ fn main() {
         .build();
 
     let mut layer = Layer::new(composition.resolution());
-
-    layer.add_to_defs(NodeKind::LinearGradient(LinearGradient {
-        id: "lg1".into(),
-        x1: 0.0,
-        y1: 0.0,
-        x2: 1.0,
-        y2: 0.0,
-        base: BaseGradient {
-            units: Units::ObjectBoundingBox,
-            transform: Transform::default(),
-            spread_method: SpreadMethod::Pad,
-            stops: vec![
-                Stop {
-                    offset: StopOffset::new(0.0),
-                    color: Color::new_rgb(0, 255, 0),
-                    opacity: Opacity::new(1.0),
-                },
-                Stop {
-                    offset: StopOffset::new(1.0),
-                    color: Color::new_rgb(0, 0, 255),
-                    opacity: Opacity::new(1.0),
-                },
-            ],
-        },
-    }));
     layer.add_to_defs(NodeKind::LinearGradient(LinearGradient {
         id: "lg2".into(),
         x1: 0.0,
@@ -82,6 +57,47 @@ fn main() {
         )),
         ..Path::default()
     }));
+    layer.add_animation(animation::PositionAnimation::new(
+        "circle".to_string(),
+        animation::functions::S::new(
+            0,
+            90,
+            circle_position,
+            animation::Points::Point2d(
+                composition.resolution().width() as f64 / 2.0,
+                composition.resolution().height() as f64 / 2.0,
+            ),
+        )
+        .unwrap(),
+    ));
+
+    composition.add_layer(layer);
+
+    let mut layer = Layer::new(composition.resolution());
+    layer.add_to_defs(NodeKind::LinearGradient(LinearGradient {
+        id: "lg1".into(),
+        x1: 0.0,
+        y1: 0.0,
+        x2: 1.0,
+        y2: 0.0,
+        base: BaseGradient {
+            units: Units::ObjectBoundingBox,
+            transform: Transform::default(),
+            spread_method: SpreadMethod::Pad,
+            stops: vec![
+                Stop {
+                    offset: StopOffset::new(0.0),
+                    color: Color::new_rgb(0, 255, 0),
+                    opacity: Opacity::new(1.0),
+                },
+                Stop {
+                    offset: StopOffset::new(1.0),
+                    color: Color::new_rgb(0, 0, 255),
+                    opacity: Opacity::new(1.0),
+                },
+            ],
+        },
+    }));
 
     let mut path = figures::equilateral_triangle(400.0, 400.0, 350.0);
     path.transform(Transform::new_rotate(2.5));
@@ -110,40 +126,22 @@ fn main() {
         )),
         ..Path::default()
     }));
+    layer.add_animation(animation::PositionAnimation::new(
+        "rect".to_string(),
+        animation::functions::Linear::new(0, 200, pixel_position, (1250.0, 500.0).into()).unwrap(),
+    ));
+    layer.add_animation(animation::PositionAnimation::new(
+        "rect".to_string(),
+        animation::functions::Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into())
+            .unwrap(),
+    ));
+
+    composition.add_layer(layer);
 
     let out_path = PathBuf::from("out.mp4");
     let tmp_path = PathBuf::from("./out");
 
     // TODO add builder pattern for video- & image-render
-    let animation_1 = animation::PositionAnimation::new(
-        "rect".to_string(),
-        animation::functions::Linear::new(0, 200, pixel_position, (1250.0, 500.0).into()).unwrap(),
-    );
-    let animation_2 = animation::PositionAnimation::new(
-        "rect".to_string(),
-        animation::functions::Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into())
-            .unwrap(),
-    );
-    let animation_3 = animation::PositionAnimation::new(
-        "circle".to_string(),
-        animation::functions::S::new(
-            0,
-            90,
-            circle_position,
-            animation::Points::Point2d(
-                composition.resolution().width() as f64 / 2.0,
-                composition.resolution().height() as f64 / 2.0,
-            ),
-        )
-        .unwrap(),
-    );
-
-    layer.add_animation(animation_1);
-    layer.add_animation(animation_2);
-    layer.add_animation(animation_3);
-
-    composition.add_layer(layer);
-
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path);
     renderer.set_image_render(PngRender::new());
     renderer.render(composition).unwrap()

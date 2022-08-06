@@ -1,8 +1,5 @@
-use debug_ignore::DebugIgnore;
-use std::ops::{Deref, DerefMut};
-use usvg::{Fill, Node, NodeExt, NodeKind, Paint, Tree};
+use anyhow::Result;
 
-use crate::animation::manager::AnimationManager;
 use crate::composition::CompositionBuilder;
 use crate::layer::Layer;
 use crate::metrics::{MetricsSize, MetricsVideo};
@@ -42,8 +39,16 @@ impl Composition {
     }
 
     #[inline]
-    pub fn get_layers(&mut self) -> &Vec<Layer> {
+    pub fn get_layers(&self) -> &Vec<Layer> {
         &self.layers
+    }
+
+    #[inline]
+    pub fn update(&mut self, frame_count: usize) -> Result<()> {
+        for layer in &mut self.layers {
+            let _ = layer.update(frame_count)?;
+        }
+        Ok(())
     }
 }
 

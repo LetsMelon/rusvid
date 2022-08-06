@@ -1,7 +1,6 @@
 use anyhow::Result;
-use image::{ImageBuffer, RgbaImage};
+use image::RgbaImage;
 use std::path::{Path, PathBuf};
-use tiny_skia::{PremultipliedColorU8, ALPHA_U8_OPAQUE};
 
 use crate::composition::Composition;
 use crate::renderer::ImageRender;
@@ -14,13 +13,8 @@ impl RawRender {
         RawRender {}
     }
 
-    #[inline]
-    pub fn calculate_image_buffer(&self, composition: &Composition) -> Result<RgbaImage> {
-        let pixmap = self.render_pixmap(composition)?;
-
-        let width = composition.resolution().width() as u32;
-        let height = composition.resolution().height() as u32;
-
+    /*
+    fn calculate_image_buffer_single(&self, pixmap: &Pixmap, width: u32, height: u32) -> RgbaImage {
         let pixels = pixmap.pixels();
 
         let image_buffer: RgbaImage = ImageBuffer::from_fn(width, height, |x, y| {
@@ -43,7 +37,13 @@ impl RawRender {
             image::Rgba([r, g, b, a])
         });
 
-        Ok(image_buffer)
+        image_buffer
+    }
+     */
+
+    #[inline]
+    pub fn calculate_image_buffer(&self, composition: &Composition) -> Result<RgbaImage> {
+        self.render_rgba_image(composition)
     }
 }
 

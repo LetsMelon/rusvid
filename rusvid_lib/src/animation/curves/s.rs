@@ -145,10 +145,19 @@ impl Function for S {
             sum = sum + (Points::Point2d(ff1, ff2) * diff);
         }
 
-        Points::Point2d(
-            map(out.x(), 0.0, sum.x(), 0.0, diff.x()),
-            map(out.y(), 0.0, sum.y(), 0.0, diff.y()),
-        )
+        // TODO find out why there is a bug if self.start == self.end (with x,y or x&y)
+        // temporary fix
+        let x = if self.start.x() == self.end.x() {
+            0.0
+        } else {
+            map(out.x(), 0.0, sum.x(), 0.0, diff.x())
+        };
+        let y = if self.start.y() == self.end.y() {
+            0.0
+        } else {
+            map(out.y(), 0.0, sum.y(), 0.0, diff.y())
+        };
+        Points::Point2d(x, y)
     }
 
     fn internal_debug(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
