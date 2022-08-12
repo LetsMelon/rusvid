@@ -1,4 +1,6 @@
+use crate::animation::Animation;
 use anyhow::Result;
+use usvg::{Fill, Node, NodeKind};
 
 use crate::composition::CompositionBuilder;
 use crate::layer::Layer;
@@ -49,6 +51,40 @@ impl Composition {
             let _ = layer.update(frame_count)?;
         }
         Ok(())
+    }
+
+    #[inline]
+    fn check_or_create_layer(&mut self) {
+        if self.layers.len() == 0 {
+            self.layers.push(Layer::new(self.resolution()));
+        }
+    }
+
+    #[inline]
+    pub fn add_to_defs(&mut self, kind: NodeKind) -> Node {
+        self.check_or_create_layer();
+        self.layers[0].add_to_defs(kind)
+    }
+
+    #[inline]
+    pub fn add_to_root(&mut self, kind: NodeKind) -> Node {
+        self.check_or_create_layer();
+        self.layers[0].add_to_root(kind)
+    }
+
+    #[inline]
+    pub fn fill_with_link(&self, id: &str) -> Option<Fill> {
+        if self.layers.len() == 0 {
+            None
+        } else {
+            self.layers[0].fill_with_link(id)
+        }
+    }
+
+    #[inline]
+    pub fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
+        self.check_or_create_layer();
+        self.layers[0].add_animation(animation);
     }
 }
 

@@ -29,17 +29,17 @@ fn renders_correctly_static() {
     }));
 
     // TODO why not with end_frame=1
-    composition.animations.add_animation(PositionAnimation::new(
+    composition.add_animation(PositionAnimation::new(
         "rect".to_string(),
         Linear::new(0, 1, Points::zero_2d(), Points::Point2d(50.0, 50.0)).unwrap(),
     ));
 
     let image_render = RawRender::new();
 
-    composition.animations.update(0).unwrap();
+    composition.update(0).unwrap();
     let frame_1 = image_render.calculate_image_buffer(&composition);
 
-    composition.animations.update(1).unwrap();
+    composition.update(1).unwrap();
     let frame_2 = image_render.calculate_image_buffer(&composition);
 
     match (frame_1, frame_2) {
