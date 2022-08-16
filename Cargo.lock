@@ -805,7 +805,6 @@ dependencies = [
  "criterion",
  "debug-ignore",
  "image",
- "rayon",
  "resvg",
  "tiny-skia",
  "usvg",

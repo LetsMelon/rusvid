@@ -20,7 +20,6 @@ usvg = "0.23.0"
 debug-ignore = "1.0.2"
 anyhow = "1.0.59"
 image = "0.24.3"
-rayon = "1.5.3"
 
 [[bench]]
 name = "image_render"
