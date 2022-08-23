@@ -10,8 +10,9 @@ keywords = ["svg", "graphics", "animation"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dev-dependencies]
-criterion = "0.3"
+[[bin]]
+name = "gpu_test"
+path = "./tests/gpu_shader.rs"
 
 [dependencies]
 resvg = "0.23.0"
@@ -20,6 +21,14 @@ usvg = "0.23.0"
 debug-ignore = "1.0.2"
 anyhow = "1.0.59"
 image = "0.24.3"
+bytemuck = "1.12.1"
+pollster = "0.2.5"
+wgpu = "0.13"
+futures-intrusive = "0.4"
+
+[dev-dependencies]
+criterion = "0.3"
+paste = "1.0"
 
 [[bench]]
 name = "image_render"

@@ -3,3 +3,4 @@ members = [
     "rusvid_lib",
     "rusvid_cli"
 ]
+resolver="2"

@@ -58,3 +58,44 @@ impl Default for Resolution {
         Resolution::FHD
     }
 }
+
+impl<T: Into<usize>> From<(T, T)> for Resolution {
+    fn from(raw: (T, T)) -> Self {
+        let width: usize = raw.0.into();
+        let height: usize = raw.1.into();
+
+        Resolution::Custom(width, height)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    mod from {
+        macro_rules! primitive_test {
+            ($type:ty) => {
+                paste::item! {
+                        #[test]
+                        fn [< from_primitive_ $type >] () {
+                            use crate::resolution::Resolution;
+
+                            let w: $type = $type::default();
+                            let h: $type = $type::default();
+                            assert_eq!(
+                                Resolution::from((w, h)),
+                                Resolution::Custom(usize::try_from(w).unwrap(), usize::try_from(h).unwrap())
+                            )
+                        }
+                }
+            };
+        }
+
+        primitive_test!(usize);
+        primitive_test!(u8);
+        primitive_test!(u16);
+
+        #[test]
+        fn sth() {
+            assert!(true);
+        }
+    }
+}
