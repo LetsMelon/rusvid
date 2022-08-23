@@ -3,6 +3,7 @@ use image::{Rgba, RgbaImage};
 use std::ffi::OsString;
 use std::path::Path;
 use std::process::Command;
+use std::time::Instant;
 use tiny_skia::{Pixmap, PremultipliedColorU8};
 
 use crate::composition::Composition;
@@ -36,6 +37,8 @@ fn render_pixmap_layer(layer: &Layer) -> anyhow::Result<Pixmap> {
 }
 
 fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
+    let now = Instant::now();
+
     let as_pixels: Vec<&[PremultipliedColorU8]> = pixmaps.iter().map(|x| x.pixels()).collect();
 
     let combined_layer_image = RgbaImage::from_fn(width, height, |x, y| {
@@ -122,6 +125,9 @@ fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
 
         Rgba([r, g, b, a])
     });
+
+    let dt = now.elapsed().as_millis();
+    println!("combine_renders took {}ms", dt);
 
     combined_layer_image
 }

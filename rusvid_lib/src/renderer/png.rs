@@ -1,4 +1,5 @@
 use std::path::{Path, PathBuf};
+use std::time::Instant;
 
 use crate::composition::Composition;
 use crate::renderer::ImageRender;
@@ -32,7 +33,11 @@ impl ImageRender for PngRender {
     ) -> anyhow::Result<()> {
         let file_path = self.generate_filepath(tmp_dir_path, frame_number);
 
+        let now = Instant::now();
         let pixmap = self.render_pixmap(composition)?;
+        let dt = now.elapsed().as_millis();
+        println!("Render took {}ms", dt);
+
         pixmap.save_png(file_path)?;
 
         Ok(())

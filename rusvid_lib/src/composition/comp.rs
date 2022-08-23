@@ -66,6 +66,7 @@ impl Composition {
         self.layers[0].add_to_defs(kind)
     }
 
+    // TODO create trait to keep in-sync with the functions of Layer-struct
     #[inline]
     pub fn add_to_root(&mut self, kind: NodeKind) -> Node {
         self.check_or_create_layer();
