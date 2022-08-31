@@ -28,7 +28,6 @@ futures-intrusive = {version = "0.4", optional = true }
 
 [dev-dependencies]
 criterion = "0.3"
-paste = "1.0"
 
 [[bench]]
 name = "image_render"
