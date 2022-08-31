@@ -3,12 +3,10 @@ use image::RgbaImage;
 use pollster::FutureExt;
 use tiny_skia::Pixmap;
 use wgpu::{
-    Adapter, Backends, BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource, Buffer,
-    BufferDescriptor, BufferUsages, CommandEncoderDescriptor, ComputePassDescriptor,
-    ComputePipeline, ComputePipelineDescriptor, Device, DeviceDescriptor, Extent3d,
-    ImageCopyBuffer, ImageCopyTexture, ImageDataLayout, Instance, MaintainBase, MapMode, Origin3d,
-    PowerPreference, Queue, RequestAdapterOptionsBase, ShaderModuleDescriptor, ShaderSource,
-    Texture, TextureAspect, TextureDescriptor, TextureViewDescriptor,
+    Adapter, BindGroup, Buffer, CommandEncoderDescriptor, ComputePassDescriptor, ComputePipeline,
+    Device, Extent3d, ImageCopyBuffer, ImageCopyTexture, ImageDataLayout, Instance, MaintainBase,
+    MapMode, Origin3d, PowerPreference, Queue, RequestAdapterOptionsBase, Texture, TextureAspect,
+    TextureDescriptor,
 };
 
 use crate::layer::LayerTranscoder;
@@ -179,7 +177,7 @@ impl GpuLayerTranscoder {
 }
 
 impl LayerTranscoder for GpuLayerTranscoder {
-    fn combine_renders(&self, pixmaps: Vec<Pixmap>) -> RgbaImage {
+    fn combine_renders(&self, _pixmaps: Vec<Pixmap>) -> RgbaImage {
         todo!()
     }
 }

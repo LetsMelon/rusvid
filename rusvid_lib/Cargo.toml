@@ -10,9 +10,9 @@ keywords = ["svg", "graphics", "animation"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[[bin]]
-name = "gpu_test"
-path = "./tests/gpu_shader.rs"
+[features]
+default = ["hardware_transcoding"]
+hardware_transcoding = ["dep:wgpu", "dep:futures-intrusive", "dep:bytemuck", "dep:pollster"]
 
 [dependencies]
 resvg = "0.23.0"
@@ -33,7 +33,3 @@ paste = "1.0"
 [[bench]]
 name = "image_render"
 harness = false
-
-[features]
-default = ["hardware_transcoding"]
-hardware_transcoding = ["dep:wgpu", "dep:futures-intrusive", "dep:bytemuck", "dep:pollster"]
