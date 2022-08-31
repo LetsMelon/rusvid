@@ -97,31 +97,7 @@ fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
                     b = (mix_b * 255.0) as u8;
                 }
             };
-
-            /*
-            println!(
-                "c{} at {:?}({:?}): r {}, g {}, b {}, a {}",
-                layer_index,
-                (x, y),
-                array_index,
-                r,
-                g,
-                b,
-                a
-            );
-             */
         }
-        /*
-        println!(
-            "c at {:?}({:?}): r {}, g {}, b {}, a {}",
-            (x, y),
-            array_index,
-            r,
-            g,
-            b,
-            a
-        );
-         */
 
         Rgba([r, g, b, a])
     });
