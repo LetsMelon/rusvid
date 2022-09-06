@@ -1,7 +1,7 @@
-use crate::animation::Animation;
 use anyhow::Result;
 use usvg::{Fill, Node, NodeKind, Tree};
 
+use crate::animation::Animation;
 use crate::composition::CompositionBuilder;
 use crate::layer::{Layer, LayerLogic};
 use crate::metrics::{MetricsSize, MetricsVideo};
