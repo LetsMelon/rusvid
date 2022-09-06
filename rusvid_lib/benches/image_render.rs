@@ -1,5 +1,4 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use rusvid_lib::layer::Layer;
 use rusvid_lib::prelude::figures::*;
 use rusvid_lib::prelude::*;
 use rusvid_lib::renderer::ImageRender;
@@ -32,43 +31,51 @@ fn criterion_benchmark(c: &mut Criterion) {
         .build();
 
     let mut layer = Layer::new(composition.resolution());
-    layer.add_to_root(NodeKind::Path(Path {
-        id: "ul".to_string(),
-        fill: Some(Fill {
-            paint: Paint::Color(color_from_hex("ff0000".to_string()).unwrap()),
-            ..Fill::default()
-        }),
-        data: Rc::new(rect(0.0, 0.0, 50.0, 50.0)),
-        ..Path::default()
-    }));
-    layer.add_to_root(NodeKind::Path(Path {
-        id: "ur".to_string(),
-        fill: Some(Fill {
-            paint: Paint::Color(color_from_hex("00ff00".to_string()).unwrap()),
-            ..Fill::default()
-        }),
-        data: Rc::new(rect(50.0, 0.0, 50.0, 50.0)),
-        ..Path::default()
-    }));
-    layer.add_to_root(NodeKind::Path(Path {
-        id: "dl".to_string(),
-        fill: Some(Fill {
-            paint: Paint::Color(color_from_hex("0000ff".to_string()).unwrap()),
-            ..Fill::default()
-        }),
-        data: Rc::new(rect(0.0, 50.0, 50.0, 50.0)),
-        ..Path::default()
-    }));
-    layer.add_to_root(NodeKind::Path(Path {
-        id: "dr".to_string(),
-        fill: Some(Fill {
-            paint: Paint::Color(color_from_hex("fff00f".to_string()).unwrap()),
-            ..Fill::default()
-        }),
-        data: Rc::new(circle(75.0, 75.0, 25.0)),
-        rendering_mode: ShapeRendering::CrispEdges,
-        ..Path::default()
-    }));
+    layer
+        .add_to_root(NodeKind::Path(Path {
+            id: "ul".to_string(),
+            fill: Some(Fill {
+                paint: Paint::Color(color_from_hex("ff0000".to_string()).unwrap()),
+                ..Fill::default()
+            }),
+            data: Rc::new(rect(0.0, 0.0, 50.0, 50.0)),
+            ..Path::default()
+        }))
+        .unwrap();
+    layer
+        .add_to_root(NodeKind::Path(Path {
+            id: "ur".to_string(),
+            fill: Some(Fill {
+                paint: Paint::Color(color_from_hex("00ff00".to_string()).unwrap()),
+                ..Fill::default()
+            }),
+            data: Rc::new(rect(50.0, 0.0, 50.0, 50.0)),
+            ..Path::default()
+        }))
+        .unwrap();
+    layer
+        .add_to_root(NodeKind::Path(Path {
+            id: "dl".to_string(),
+            fill: Some(Fill {
+                paint: Paint::Color(color_from_hex("0000ff".to_string()).unwrap()),
+                ..Fill::default()
+            }),
+            data: Rc::new(rect(0.0, 50.0, 50.0, 50.0)),
+            ..Path::default()
+        }))
+        .unwrap();
+    layer
+        .add_to_root(NodeKind::Path(Path {
+            id: "dr".to_string(),
+            fill: Some(Fill {
+                paint: Paint::Color(color_from_hex("fff00f".to_string()).unwrap()),
+                ..Fill::default()
+            }),
+            data: Rc::new(circle(75.0, 75.0, 25.0)),
+            rendering_mode: ShapeRendering::CrispEdges,
+            ..Path::default()
+        }))
+        .unwrap();
     composition.add_layer(layer);
 
     c.bench_function("raw", |b| b.iter(|| raw(black_box(&composition))));

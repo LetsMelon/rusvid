@@ -8,6 +8,15 @@ use crate::animation::Animation;
 use crate::composition::CompositionBuilder;
 use crate::resolution::Resolution;
 
+pub trait LayerLogic {
+    fn rtree(&self) -> Option<&Tree>;
+    fn rtree_mut(&mut self) -> Option<&mut Tree>;
+    fn add_to_defs(&mut self, kind: NodeKind) -> Result<Node>;
+    fn add_to_root(&mut self, kind: NodeKind) -> Result<Node>;
+    fn fill_with_link(&self, id: &str) -> Option<Fill>;
+    fn add_animation<T: Animation + 'static>(&mut self, animation: T);
+}
+
 #[derive(Debug)]
 pub struct Layer {
     name: String,
@@ -28,31 +37,38 @@ impl Layer {
     }
 
     #[inline(always)]
-    pub fn rtree(&self) -> &Tree {
-        self.rtree.deref()
+    pub fn update(&mut self, frame_count: usize) -> Result<()> {
+        self.animations.update(frame_count)
+    }
+}
+
+impl LayerLogic for Layer {
+    #[inline(always)]
+    fn rtree(&self) -> Option<&Tree> {
+        Some(self.rtree.deref())
     }
 
     #[inline(always)]
-    pub fn rtree_mut(&mut self) -> &mut Tree {
-        self.rtree.deref_mut()
+    fn rtree_mut(&mut self) -> Option<&mut Tree> {
+        Some(self.rtree.deref_mut())
     }
 
     #[inline(always)]
-    pub fn add_to_defs(&mut self, kind: NodeKind) -> Node {
-        self.rtree_mut().append_to_defs(kind)
+    fn add_to_defs(&mut self, kind: NodeKind) -> Result<Node> {
+        Ok(self.rtree_mut().unwrap().append_to_defs(kind))
     }
 
     #[inline(always)]
-    pub fn add_to_root(&mut self, kind: NodeKind) -> Node {
+    fn add_to_root(&mut self, kind: NodeKind) -> Result<Node> {
         if let NodeKind::Path(path) = &kind {
             self.animations
                 .add_reference(path.id.clone(), path.data.clone());
         }
-        self.rtree().root().append_kind(kind)
+        Ok(self.rtree().unwrap().root().append_kind(kind))
     }
 
     #[inline(always)]
-    pub fn fill_with_link(&self, id: &str) -> Option<Fill> {
+    fn fill_with_link(&self, id: &str) -> Option<Fill> {
         // TODO add check if the paint is in the defs?
 
         Some(Fill {
@@ -62,12 +78,7 @@ impl Layer {
     }
 
     #[inline(always)]
-    pub fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
+    fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
         self.animations.add_animation(animation);
-    }
-
-    #[inline(always)]
-    pub fn update(&mut self, frame_count: usize) -> Result<()> {
-        self.animations.update(frame_count)
     }
 }

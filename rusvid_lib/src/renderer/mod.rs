@@ -6,7 +6,7 @@ use std::process::Command;
 use tiny_skia::{Pixmap, PremultipliedColorU8};
 
 use crate::composition::Composition;
-use crate::layer::Layer;
+use crate::layer::{Layer, LayerLogic};
 
 pub mod ffmpeg;
 pub mod png;
@@ -20,12 +20,17 @@ pub trait Renderer {
 }
 
 fn render_pixmap_layer(layer: &Layer) -> anyhow::Result<Pixmap> {
-    let pixmap_size = layer.rtree().svg_node().size.to_screen_size();
+    let pixmap_size = layer
+        .rtree()
+        .expect("Expect a tree in the given layer")
+        .svg_node()
+        .size
+        .to_screen_size();
 
     let mut pixmap = tiny_skia::Pixmap::new(pixmap_size.width(), pixmap_size.height())
         .expect("Error while creating pixmap");
     resvg::render(
-        layer.rtree(),
+        layer.rtree().expect("Expect a tree in the given layer"),
         usvg::FitTo::Original,
         tiny_skia::Transform::default(),
         pixmap.as_mut(),

@@ -1,9 +1,9 @@
 use crate::animation::Animation;
 use anyhow::Result;
-use usvg::{Fill, Node, NodeKind};
+use usvg::{Fill, Node, NodeKind, Tree};
 
 use crate::composition::CompositionBuilder;
-use crate::layer::Layer;
+use crate::layer::{Layer, LayerLogic};
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
 use crate::types::FPS;
@@ -36,6 +36,13 @@ impl Composition {
     }
 
     #[inline]
+    fn check_or_create_layer(&mut self) {
+        if self.layers.len() == 0 {
+            self.layers.push(Layer::new(self.resolution()));
+        }
+    }
+
+    #[inline]
     pub fn add_layer(&mut self, layer: Layer) {
         self.layers.push(layer);
     }
@@ -51,40 +58,6 @@ impl Composition {
             let _ = layer.update(frame_count)?;
         }
         Ok(())
-    }
-
-    #[inline]
-    fn check_or_create_layer(&mut self) {
-        if self.layers.len() == 0 {
-            self.layers.push(Layer::new(self.resolution()));
-        }
-    }
-
-    #[inline]
-    pub fn add_to_defs(&mut self, kind: NodeKind) -> Node {
-        self.check_or_create_layer();
-        self.layers[0].add_to_defs(kind)
-    }
-
-    #[inline]
-    pub fn add_to_root(&mut self, kind: NodeKind) -> Node {
-        self.check_or_create_layer();
-        self.layers[0].add_to_root(kind)
-    }
-
-    #[inline]
-    pub fn fill_with_link(&self, id: &str) -> Option<Fill> {
-        if self.layers.len() == 0 {
-            None
-        } else {
-            self.layers[0].fill_with_link(id)
-        }
-    }
-
-    #[inline]
-    pub fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
-        self.check_or_create_layer();
-        self.layers[0].add_animation(animation);
     }
 }
 
@@ -111,5 +84,52 @@ impl MetricsSize for Composition {
         let layers = self.layers.len();
 
         frames * per_frame_bytes * layers
+    }
+}
+
+impl LayerLogic for Composition {
+    #[inline]
+    fn rtree(&self) -> Option<&Tree> {
+        if self.layers.len() == 0 {
+            None
+        } else {
+            Some(self.layers[0].rtree().unwrap())
+        }
+    }
+
+    #[inline]
+    fn rtree_mut(&mut self) -> Option<&mut Tree> {
+        if self.layers.len() == 0 {
+            None
+        } else {
+            Some(self.layers[0].rtree_mut().unwrap())
+        }
+    }
+
+    #[inline]
+    fn add_to_defs(&mut self, kind: NodeKind) -> Result<Node> {
+        self.check_or_create_layer();
+        self.layers[0].add_to_defs(kind)
+    }
+
+    #[inline]
+    fn add_to_root(&mut self, kind: NodeKind) -> Result<Node> {
+        self.check_or_create_layer();
+        self.layers[0].add_to_root(kind)
+    }
+
+    #[inline]
+    fn fill_with_link(&self, id: &str) -> Option<Fill> {
+        if self.layers.len() == 0 {
+            None
+        } else {
+            self.layers[0].fill_with_link(id)
+        }
+    }
+
+    #[inline]
+    fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
+        self.check_or_create_layer();
+        self.layers[0].add_animation(animation);
     }
 }
