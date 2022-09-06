@@ -22,10 +22,7 @@ and copy the following code into `main.rs`
 
 ```rust
 use rusvid_lib::prelude::*;
-use rusvid_lib::usvg::{
-    BaseGradient, Color, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
-    StopOffset, Stroke, StrokeWidth, Transform, Units,
-};
+use rusvid_lib::usvg::*;
 use rusvid_lib::utils::color_from_hex;
 use std::path::PathBuf;
 use std::rc::Rc;
