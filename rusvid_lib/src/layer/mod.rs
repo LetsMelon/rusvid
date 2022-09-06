@@ -1,7 +1,9 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use debug_ignore::DebugIgnore;
+use std::fs::{canonicalize, read};
 use std::ops::{Deref, DerefMut};
-use usvg::{Fill, Node, NodeExt, NodeKind, Paint, Tree};
+use std::path::Path;
+use usvg::{Fill, Node, NodeExt, NodeKind, Options, Paint, Tree};
 
 use crate::animation::manager::AnimationManager;
 use crate::animation::Animation;
@@ -34,6 +36,47 @@ impl Layer {
             rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(resolution)),
             animations: AnimationManager::new(),
         }
+    }
+
+    pub fn from_file(resolution: Resolution, path: &Path) -> Result<Self> {
+        if path.is_relative() {
+            bail!("Path must be absolute")
+        }
+
+        let mut layer_item = Layer::new(resolution);
+
+        let mut options = Options::default();
+        options.resources_dir = canonicalize(path)
+            .ok()
+            .and_then(|p| p.parent().map(|p| p.to_path_buf()));
+        options.keep_named_groups = true;
+
+        let svg_data = read(path)?;
+        let rtree = Tree::from_data(&svg_data, &options.to_ref())?;
+
+        for node in rtree.root().descendants() {
+            let node = &*node.borrow();
+            match node {
+                NodeKind::LinearGradient(ref gradient) => {
+                    layer_item.add_to_defs(NodeKind::LinearGradient(gradient.clone()))?;
+                }
+                NodeKind::RadialGradient(ref gradient) => {
+                    layer_item.add_to_defs(NodeKind::RadialGradient(gradient.clone()))?;
+                }
+                NodeKind::Svg(ref svg) => {
+                    layer_item.add_to_root(NodeKind::Svg(*svg))?;
+                }
+                NodeKind::Group(ref group) => {
+                    layer_item.add_to_root(NodeKind::Group(group.clone()))?;
+                }
+                NodeKind::Path(ref path) => {
+                    layer_item.add_to_root(NodeKind::Path(path.clone()))?;
+                }
+                _ => (),
+            }
+        }
+
+        Ok(layer_item)
     }
 
     #[inline(always)]
