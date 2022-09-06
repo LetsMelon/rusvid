@@ -3,6 +3,7 @@ use rusvid_lib::animation::curves::Points;
 use rusvid_lib::animation::position_animation::PositionAnimation;
 use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::rect::rect;
+use rusvid_lib::layer::LayerLogic;
 use rusvid_lib::prelude::Function;
 use rusvid_lib::renderer::raw::RawRender;
 use rusvid_lib::resolution::Resolution;
@@ -18,28 +19,30 @@ fn renders_correctly_static() {
         .duration(1)
         .build();
 
-    composition.add_to_root(NodeKind::Path(Path {
-        id: "rect".to_string(),
-        fill: Some(Fill {
-            paint: Paint::Color(color_from_hex("ff0000".to_string()).unwrap()),
-            ..Fill::default()
-        }),
-        data: Rc::new(rect(0.0, 0.0, 50.0, 50.0)),
-        ..Path::default()
-    }));
+    composition
+        .add_to_root(NodeKind::Path(Path {
+            id: "rect".to_string(),
+            fill: Some(Fill {
+                paint: Paint::Color(color_from_hex("ff0000".to_string()).unwrap()),
+                ..Fill::default()
+            }),
+            data: Rc::new(rect(0.0, 0.0, 50.0, 50.0)),
+            ..Path::default()
+        }))
+        .unwrap();
 
     // TODO why not with end_frame=1
-    composition.animations.add_animation(PositionAnimation::new(
+    composition.add_animation(PositionAnimation::new(
         "rect".to_string(),
         Linear::new(0, 1, Points::zero_2d(), Points::Point2d(50.0, 50.0)).unwrap(),
     ));
 
     let image_render = RawRender::new();
 
-    composition.animations.update(0).unwrap();
+    composition.update(0).unwrap();
     let frame_1 = image_render.calculate_image_buffer(&composition);
 
-    composition.animations.update(1).unwrap();
+    composition.update(1).unwrap();
     let frame_2 = image_render.calculate_image_buffer(&composition);
 
     match (frame_1, frame_2) {

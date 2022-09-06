@@ -1,9 +1,9 @@
-use debug_ignore::DebugIgnore;
-use std::ops::{Deref, DerefMut};
-use usvg::{Fill, Node, NodeExt, NodeKind, Paint, Tree};
+use anyhow::Result;
+use usvg::{Fill, Node, NodeKind, Tree};
 
-use crate::animation::manager::AnimationManager;
+use crate::animation::Animation;
 use crate::composition::CompositionBuilder;
+use crate::layer::{Layer, LayerLogic};
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
 use crate::types::FPS;
@@ -21,9 +21,7 @@ pub struct Composition {
 
     pub name: String,
 
-    pub(crate) rtree: DebugIgnore<Tree>,
-
-    pub animations: AnimationManager,
+    pub(crate) layers: Vec<Layer>,
 }
 
 impl Composition {
@@ -37,38 +35,29 @@ impl Composition {
         self.resolution
     }
 
-    #[inline(always)]
-    pub fn rtree(&self) -> &Tree {
-        self.rtree.deref()
-    }
-
-    #[inline(always)]
-    pub fn rtree_mut(&mut self) -> &mut Tree {
-        self.rtree.deref_mut()
-    }
-
     #[inline]
-    pub fn add_to_defs(&mut self, kind: NodeKind) -> Node {
-        self.rtree_mut().append_to_defs(kind)
-    }
-
-    #[inline]
-    pub fn add_to_root(&mut self, kind: NodeKind) -> Node {
-        if let NodeKind::Path(path) = &kind {
-            self.animations
-                .add_reference(path.id.clone(), path.data.clone());
+    fn check_or_create_layer(&mut self) {
+        if self.layers.len() == 0 {
+            self.layers.push(Layer::new(self.resolution()));
         }
-        self.rtree().root().append_kind(kind)
     }
 
     #[inline]
-    pub fn fill_with_link(&self, id: &str) -> Option<Fill> {
-        // TODO add check if the paint is in the defs?
+    pub fn add_layer(&mut self, layer: Layer) {
+        self.layers.push(layer);
+    }
 
-        Some(Fill {
-            paint: Paint::Link(id.to_string()),
-            ..Fill::default()
-        })
+    #[inline]
+    pub fn get_layers(&self) -> &Vec<Layer> {
+        &self.layers
+    }
+
+    #[inline]
+    pub fn update(&mut self, frame_count: usize) -> Result<()> {
+        for layer in &mut self.layers {
+            let _ = layer.update(frame_count)?;
+        }
+        Ok(())
     }
 }
 
@@ -92,7 +81,55 @@ impl MetricsSize for Composition {
     fn bytes(&self) -> usize {
         let frames = self.frames();
         let per_frame_bytes = self.resolution.bytes();
+        let layers = self.layers.len();
 
-        frames * per_frame_bytes
+        frames * per_frame_bytes * layers
+    }
+}
+
+impl LayerLogic for Composition {
+    #[inline]
+    fn rtree(&self) -> Option<&Tree> {
+        if self.layers.len() == 0 {
+            None
+        } else {
+            Some(self.layers[0].rtree().unwrap())
+        }
+    }
+
+    #[inline]
+    fn rtree_mut(&mut self) -> Option<&mut Tree> {
+        if self.layers.len() == 0 {
+            None
+        } else {
+            Some(self.layers[0].rtree_mut().unwrap())
+        }
+    }
+
+    #[inline]
+    fn add_to_defs(&mut self, kind: NodeKind) -> Result<Node> {
+        self.check_or_create_layer();
+        self.layers[0].add_to_defs(kind)
+    }
+
+    #[inline]
+    fn add_to_root(&mut self, kind: NodeKind) -> Result<Node> {
+        self.check_or_create_layer();
+        self.layers[0].add_to_root(kind)
+    }
+
+    #[inline]
+    fn fill_with_link(&self, id: &str) -> Option<Fill> {
+        if self.layers.len() == 0 {
+            None
+        } else {
+            self.layers[0].fill_with_link(id)
+        }
+    }
+
+    #[inline]
+    fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
+        self.check_or_create_layer();
+        self.layers[0].add_animation(animation);
     }
 }
