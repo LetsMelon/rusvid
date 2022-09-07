@@ -15,7 +15,7 @@ Add `rusvid_lib` to `cargo.toml`
 
 ```toml
 [dependencies]
-rusvid_lib = "0.1.0"
+rusvid_lib = "0.1.1"
 ```
 
 and copy the following code into `main.rs`
