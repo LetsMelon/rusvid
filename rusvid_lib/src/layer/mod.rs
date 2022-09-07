@@ -19,6 +19,11 @@ pub trait LayerLogic {
     fn add_animation<T: Animation + 'static>(&mut self, animation: T);
 }
 
+pub trait CacheLogic {
+    /// returns `false` if no animation happens between `frame_count - 1` and `frame_count`, otherwise returns `true`
+    fn has_update(&self, frame_count: &usize) -> bool;
+}
+
 #[derive(Debug)]
 pub struct Layer {
     name: String,

@@ -5,6 +5,15 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 pub mod linear;
 pub mod s;
 
+#[inline(always)]
+pub(crate) fn has_update_function(
+    start_frame: usize,
+    end_frame: usize,
+    frame_number: &usize,
+) -> bool {
+    *frame_number >= start_frame && *frame_number <= end_frame
+}
+
 /// ```rust
 /// use rusvid_lib::animation::curves::linear::Linear;
 /// use rusvid_lib::animation::curves::Function;
@@ -25,6 +34,10 @@ pub trait Function: std::fmt::Debug {
     fn end_frame(&self) -> usize;
     fn start(&self) -> Points;
     fn end(&self) -> Points;
+
+    fn has_update(&self, frame_number: &usize) -> bool {
+        has_update_function(self.start_frame(), self.end_frame(), frame_number)
+    }
 
     fn calc_raw(&self, frame_number: usize) -> Points;
     fn calc(&self, frame_number: usize) -> Points {
@@ -219,6 +232,79 @@ impl Neg for Points {
 
 #[cfg(test)]
 mod tests {
+    mod function {
+        use anyhow::Result;
+
+        use crate::animation::curves::{Function, Points};
+
+        #[derive(Debug)]
+        struct TestFunction {
+            start_frame: usize,
+            end_frame: usize,
+        }
+
+        impl Function for TestFunction {
+            fn new(
+                start_frame: usize,
+                end_frame: usize,
+                _start: Points,
+                _end: Points,
+            ) -> Result<Self>
+            where
+                Self: Sized,
+            {
+                Ok(TestFunction {
+                    start_frame,
+                    end_frame,
+                })
+            }
+
+            fn start_frame(&self) -> usize {
+                self.start_frame
+            }
+
+            fn end_frame(&self) -> usize {
+                self.end_frame
+            }
+
+            fn start(&self) -> crate::prelude::animation::Points {
+                todo!()
+            }
+
+            fn end(&self) -> crate::prelude::animation::Points {
+                todo!()
+            }
+
+            fn calc_raw(&self, _frame_number: usize) -> crate::prelude::animation::Points {
+                todo!()
+            }
+
+            fn delta_raw(&self, _frame_number: usize) -> crate::prelude::animation::Points {
+                todo!()
+            }
+
+            fn internal_debug(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                todo!()
+            }
+        }
+
+        mod has_update {
+            use super::*;
+
+            #[test]
+            fn is_only_true_if_updated() {
+                let item = TestFunction::new(10, 20, (0.0, 0.0).into(), (0.0, 0.0).into()).unwrap();
+
+                assert!(!item.has_update(&0));
+                assert!(!item.has_update(&50));
+
+                assert!(item.has_update(&10));
+                assert!(item.has_update(&15));
+                assert!(item.has_update(&20));
+            }
+        }
+    }
+
     mod points {
         use crate::animation::curves::Points::*;
 

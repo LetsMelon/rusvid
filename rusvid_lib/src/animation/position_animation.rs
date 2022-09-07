@@ -4,6 +4,7 @@ use usvg::PathData;
 
 use crate::animation::curves::Function;
 use crate::animation::Animation;
+use crate::layer::CacheLogic;
 
 #[derive(Debug)]
 pub struct PositionAnimation {
@@ -22,7 +23,7 @@ impl PositionAnimation {
 
 impl Animation for PositionAnimation {
     unsafe fn update(&mut self, mut path: Rc<PathData>, frame_count: &usize) -> anyhow::Result<()> {
-        if *frame_count >= self.curve.start_frame() && *frame_count <= self.curve.end_frame() {
+        if self.has_update(frame_count) {
             let pd = Rc::get_mut_unchecked(&mut path);
 
             let delta = self.curve.delta(*frame_count);
@@ -37,5 +38,11 @@ impl Animation for PositionAnimation {
 
     fn object_id(&self) -> &str {
         &self.object_id
+    }
+}
+
+impl CacheLogic for PositionAnimation {
+    fn has_update(&self, frame_count: &usize) -> bool {
+        self.curve.has_update(frame_count)
     }
 }
