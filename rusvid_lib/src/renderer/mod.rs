@@ -6,7 +6,7 @@ use std::process::Command;
 use tiny_skia::{Pixmap, PremultipliedColorU8};
 
 use crate::composition::Composition;
-use crate::layer::{Layer, LayerLogic};
+use crate::layer::{CacheLogic, Layer, LayerLogic};
 
 pub mod ffmpeg;
 pub mod png;
@@ -135,33 +135,75 @@ pub trait ImageRender {
     fn generate_filepath(&self, tmp_dir_path: &Path, frame_count: usize) -> std::path::PathBuf;
     fn file_extension(&self) -> String;
     fn render(
-        &self,
-        composition: &Composition,
+        &mut self,
+        composition: &mut Composition,
         tmp_dir_path: &Path,
         frame_number: usize,
     ) -> anyhow::Result<()>;
 
-    fn render_rgba_image(&self, composition: &Composition) -> anyhow::Result<RgbaImage> {
-        let layers = composition.get_layers();
+    fn set_last_complete_render(&mut self, data: RgbaImage);
+    fn get_last_complete_render(&self) -> Option<RgbaImage>;
+
+    fn render_rgba_image(
+        &mut self,
+        composition: &mut Composition,
+        frame_number: &usize,
+    ) -> anyhow::Result<RgbaImage> {
+        let layers = composition.get_layers_mut();
         if layers.len() == 0 {
             bail!("TODO: error")
         }
 
+        let mut only_used_cache = true;
         let mut pixmaps = Vec::new();
         for layer in layers {
-            let pixmap = render_pixmap_layer(layer)?;
+            let has_update = layer.has_update(frame_number);
+
+            let pixmap = match (has_update, &layer.cache) {
+                (false, Some(data)) => {
+                    println!("Cached layer");
+                    data.clone()
+                }
+                (_, _) => {
+                    let pixmap = render_pixmap_layer(layer)?;
+
+                    println!("Set cache for layer");
+                    layer.cache = Some(pixmap.clone());
+                    only_used_cache = false;
+
+                    pixmap
+                }
+            };
+
             pixmaps.push(pixmap);
         }
 
-        let width = composition.resolution.width() as u32;
-        let height = composition.resolution.height() as u32;
-        let image = combine_renders(width, height, pixmaps);
+        let image = match (only_used_cache, self.get_last_complete_render()) {
+            (true, Some(data)) => {
+                println!("Cached layer combination");
+                data.clone()
+            }
+            _ => {
+                let width = composition.resolution.width() as u32;
+                let height = composition.resolution.height() as u32;
+                let data = combine_renders(width, height, pixmaps);
+
+                println!("Set layer combination cache");
+                self.set_last_complete_render(data.clone());
+
+                data
+            }
+        };
 
         Ok(image)
     }
 
-    fn render_pixmap(&self, composition: &Composition) -> anyhow::Result<Pixmap> {
-        let image = self.render_rgba_image(&composition)?;
+    fn render_pixmap(
+        &mut self,
+        composition: &mut Composition,
+        frame_number: &usize,
+    ) -> anyhow::Result<Pixmap> {
+        let image = self.render_rgba_image(composition, frame_number)?;
         let pixels = image.to_vec();
 
         let width = composition.resolution().width() as u32;
@@ -193,5 +235,5 @@ pub trait CliArgument {
 }
 
 pub trait CliCommand {
-    fn build_command(&self, out_path: &std::path::Path, tmp_path: &std::path::Path) -> Command;
+    fn build_command(&mut self, out_path: &std::path::Path, tmp_path: &std::path::Path) -> Command;
 }

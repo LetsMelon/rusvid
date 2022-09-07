@@ -3,7 +3,6 @@ use debug_ignore::DebugIgnore;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
-use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -53,8 +52,8 @@ impl FfmpegRenderer {
         }
     }
 
-    fn image_render(&self) -> &Box<dyn ImageRender> {
-        self.image_render.deref()
+    fn image_render(&mut self) -> &mut dyn ImageRender {
+        self.image_render.as_mut()
     }
 
     pub fn set_image_render<T: ImageRender + 'static>(&mut self, image_render: T) {
@@ -80,7 +79,7 @@ impl Renderer for FfmpegRenderer {
 
             let _ = &composition.update(i)?;
 
-            self.image_render().render(&composition, &tmp_path, i)?;
+            self.image_render().render(&mut composition, &tmp_path, i)?;
         }
 
         let mut command = self.build_command(&out_path, &tmp_path);
@@ -112,7 +111,11 @@ impl Renderer for FfmpegRenderer {
 }
 
 impl CliCommand for FfmpegRenderer {
-    fn build_command(&self, out_path: &std::path::Path, _tmp_path: &std::path::Path) -> Command {
+    fn build_command(
+        &mut self,
+        out_path: &std::path::Path,
+        _tmp_path: &std::path::Path,
+    ) -> Command {
         let mut command = Command::new(OsString::from("ffmpeg"));
 
         command.args([

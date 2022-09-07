@@ -53,6 +53,11 @@ impl Composition {
     }
 
     #[inline]
+    pub fn get_layers_mut(&mut self) -> &mut Vec<Layer> {
+        &mut self.layers
+    }
+
+    #[inline]
     pub fn update(&mut self, frame_count: usize) -> Result<()> {
         for layer in &mut self.layers {
             let _ = layer.update(frame_count)?;
