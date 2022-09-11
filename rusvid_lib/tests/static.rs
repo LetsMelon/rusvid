@@ -63,9 +63,9 @@ fn renders_correctly_static() {
         }))
         .unwrap();
 
-    let image_render = RawRender::new();
+    let mut image_render = RawRender::new();
 
-    let buffer = image_render.calculate_image_buffer(&composition);
+    let buffer = image_render.calculate_image_buffer(&mut composition, &0);
     if let Ok(buffer) = buffer {
         // Corners
         assert_eq!(buffer.get_pixel(0, 0).0, [255, 0, 0, 255]);

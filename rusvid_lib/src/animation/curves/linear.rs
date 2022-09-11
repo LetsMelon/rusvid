@@ -4,6 +4,8 @@ use std::fmt::{Debug, Formatter};
 use crate::animation::curves::Points::*;
 use crate::animation::curves::{Function, Points};
 
+use super::has_update_function;
+
 #[derive(Debug, Copy, Clone)]
 pub struct Linear {
     start_frame: usize,
@@ -28,8 +30,14 @@ impl Function for Linear {
         let start_frame_point = Point2d(start_frame as f64, start_frame as f64);
         let end_frame_point = Point2d(end_frame as f64, end_frame as f64);
 
-        let k = (end - start) / (end_frame_point - start_frame_point);
-        let d = end - k * end_frame_point;
+        let (k, d) = if start == end && start == Points::zero_2d() {
+            (Points::zero_2d(), Points::zero_2d())
+        } else {
+            let k = (end - start) / (end_frame_point - start_frame_point);
+            let d = end - k * end_frame_point;
+
+            (k, d)
+        };
 
         Ok(Linear {
             start_frame,
@@ -59,6 +67,15 @@ impl Function for Linear {
     #[inline]
     fn end(&self) -> Points {
         self.end
+    }
+
+    fn has_update(&self, frame_number: &usize) -> bool {
+        let linear_change = self.k == self.d && self.k == Points::zero_2d();
+        if linear_change {
+            return false;
+        }
+
+        has_update_function(self.start_frame(), self.end_frame(), frame_number)
     }
 
     #[inline]
@@ -158,5 +175,22 @@ mod tests {
         assert_eq!(linear.calc(0), Point1d(10.0));
         assert_eq!(linear.calc(5), Point1d(15.0));
         assert_eq!(linear.calc(10), Point1d(20.0));
+    }
+
+    #[test]
+    fn has_update() {
+        let linear = Linear::new(30, 90, Point1d(0.0), Point1d(100.0)).unwrap();
+
+        assert!(!linear.has_update(&0));
+        assert!(linear.has_update(&30));
+        assert!(linear.has_update(&90));
+        assert!(!linear.has_update(&100));
+
+        let linear = Linear::new(30, 90, Point1d(0.0), Point1d(0.0)).unwrap();
+
+        assert!(!linear.has_update(&0));
+        assert!(!linear.has_update(&30));
+        assert!(!linear.has_update(&90));
+        assert!(!linear.has_update(&100));
     }
 }

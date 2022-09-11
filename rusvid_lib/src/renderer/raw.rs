@@ -6,11 +6,13 @@ use crate::composition::Composition;
 use crate::renderer::ImageRender;
 
 #[derive(Debug)]
-pub struct RawRender {}
+pub struct RawRender {
+    pub(crate) cache: Option<RgbaImage>,
+}
 
 impl RawRender {
     pub fn new() -> Self {
-        RawRender {}
+        RawRender { cache: None }
     }
 
     /*
@@ -42,8 +44,12 @@ impl RawRender {
      */
 
     #[inline]
-    pub fn calculate_image_buffer(&self, composition: &Composition) -> Result<RgbaImage> {
-        self.render_rgba_image(composition)
+    pub fn calculate_image_buffer(
+        &mut self,
+        composition: &mut Composition,
+        frame_number: &usize,
+    ) -> Result<RgbaImage> {
+        self.render_rgba_image(composition, frame_number)
     }
 }
 
@@ -60,16 +66,24 @@ impl ImageRender for RawRender {
     }
 
     fn render(
-        &self,
-        composition: &Composition,
+        &mut self,
+        composition: &mut Composition,
         tmp_dir_path: &Path,
         frame_number: usize,
     ) -> anyhow::Result<()> {
         let file_path = self.generate_filepath(tmp_dir_path, frame_number);
 
-        let image_buffer = self.calculate_image_buffer(composition)?;
+        let image_buffer = self.calculate_image_buffer(composition, &frame_number)?;
         image_buffer.save(file_path)?;
 
         Ok(())
+    }
+
+    fn set_last_complete_render(&mut self, data: RgbaImage) {
+        self.cache = Some(data);
+    }
+
+    fn get_last_complete_render(&self) -> Option<RgbaImage> {
+        self.cache.clone()
     }
 }

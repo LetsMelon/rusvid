@@ -1,14 +1,18 @@
 use std::path::{Path, PathBuf};
 
+use image::RgbaImage;
+
 use crate::composition::Composition;
 use crate::renderer::ImageRender;
 
 #[derive(Debug)]
-pub struct PngRender {}
+pub struct PngRender {
+    pub(crate) cache: Option<RgbaImage>,
+}
 
 impl PngRender {
     pub fn new() -> Self {
-        PngRender {}
+        PngRender { cache: None }
     }
 }
 
@@ -25,16 +29,24 @@ impl ImageRender for PngRender {
     }
 
     fn render(
-        &self,
-        composition: &Composition,
+        &mut self,
+        composition: &mut Composition,
         tmp_dir_path: &Path,
         frame_number: usize,
     ) -> anyhow::Result<()> {
         let file_path = self.generate_filepath(tmp_dir_path, frame_number);
 
-        let pixmap = self.render_pixmap(composition)?;
+        let pixmap = self.render_pixmap(composition, &frame_number)?;
         pixmap.save_png(file_path)?;
 
         Ok(())
+    }
+
+    fn set_last_complete_render(&mut self, data: RgbaImage) {
+        self.cache = Some(data);
+    }
+
+    fn get_last_complete_render(&self) -> Option<RgbaImage> {
+        self.cache.clone()
     }
 }

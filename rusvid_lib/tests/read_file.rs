@@ -25,9 +25,11 @@ fn renders_svg_file() {
     .unwrap();
     composition.add_layer(layer);
 
-    let image_render = RawRender::new();
+    let mut image_render = RawRender::new();
 
-    let buffer = image_render.calculate_image_buffer(&composition).unwrap();
+    let buffer = image_render
+        .calculate_image_buffer(&mut composition, &0)
+        .unwrap();
 
     // corners
     assert_eq!(buffer.get_pixel(0, 0).0, PIXEL_TRANSPARENT);

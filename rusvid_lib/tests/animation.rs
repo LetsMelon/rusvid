@@ -37,13 +37,13 @@ fn renders_correctly_static() {
         Linear::new(0, 1, Points::zero_2d(), Points::Point2d(50.0, 50.0)).unwrap(),
     ));
 
-    let image_render = RawRender::new();
+    let mut image_render = RawRender::new();
 
     composition.update(0).unwrap();
-    let frame_1 = image_render.calculate_image_buffer(&composition);
+    let frame_1 = image_render.calculate_image_buffer(&mut composition, &0);
 
     composition.update(1).unwrap();
-    let frame_2 = image_render.calculate_image_buffer(&composition);
+    let frame_2 = image_render.calculate_image_buffer(&mut composition, &1);
 
     match (frame_1, frame_2) {
         (Ok(frame_1), Ok(frame_2)) => {

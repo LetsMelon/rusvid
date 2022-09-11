@@ -3,6 +3,7 @@ use debug_ignore::DebugIgnore;
 use std::fs::{canonicalize, read};
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
+use tiny_skia::Pixmap;
 use usvg::{Fill, Node, NodeExt, NodeKind, Options, Paint, Tree};
 
 use crate::animation::manager::AnimationManager;
@@ -19,6 +20,11 @@ pub trait LayerLogic {
     fn add_animation<T: Animation + 'static>(&mut self, animation: T);
 }
 
+pub trait CacheLogic {
+    /// returns `false` if no animation happens between `frame_count - 1` and `frame_count`, otherwise returns `true`
+    fn has_update(&self, frame_count: &usize) -> bool;
+}
+
 #[derive(Debug)]
 pub struct Layer {
     name: String,
@@ -26,6 +32,8 @@ pub struct Layer {
     rtree: DebugIgnore<Tree>,
 
     animations: AnimationManager,
+
+    pub(crate) cache: Option<Pixmap>,
 }
 
 impl Layer {
@@ -35,6 +43,7 @@ impl Layer {
             name: "layer_0".to_string(),
             rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(resolution)),
             animations: AnimationManager::new(),
+            cache: None,
         }
     }
 
@@ -123,5 +132,11 @@ impl LayerLogic for Layer {
     #[inline(always)]
     fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
         self.animations.add_animation(animation);
+    }
+}
+
+impl CacheLogic for Layer {
+    fn has_update(&self, frame_count: &usize) -> bool {
+        self.animations.has_update(frame_count)
     }
 }

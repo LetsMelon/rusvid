@@ -1,4 +1,5 @@
 #![feature(get_mut_unchecked)]
+#![feature(let_chains)]
 
 pub mod animation;
 pub mod composition;

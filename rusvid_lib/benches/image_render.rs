@@ -7,18 +7,18 @@ use rusvid_lib::utils::color_from_hex;
 use std::rc::Rc;
 
 #[inline(always)]
-fn raw(comp: &Composition) {
-    let image_render = RawRender::new();
+fn raw(comp: &mut Composition) {
+    let mut image_render = RawRender::new();
 
-    let data = image_render.calculate_image_buffer(&comp).unwrap();
+    let data = image_render.calculate_image_buffer(comp, &0).unwrap();
     assert_eq!(data.pixels().len(), 10_000);
 }
 
 #[inline(always)]
-fn png(comp: &Composition) {
-    let image_render = PngRender::new();
+fn png(comp: &mut Composition) {
+    let mut image_render = PngRender::new();
 
-    let pixmap = image_render.render_pixmap(&comp).unwrap();
+    let pixmap = image_render.render_pixmap(comp, &0).unwrap();
     let data = pixmap.encode_png().unwrap();
     assert_eq!(data.len(), 735);
 }
@@ -78,8 +78,8 @@ fn criterion_benchmark(c: &mut Criterion) {
         .unwrap();
     composition.add_layer(layer);
 
-    c.bench_function("raw", |b| b.iter(|| raw(black_box(&composition))));
-    c.bench_function("png", |b| b.iter(|| png(black_box(&composition))));
+    c.bench_function("raw", |b| b.iter(|| raw(black_box(&mut composition))));
+    c.bench_function("png", |b| b.iter(|| png(black_box(&mut composition))));
 }
 
 criterion_group!(benches, criterion_benchmark);
