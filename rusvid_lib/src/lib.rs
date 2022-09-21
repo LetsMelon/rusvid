@@ -2,6 +2,7 @@
 
 pub mod animation;
 pub mod composition;
+pub mod effects;
 pub mod figures;
 pub mod layer;
 pub mod metrics;
