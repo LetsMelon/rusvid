@@ -1,15 +1,15 @@
-use rusvid_lib::animation::curves::linear::Linear;
-use rusvid_lib::animation::curves::Points;
-use rusvid_lib::animation::position_animation::PositionAnimation;
-use rusvid_lib::composition::Composition;
-use rusvid_lib::figures::rect::rect;
-use rusvid_lib::layer::LayerLogic;
-use rusvid_lib::prelude::Function;
-use rusvid_lib::renderer::raw::RawRender;
+use rusvid_lib::prelude::animation::functions::*;
+use rusvid_lib::prelude::animation::*;
+use rusvid_lib::prelude::figures::*;
+use rusvid_lib::prelude::*;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::usvg::{Fill, NodeKind, Paint, Path};
 use rusvid_lib::utils::color_from_hex;
 use std::rc::Rc;
+
+mod dummy;
+
+use dummy::DummyRender;
 
 #[test]
 fn renders_correctly_static() {
@@ -37,13 +37,13 @@ fn renders_correctly_static() {
         Linear::new(0, 1, Points::zero_2d(), Points::Point2d(50.0, 50.0)).unwrap(),
     ));
 
-    let image_render = RawRender::new();
+    let image_render = DummyRender::default();
 
     composition.update(0).unwrap();
-    let frame_1 = image_render.calculate_image_buffer(&composition);
+    let frame_1 = image_render.render_frame(&composition);
 
     composition.update(1).unwrap();
-    let frame_2 = image_render.calculate_image_buffer(&composition);
+    let frame_2 = image_render.render_frame(&composition);
 
     match (frame_1, frame_2) {
         (Ok(frame_1), Ok(frame_2)) => {

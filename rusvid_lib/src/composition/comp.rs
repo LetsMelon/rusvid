@@ -36,10 +36,11 @@ impl Composition {
     }
 
     #[inline]
-    fn check_or_create_layer(&mut self) {
+    fn check_or_create_layer(&mut self) -> Result<()> {
         if self.layers.len() == 0 {
-            self.layers.push(Layer::new(self.resolution()));
-        }
+            self.create_layer().unwrap();
+        };
+        Ok(())
     }
 
     #[inline]
@@ -58,6 +59,13 @@ impl Composition {
             let _ = layer.update(frame_count)?;
         }
         Ok(())
+    }
+
+    pub fn create_layer(&mut self) -> Option<&mut Layer> {
+        let layer = Layer::new(self.resolution());
+        self.layers.push(layer);
+
+        self.layers.last_mut()
     }
 }
 

@@ -9,15 +9,7 @@ use crate::composition::Composition;
 use crate::layer::{Layer, LayerLogic};
 
 pub mod ffmpeg;
-pub mod png;
-pub mod raw;
-
-pub trait Renderer {
-    fn render(&mut self, composition: Composition) -> anyhow::Result<()>;
-
-    fn out_path(&self) -> &Path;
-    fn tmp_dir_path(&self) -> &Path;
-}
+pub mod frame_image_format;
 
 fn render_pixmap_layer(layer: &Layer) -> anyhow::Result<Pixmap> {
     let pixmap_size = layer
@@ -99,31 +91,7 @@ fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
                     b = (mix_b * 255.0) as u8;
                 }
             };
-
-            /*
-            println!(
-                "c{} at {:?}({:?}): r {}, g {}, b {}, a {}",
-                layer_index,
-                (x, y),
-                array_index,
-                r,
-                g,
-                b,
-                a
-            );
-             */
         }
-        /*
-        println!(
-            "c at {:?}({:?}): r {}, g {}, b {}, a {}",
-            (x, y),
-            array_index,
-            r,
-            g,
-            b,
-            a
-        );
-         */
 
         Rgba([r, g, b, a])
     });
@@ -131,15 +99,11 @@ fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
     combined_layer_image
 }
 
-pub trait ImageRender {
-    fn generate_filepath(&self, tmp_dir_path: &Path, frame_count: usize) -> std::path::PathBuf;
-    fn file_extension(&self) -> String;
-    fn render(
-        &self,
-        composition: &Composition,
-        tmp_dir_path: &Path,
-        frame_number: usize,
-    ) -> anyhow::Result<()>;
+pub trait Renderer {
+    fn render(&mut self, composition: Composition) -> anyhow::Result<()>;
+
+    fn out_path(&self) -> &Path;
+    fn tmp_dir_path(&self) -> &Path;
 
     fn render_rgba_image(&self, composition: &Composition) -> anyhow::Result<RgbaImage> {
         let layers = composition.get_layers();

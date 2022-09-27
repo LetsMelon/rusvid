@@ -8,13 +8,15 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 fn main() {
+    let resolution = Resolution::FourK;
+
     let mut composition = Composition::builder()
-        .resolution(Resolution::FourK)
+        .resolution(resolution)
         .framerate(60)
         .duration(5)
         .build();
 
-    let mut layer = Layer::new(composition.resolution());
+    let layer = composition.create_layer().unwrap(); // Layer::new(composition.resolution());
     layer
         .add_to_defs(NodeKind::LinearGradient(LinearGradient {
             id: "lg2".into(),
@@ -67,16 +69,14 @@ fn main() {
             90,
             circle_position,
             animation::Points::Point2d(
-                composition.resolution().width() as f64 / 2.0,
-                composition.resolution().height() as f64 / 2.0,
+                resolution.width() as f64 / 2.0,
+                resolution.height() as f64 / 2.0,
             ),
         )
         .unwrap(),
     ));
 
-    composition.add_layer(layer);
-
-    let mut layer = Layer::new(composition.resolution());
+    let layer = composition.create_layer().unwrap();
     layer
         .add_to_defs(NodeKind::LinearGradient(LinearGradient {
             id: "lg1".into(),
@@ -129,8 +129,8 @@ fn main() {
             data: Rc::new(figures::rect(
                 pixel_position.x(),
                 pixel_position.y(),
-                composition.resolution().width() as f64 / 2.0,
-                composition.resolution().height() as f64 / 3.0,
+                resolution.width() as f64 / 2.0,
+                resolution.height() as f64 / 3.0,
             )),
             ..Path::default()
         }))
@@ -145,13 +145,9 @@ fn main() {
             .unwrap(),
     ));
 
-    composition.add_layer(layer);
-
     let out_path = PathBuf::from("out.mp4");
     let tmp_path = PathBuf::from("./out");
 
-    // TODO add builder pattern for video- & image-render
-    let mut renderer = FfmpegRenderer::new(out_path, tmp_path);
-    renderer.set_image_render(PngRender::new());
+    let mut renderer = FfmpegRenderer::new(out_path, tmp_path, FrameImageFormat::Png);
     renderer.render(composition).unwrap()
 }
