@@ -19,12 +19,7 @@ anyhow = "1.0.64"
 image = { version = "0.24", default-features = false, features = ["png", "bmp", "jpeg"] }
 
 [dev-dependencies]
-criterion = "0.3"
 rayon = "*"
 
 [features]
 parallel = ["image/jpeg_rayon"]
-
-[[bench]]
-name = "image_render"
-harness = false

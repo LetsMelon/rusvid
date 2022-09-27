@@ -3,6 +3,10 @@ use rusvid_lib::metrics::MetricsVideo;
 use rusvid_lib::prelude::*;
 use std::env;
 
+mod dummy;
+
+use dummy::DummyRender;
+
 const PIXEL_TRANSPARENT: [u8; 4] = [0; 4];
 const PIXEL_WHITE: [u8; 4] = [255; 4];
 const PIXEL_BLACK: [u8; 4] = [0, 0, 0, 255];
@@ -25,9 +29,9 @@ fn renders_svg_file() {
     .unwrap();
     composition.add_layer(layer);
 
-    let image_render = RawRender::new();
+    let image_render = DummyRender::default();
 
-    let buffer = image_render.calculate_image_buffer(&composition).unwrap();
+    let buffer = image_render.render_frame(&composition).unwrap();
 
     // corners
     assert_eq!(buffer.get_pixel(0, 0).0, PIXEL_TRANSPARENT);
