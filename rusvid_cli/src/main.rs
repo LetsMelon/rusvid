@@ -148,8 +148,6 @@ fn main() {
     let out_path = PathBuf::from("out.mp4");
     let tmp_path = PathBuf::from("./out");
 
-    // TODO add builder pattern for video- & image-render
-    let mut renderer = FfmpegRenderer::new(out_path, tmp_path);
-    renderer.set_image_render(PngRender::new());
+    let mut renderer = FfmpegRenderer::new(out_path, tmp_path, FrameImageFormat::Png);
     renderer.render(composition).unwrap()
 }

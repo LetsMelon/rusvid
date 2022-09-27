@@ -16,12 +16,10 @@ tiny-skia = "0.6.5"
 usvg = "0.23.0"
 debug-ignore = "1.0.3"
 anyhow = "1.0.64"
-image = "0.24.3"
+image = { version = "0.24", default-features = false, features = ["png", "bmp", "jpeg"] }
 
 [dev-dependencies]
-criterion = "0.3"
-rayon = "1.5"
+rayon = "*"
 
-[[bench]]
-name = "image_render"
-harness = false
+[features]
+parallel = ["image/jpeg_rayon"]
