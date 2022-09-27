@@ -1,5 +1,5 @@
 use anyhow::bail;
-use image::{ImageFormat, Rgba, RgbaImage};
+use image::{Rgba, RgbaImage};
 use std::ffi::OsString;
 use std::path::Path;
 use std::process::Command;
@@ -9,42 +9,7 @@ use crate::composition::Composition;
 use crate::layer::{Layer, LayerLogic};
 
 pub mod ffmpeg;
-
-#[derive(Debug, Clone, Copy)]
-pub enum FrameImageFormat {
-    Png,
-    Bmp,
-}
-
-impl FrameImageFormat {
-    #[inline]
-    fn file_extension(&self) -> String {
-        match self {
-            FrameImageFormat::Png => "png".to_string(),
-            FrameImageFormat::Bmp => "bmp".to_string(),
-        }
-    }
-
-    #[inline]
-    fn as_image_format(&self) -> ImageFormat {
-        self.clone().into()
-    }
-}
-
-impl Default for FrameImageFormat {
-    fn default() -> Self {
-        FrameImageFormat::Png
-    }
-}
-
-impl Into<ImageFormat> for FrameImageFormat {
-    fn into(self) -> ImageFormat {
-        match self {
-            FrameImageFormat::Png => ImageFormat::Png,
-            FrameImageFormat::Bmp => ImageFormat::Bmp,
-        }
-    }
-}
+pub mod frame_image_format;
 
 fn render_pixmap_layer(layer: &Layer) -> anyhow::Result<Pixmap> {
     let pixmap_size = layer
