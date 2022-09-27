@@ -20,9 +20,7 @@ pub mod prelude {
     pub use crate::composition::CompositionBuilder;
     pub use crate::layer::{Layer, LayerLogic};
     pub use crate::renderer::ffmpeg::FfmpegRenderer;
-    pub use crate::renderer::png::PngRender;
-    pub use crate::renderer::raw::RawRender;
-    pub use crate::renderer::Renderer;
+    pub use crate::renderer::{FrameImageFormat, Renderer};
     pub use crate::resolution::Resolution;
 
     pub mod figures {
