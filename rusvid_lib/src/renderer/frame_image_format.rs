@@ -4,6 +4,7 @@ use image::ImageFormat;
 pub enum FrameImageFormat {
     Png,
     Bmp,
+    Jpg,
 }
 
 impl FrameImageFormat {
@@ -12,6 +13,7 @@ impl FrameImageFormat {
         match self {
             FrameImageFormat::Png => "png".to_string(),
             FrameImageFormat::Bmp => "bmp".to_string(),
+            FrameImageFormat::Jpg => "jpg".to_string(),
         }
     }
 
@@ -20,6 +22,7 @@ impl FrameImageFormat {
         match self.clone() {
             FrameImageFormat::Png => ImageFormat::Png,
             FrameImageFormat::Bmp => ImageFormat::Bmp,
+            FrameImageFormat::Jpg => ImageFormat::Jpeg,
         }
     }
 }
