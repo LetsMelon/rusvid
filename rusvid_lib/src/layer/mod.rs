@@ -8,6 +8,7 @@ use usvg::{Fill, Node, NodeExt, NodeKind, Options, Paint, Tree};
 use crate::animation::manager::AnimationManager;
 use crate::animation::Animation;
 use crate::composition::CompositionBuilder;
+use crate::effects::EffectLogic;
 use crate::resolution::Resolution;
 
 pub trait LayerLogic {
@@ -17,6 +18,11 @@ pub trait LayerLogic {
     fn add_to_root(&mut self, kind: NodeKind) -> Result<Node>;
     fn fill_with_link(&self, id: &str) -> Option<Fill>;
     fn add_animation<T: Animation + 'static>(&mut self, animation: T);
+
+    fn get_effects(&self) -> Vec<Box<dyn EffectLogic>>;
+    fn has_effects(&self) -> bool {
+        self.get_effects().len() != 0
+    }
 }
 
 #[derive(Debug)]
@@ -26,6 +32,8 @@ pub struct Layer {
     rtree: DebugIgnore<Tree>,
 
     animations: AnimationManager,
+
+    effects: Vec<Box<dyn EffectLogic>>,
 }
 
 impl Layer {
@@ -123,5 +131,9 @@ impl LayerLogic for Layer {
     #[inline(always)]
     fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
         self.animations.add_animation(animation);
+    }
+
+    fn get_effects(&self) -> Vec<Box<dyn EffectLogic>> {
+        self.effects
     }
 }

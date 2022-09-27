@@ -3,6 +3,7 @@ use usvg::{Fill, Node, NodeKind, Tree};
 
 use crate::animation::Animation;
 use crate::composition::CompositionBuilder;
+use crate::effects::EffectLogic;
 use crate::layer::{Layer, LayerLogic};
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::resolution::Resolution;
@@ -22,6 +23,7 @@ pub struct Composition {
     pub name: String,
 
     pub(crate) layers: Vec<Layer>,
+    pub(crate) effects: Vec<Box<dyn EffectLogic>>,
 }
 
 impl Composition {
@@ -139,5 +141,9 @@ impl LayerLogic for Composition {
     fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
         self.check_or_create_layer();
         self.layers[0].add_animation(animation);
+    }
+
+    fn get_effects(&self) -> Vec<Box<dyn EffectLogic>> {
+        self.effects
     }
 }
