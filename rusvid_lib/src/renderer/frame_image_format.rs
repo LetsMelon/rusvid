@@ -19,7 +19,7 @@ impl FrameImageFormat {
 
     #[inline]
     pub(crate) fn as_image_format(&self) -> ImageFormat {
-        match self.clone() {
+        match self {
             FrameImageFormat::Png => ImageFormat::Png,
             FrameImageFormat::Bmp => ImageFormat::Bmp,
             FrameImageFormat::Jpg => ImageFormat::Jpeg,
@@ -30,5 +30,25 @@ impl FrameImageFormat {
 impl Default for FrameImageFormat {
     fn default() -> Self {
         FrameImageFormat::Png
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::FrameImageFormat;
+    use image::ImageFormat;
+
+    #[test]
+    fn get_file_extensions() {
+        assert_eq!(&FrameImageFormat::Png.file_extension(), "png");
+        assert_eq!(&FrameImageFormat::Bmp.file_extension(), "bmp");
+        assert_eq!(&FrameImageFormat::Jpg.file_extension(), "jpg");
+    }
+
+    #[test]
+    fn converts_into_image_crate() {
+        assert_eq!(FrameImageFormat::Png.as_image_format(), ImageFormat::Png);
+        assert_eq!(FrameImageFormat::Bmp.as_image_format(), ImageFormat::Bmp);
+        assert_eq!(FrameImageFormat::Jpg.as_image_format(), ImageFormat::Jpeg);
     }
 }
