@@ -1,9 +1,24 @@
 use anyhow::Result;
-use std::fmt::{Debug, Formatter};
+use std::fmt::Debug;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-pub mod linear;
-pub mod s;
+// #[rustfmt::skip]
+mod third_party;
+
+pub use third_party::*;
+
+#[derive(Debug)]
+pub enum EaseType {
+    In,
+    Out,
+    InOut,
+}
+
+impl Default for EaseType {
+    fn default() -> Self {
+        EaseType::In
+    }
+}
 
 /// ```rust
 /// use rusvid_lib::animation::curves::linear::Linear;
@@ -21,10 +36,29 @@ pub trait Function: std::fmt::Debug {
     where
         Self: Sized;
 
+    fn new_with_ease_type(
+        start_frame: usize,
+        end_frame: usize,
+        start: Points,
+        end: Points,
+        ease_type: EaseType,
+    ) -> Result<Self>
+    where
+        Self: Sized,
+    {
+        let mut obj = Self::new(start_frame, end_frame, start, end)?;
+        obj.set_ease_type(ease_type);
+
+        Ok(obj)
+    }
+
     fn start_frame(&self) -> usize;
     fn end_frame(&self) -> usize;
+    fn delta_frame(&self) -> usize;
     fn start(&self) -> Points;
     fn end(&self) -> Points;
+
+    fn set_ease_type(&mut self, _ease_type: EaseType) {}
 
     fn calc_raw(&self, frame_number: usize) -> Points;
     fn calc(&self, frame_number: usize) -> Points {
@@ -45,7 +79,9 @@ pub trait Function: std::fmt::Debug {
         self.delta_raw(frame_number)
     }
 
-    fn internal_debug(&self, f: &mut Formatter<'_>) -> std::fmt::Result;
+    fn calc_ease_in(&self, frame_number: usize) -> Points;
+    fn calc_ease_out(&self, frame_number: usize) -> Points;
+    fn calc_ease_in_out(&self, frame_number: usize) -> Points;
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -112,15 +148,15 @@ impl Points {
         Points::Point2d(x, y)
     }
 
-    pub fn zero_2d() -> Self {
+    pub const fn zero_2d() -> Self {
         Points::Point2d(0.0, 0.0)
     }
 
-    pub fn one_2d() -> Self {
+    pub const fn one_2d() -> Self {
         Points::Point2d(1.0, 1.0)
     }
 
-    pub fn two_2d() -> Self {
+    pub const fn two_2d() -> Self {
         Points::Point2d(2.0, 2.0)
     }
 }
