@@ -152,6 +152,7 @@ generate_ease_struct!(Sine);
 
 #[cfg(test)]
 mod tests {
+    #[cfg(test)]
     mod start_is_start_value_and_end_is_end_value {
         use crate::animation::prelude::*;
 
@@ -161,113 +162,81 @@ mod tests {
         const POS_END: Points = Points::Point2d(10.0, 25.0);
         const DELTA: f64 = 0.1;
 
-        // TODO remove duplicate code from macro matches
         macro_rules! simple_test_ease_function {
-            ($name:ident ease_in) => {
+            ($name:ident, $function:ident) => {
                 let function = $name::new(FRAME_START, FRAME_END, POS_START, POS_END).unwrap();
-
                 let ident_str = stringify!($name);
+                let function_name = stringify!($function);
+
+                let fct: Box<dyn Fn(usize) -> Points> = match function_name {
+                    "ease_in" => Box::new(|frame: usize| function.calc_ease_in(frame)),
+                    "ease_out" => Box::new(|frame: usize| function.calc_ease_out(frame)),
+                    "ease_in_out" => Box::new(|frame: usize| function.calc_ease_in_out(frame)),
+                    _ => panic!("Undefined function: {}", function_name),
+                };
 
                 assert!(
-                    function
-                        .calc_ease_in(FRAME_START)
-                        .equal_delta(&POS_START, DELTA),
+                    fct(FRAME_START).equal_delta(&POS_START, DELTA),
                     "{}",
-                    format!("Testing FRAME_START value for {}", ident_str)
+                    format!(
+                        "Testing FRAME_START value for {} ({})",
+                        ident_str, function_name
+                    )
                 );
                 assert!(
-                    function
-                        .calc_ease_in(FRAME_END)
-                        .equal_delta(&POS_END, DELTA),
+                    fct(FRAME_END).equal_delta(&POS_END, DELTA),
                     "{}",
-                    format!("Testing FRAME_END value for {}", ident_str)
-                );
-            };
-            ($name:ident ease_out) => {
-                let function = $name::new(FRAME_START, FRAME_END, POS_START, POS_END).unwrap();
-
-                let ident_str = stringify!($name);
-
-                assert!(
-                    function
-                        .calc_ease_out(FRAME_START)
-                        .equal_delta(&POS_START, DELTA),
-                    "{}",
-                    format!("Testing FRAME_START value for {}", ident_str)
-                );
-                assert!(
-                    function
-                        .calc_ease_out(FRAME_END)
-                        .equal_delta(&POS_END, DELTA),
-                    "{}",
-                    format!("Testing FRAME_END value for {}", ident_str)
-                );
-            };
-            ($name:ident ease_in_out) => {
-                let function = $name::new(FRAME_START, FRAME_END, POS_START, POS_END).unwrap();
-
-                let ident_str = stringify!($name);
-
-                assert!(
-                    function
-                        .calc_ease_in_out(FRAME_START)
-                        .equal_delta(&POS_START, DELTA),
-                    "{}",
-                    format!("Testing FRAME_START value for {}", ident_str)
-                );
-                assert!(
-                    function
-                        .calc_ease_in_out(FRAME_END)
-                        .equal_delta(&POS_END, DELTA),
-                    "{}",
-                    format!("Testing FRAME_END value for {}", ident_str)
+                    format!(
+                        "Testing FRAME_END value for {} ({})",
+                        ident_str, function_name
+                    )
                 );
             };
         }
 
         #[test]
         fn ease_in() {
-            simple_test_ease_function!(Back ease_in);
-            simple_test_ease_function!(Bounce ease_in);
-            simple_test_ease_function!(Circ ease_in);
-            simple_test_ease_function!(Cubic ease_in);
-            simple_test_ease_function!(Elastic ease_in);
-            simple_test_ease_function!(Expo ease_in);
-            simple_test_ease_function!(Linear ease_in);
-            simple_test_ease_function!(Quad ease_in);
-            simple_test_ease_function!(Quart ease_in);
-            simple_test_ease_function!(Quint ease_in);
-            simple_test_ease_function!(Sine ease_in);
+            simple_test_ease_function!(Back, ease_in);
+            simple_test_ease_function!(Bounce, ease_in);
+            simple_test_ease_function!(Circ, ease_in);
+            simple_test_ease_function!(Cubic, ease_in);
+            simple_test_ease_function!(Elastic, ease_in);
+            simple_test_ease_function!(Expo, ease_in);
+            simple_test_ease_function!(Linear, ease_in);
+            simple_test_ease_function!(Quad, ease_in);
+            simple_test_ease_function!(Quart, ease_in);
+            simple_test_ease_function!(Quint, ease_in);
+            simple_test_ease_function!(Sine, ease_in);
         }
 
         #[test]
         fn ease_out() {
-            simple_test_ease_function!(Back ease_out);
-            simple_test_ease_function!(Bounce ease_out);
-            simple_test_ease_function!(Circ ease_out);
-            simple_test_ease_function!(Cubic ease_out);
-            simple_test_ease_function!(Elastic ease_out);
-            simple_test_ease_function!(Expo ease_out);
-            simple_test_ease_function!(Linear ease_out);
-            simple_test_ease_function!(Quad ease_out);
-            simple_test_ease_function!(Quart ease_out);
-            simple_test_ease_function!(Quint ease_out);
-            simple_test_ease_function!(Sine ease_out);
+            simple_test_ease_function!(Back, ease_out);
+            simple_test_ease_function!(Bounce, ease_out);
+            simple_test_ease_function!(Circ, ease_out);
+            simple_test_ease_function!(Cubic, ease_out);
+            simple_test_ease_function!(Elastic, ease_out);
+            simple_test_ease_function!(Expo, ease_out);
+            simple_test_ease_function!(Linear, ease_out);
+            simple_test_ease_function!(Quad, ease_out);
+            simple_test_ease_function!(Quart, ease_out);
+            simple_test_ease_function!(Quint, ease_out);
+            simple_test_ease_function!(Sine, ease_out);
         }
 
         #[test]
         fn ease_in_out() {
-            simple_test_ease_function!(Back ease_in_out);
-            simple_test_ease_function!(Bounce ease_in_out);
-            simple_test_ease_function!(Circ ease_in_out);
-            simple_test_ease_function!(Cubic ease_in_out);
-            simple_test_ease_function!(Elastic ease_in_out);
-            simple_test_ease_function!(Expo ease_in_out);
-            simple_test_ease_function!(Linear ease_in_out);
-            simple_test_ease_function!(Quad ease_in_out);
-            simple_test_ease_function!(Quart ease_in_out);
-            simple_test_ease_function!(Quint ease_in_out);
-            simple_test_ease_function!(Sine ease_in_out);
+            simple_test_ease_function!(Back, ease_in_out);
+            simple_test_ease_function!(Bounce, ease_in_out);
+            simple_test_ease_function!(Circ, ease_in_out);
+            simple_test_ease_function!(Cubic, ease_in_out);
+            simple_test_ease_function!(Elastic, ease_in_out);
+            simple_test_ease_function!(Expo, ease_in_out);
+            simple_test_ease_function!(Linear, ease_in_out);
+            simple_test_ease_function!(Quad, ease_in_out);
+            simple_test_ease_function!(Quart, ease_in_out);
+            simple_test_ease_function!(Quint, ease_in_out);
+            simple_test_ease_function!(Sine, ease_in_out);
         }
     }
 }
