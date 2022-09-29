@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 use std::rc::Rc;
+
 use usvg::PathData;
 
 use crate::animation::curves::Function;

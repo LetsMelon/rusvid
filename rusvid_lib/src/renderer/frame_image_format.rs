@@ -35,8 +35,9 @@ impl Default for FrameImageFormat {
 
 #[cfg(test)]
 mod tests {
-    use super::FrameImageFormat;
     use image::ImageFormat;
+
+    use super::FrameImageFormat;
 
     #[test]
     fn get_file_extensions() {

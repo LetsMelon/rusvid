@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use rusvid_lib::prelude::animation::functions::*;
 use rusvid_lib::prelude::animation::*;
 use rusvid_lib::prelude::figures::*;
@@ -5,7 +7,6 @@ use rusvid_lib::prelude::*;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::usvg::{Fill, NodeKind, Paint, Path};
 use rusvid_lib::utils::color_from_hex;
-use std::rc::Rc;
 
 mod dummy;
 

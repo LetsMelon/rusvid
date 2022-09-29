@@ -1,3 +1,6 @@
+use std::path::PathBuf;
+use std::rc::Rc;
+
 use rusvid_lib::animation::curves::EaseType;
 use rusvid_lib::prelude::*;
 use rusvid_lib::usvg::{
@@ -5,8 +8,6 @@ use rusvid_lib::usvg::{
     StopOffset, Stroke, StrokeWidth, Transform, Units,
 };
 use rusvid_lib::utils::color_from_hex;
-use std::path::PathBuf;
-use std::rc::Rc;
 
 fn main() {
     let resolution = Resolution::FourK;
@@ -150,6 +151,6 @@ fn main() {
     let out_path = PathBuf::from("out.mp4");
     let tmp_path = PathBuf::from("./out");
 
-    let mut renderer = FfmpegRenderer::new(out_path, tmp_path, FrameImageFormat::Png);
+    let mut renderer = FfmpegRenderer::new(out_path, tmp_path, FrameImageFormat::Bmp);
     renderer.render(composition).unwrap()
 }

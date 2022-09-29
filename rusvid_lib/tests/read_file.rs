@@ -1,7 +1,8 @@
+use std::env;
+
 use rayon::prelude::*;
 use rusvid_lib::metrics::MetricsVideo;
 use rusvid_lib::prelude::*;
-use std::env;
 
 mod dummy;
 

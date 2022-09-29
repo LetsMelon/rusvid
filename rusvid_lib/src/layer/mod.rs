@@ -1,8 +1,9 @@
-use anyhow::{bail, Result};
-use debug_ignore::DebugIgnore;
 use std::fs::{canonicalize, read};
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
+
+use anyhow::{bail, Result};
+use debug_ignore::DebugIgnore;
 use usvg::{Fill, Node, NodeExt, NodeKind, Options, Paint, Tree};
 
 use crate::animation::manager::AnimationManager;

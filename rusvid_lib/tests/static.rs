@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;
 use rusvid_lib::figures::rect::rect;
@@ -5,7 +7,6 @@ use rusvid_lib::layer::LayerLogic;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::usvg::{Fill, NodeKind, Paint, Path};
 use rusvid_lib::utils::color_from_hex;
-use std::rc::Rc;
 use usvg::ShapeRendering;
 
 mod dummy;

@@ -1,8 +1,9 @@
-use anyhow::bail;
-use image::{Rgba, RgbaImage};
 use std::ffi::OsString;
 use std::path::Path;
 use std::process::Command;
+
+use anyhow::bail;
+use image::{Rgba, RgbaImage};
 use tiny_skia::{Pixmap, PremultipliedColorU8};
 
 use crate::composition::Composition;

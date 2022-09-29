@@ -1,5 +1,6 @@
-use anyhow::Result;
 use std::rc::Rc;
+
+use anyhow::Result;
 use usvg::PathData;
 
 pub mod curves;

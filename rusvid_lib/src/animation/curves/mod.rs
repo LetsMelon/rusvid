@@ -1,6 +1,7 @@
-use anyhow::Result;
 use std::fmt::Debug;
 use std::ops::{Add, Div, Mul, Neg, Sub};
+
+use anyhow::Result;
 
 // #[rustfmt::skip]
 mod third_party;

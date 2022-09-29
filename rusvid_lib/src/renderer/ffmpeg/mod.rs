@@ -1,9 +1,10 @@
-use anyhow::Result;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+
+use anyhow::Result;
 
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
