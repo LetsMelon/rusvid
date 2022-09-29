@@ -21,7 +21,7 @@ impl Default for EaseType {
 }
 
 /// ```rust
-/// use rusvid_lib::animation::curves::linear::Linear;
+/// use rusvid_lib::animation::curves::Linear;
 /// use rusvid_lib::animation::curves::Function;
 /// use rusvid_lib::animation::curves::Points::Point1d;
 ///
