@@ -14,3 +14,9 @@ pub trait Animation: std::fmt::Debug {
 
     fn object_id(&self) -> &str;
 }
+
+pub mod prelude {
+    pub use super::curves::Points;
+    pub use super::curves::*;
+    pub use super::position_animation::PositionAnimation;
+}
