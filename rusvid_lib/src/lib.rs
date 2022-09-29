@@ -35,8 +35,9 @@ pub mod prelude {
         pub use crate::animation::position_animation::PositionAnimation;
 
         pub mod functions {
-            pub use crate::animation::curves::linear::Linear;
-            pub use crate::animation::curves::s::S;
+            pub use crate::animation::curves::{
+                Back, Bounce, Circ, Cubic, Elastic, Expo, Linear, Quad, Quart, Quint, Sine,
+            };
         }
     }
 }

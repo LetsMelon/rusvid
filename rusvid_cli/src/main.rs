@@ -1,3 +1,4 @@
+use rusvid_lib::animation::curves::EaseType;
 use rusvid_lib::prelude::*;
 use rusvid_lib::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
@@ -64,7 +65,7 @@ fn main() {
         .unwrap();
     layer.add_animation(animation::PositionAnimation::new(
         "circle".to_string(),
-        animation::functions::S::new(
+        animation::functions::Elastic::new_with_ease_type(
             0,
             90,
             circle_position,
@@ -72,6 +73,7 @@ fn main() {
                 resolution.width() as f64 / 2.0,
                 resolution.height() as f64 / 2.0,
             ),
+            EaseType::Out,
         )
         .unwrap(),
     ));
