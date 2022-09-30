@@ -34,7 +34,7 @@ fn renders_correctly_static() {
     // TODO why not with end_frame=1
     composition.add_animation(PositionAnimation::new(
         "rect".to_string(),
-        Linear::new(0, 1, Points::zero_2d(), Points::Point2d(50.0, 50.0)).unwrap(),
+        Linear::new(0, 1, Point::ZERO, Point::new(50.0, 50.0)).unwrap(),
     ));
 
     let image_render = DummyRender::default();

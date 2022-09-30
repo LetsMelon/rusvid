@@ -5,8 +5,8 @@ macro_rules! generate_ease_struct {
         pub struct $struct_name {
             start_frame: usize,
             end_frame: usize,
-            start: crate::animation::curves::Points,
-            end: crate::animation::curves::Points,
+            start: crate::animation::curves::Point,
+            end: crate::animation::curves::Point,
 
             ease_type: crate::animation::curves::EaseType,
 
@@ -19,8 +19,8 @@ macro_rules! generate_ease_struct {
             fn new(
                 start_frame: usize,
                 end_frame: usize,
-                start: crate::animation::curves::Points,
-                end: crate::animation::curves::Points,
+                start: crate::animation::curves::Point,
+                end: crate::animation::curves::Point,
             ) -> anyhow::Result<Self>
             where
                 Self: Sized,
@@ -33,70 +33,70 @@ macro_rules! generate_ease_struct {
                     start,
                     end,
                     ease_type: crate::animation::curves::EaseType::default(),
-                    d_x: delta.x(),
-                    d_y: delta.y(),
+                    d_x: delta.x,
+                    d_y: delta.y,
                     d_t: (end_frame - start_frame) as f64,
                 })
             }
 
-            fn calc_ease_in(&self, frame_number: usize) -> crate::animation::curves::Points {
+            fn calc_ease_in(&self, frame_number: usize) -> crate::animation::curves::Point {
                 use easer::functions::Easing;
 
                 let frame_number = (frame_number - self.start_frame) as f64;
 
                 let x = easer::functions::$struct_name::ease_in(
                     frame_number,
-                    self.start.x(),
+                    self.start.x,
                     self.d_x,
                     self.d_t,
                 );
                 let y = easer::functions::$struct_name::ease_in(
                     frame_number,
-                    self.start.y(),
+                    self.start.y,
                     self.d_y,
                     self.d_t,
                 );
-                crate::animation::curves::Points::Point2d(x, y)
+                crate::animation::curves::Point::new(x, y)
             }
 
-            fn calc_ease_out(&self, frame_number: usize) -> crate::animation::curves::Points {
+            fn calc_ease_out(&self, frame_number: usize) -> crate::animation::curves::Point {
                 use easer::functions::Easing;
 
                 let frame_number = (frame_number - self.start_frame) as f64;
 
                 let x = easer::functions::$struct_name::ease_out(
                     frame_number,
-                    self.start.x(),
+                    self.start.x,
                     self.d_x,
                     self.d_t,
                 );
                 let y = easer::functions::$struct_name::ease_out(
                     frame_number,
-                    self.start.y(),
+                    self.start.y,
                     self.d_y,
                     self.d_t,
                 );
-                crate::animation::curves::Points::Point2d(x, y)
+                crate::animation::curves::Point::new(x, y)
             }
 
-            fn calc_ease_in_out(&self, frame_number: usize) -> crate::animation::curves::Points {
+            fn calc_ease_in_out(&self, frame_number: usize) -> crate::animation::curves::Point {
                 use easer::functions::Easing;
 
                 let frame_number = (frame_number - self.start_frame) as f64;
 
                 let x = easer::functions::$struct_name::ease_in_out(
                     frame_number,
-                    self.start.x(),
+                    self.start.x,
                     self.d_x,
                     self.d_t,
                 );
                 let y = easer::functions::$struct_name::ease_in_out(
                     frame_number,
-                    self.start.y(),
+                    self.start.y,
                     self.d_y,
                     self.d_t,
                 );
-                crate::animation::curves::Points::Point2d(x, y)
+                crate::animation::curves::Point::new(x, y)
             }
 
             fn start_frame(&self) -> usize {
@@ -111,11 +111,11 @@ macro_rules! generate_ease_struct {
                 self.d_t as usize
             }
 
-            fn start(&self) -> crate::animation::curves::Points {
+            fn start(&self) -> crate::animation::curves::Point {
                 self.start
             }
 
-            fn end(&self) -> crate::animation::curves::Points {
+            fn end(&self) -> crate::animation::curves::Point {
                 self.end
             }
 
@@ -123,7 +123,7 @@ macro_rules! generate_ease_struct {
                 self.ease_type = ease_type;
             }
 
-            fn calc_raw(&self, frame_number: usize) -> crate::animation::curves::Points {
+            fn calc_raw(&self, frame_number: usize) -> crate::animation::curves::Point {
                 match &self.ease_type {
                     crate::animation::curves::EaseType::In => self.calc_ease_in(frame_number),
                     crate::animation::curves::EaseType::Out => self.calc_ease_out(frame_number),
@@ -131,7 +131,7 @@ macro_rules! generate_ease_struct {
                 }
             }
 
-            fn delta_raw(&self, frame_number: usize) -> crate::animation::curves::Points {
+            fn delta_raw(&self, frame_number: usize) -> crate::animation::curves::Point {
                 self.calc_raw(frame_number) - self.calc_raw(frame_number - 1)
             }
         }
@@ -155,42 +155,28 @@ mod tests {
     #[cfg(test)]
     mod start_is_start_value_and_end_is_end_value {
         use crate::animation::prelude::*;
+        use approx::assert_abs_diff_eq;
 
         const FRAME_START: usize = 10;
         const FRAME_END: usize = 30;
-        const POS_START: Points = Points::zero_2d();
-        const POS_END: Points = Points::Point2d(10.0, 25.0);
+        const POS_START: Point = Point::ZERO;
+        const POS_END: Point = Point::new(10.0, 25.0);
         const DELTA: f64 = 0.1;
 
         macro_rules! simple_test_ease_function {
             ($name:ident, $function:ident) => {
                 let function = $name::new(FRAME_START, FRAME_END, POS_START, POS_END).unwrap();
-                let ident_str = stringify!($name);
                 let function_name = stringify!($function);
 
-                let fct: Box<dyn Fn(usize) -> Points> = match function_name {
+                let fct: Box<dyn Fn(usize) -> Point> = match function_name {
                     "ease_in" => Box::new(|frame: usize| function.calc_ease_in(frame)),
                     "ease_out" => Box::new(|frame: usize| function.calc_ease_out(frame)),
                     "ease_in_out" => Box::new(|frame: usize| function.calc_ease_in_out(frame)),
                     _ => panic!("Undefined function: {}", function_name),
                 };
 
-                assert!(
-                    fct(FRAME_START).equal_delta(&POS_START, DELTA),
-                    "{}",
-                    format!(
-                        "Testing FRAME_START value for {} ({})",
-                        ident_str, function_name
-                    )
-                );
-                assert!(
-                    fct(FRAME_END).equal_delta(&POS_END, DELTA),
-                    "{}",
-                    format!(
-                        "Testing FRAME_END value for {} ({})",
-                        ident_str, function_name
-                    )
-                );
+                assert_abs_diff_eq!(fct(FRAME_START), POS_START, epsilon = DELTA);
+                assert_abs_diff_eq!(fct(FRAME_END), POS_END, epsilon = DELTA);
             };
         }
 

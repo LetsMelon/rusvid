@@ -47,7 +47,7 @@ fn main() {
         }))
         .unwrap();
 
-    let circle_position = Points::Point2d(700.0, 850.0);
+    let circle_position = Point::new(700.0, 850.0);
     layer
         .add_to_root(NodeKind::Path(Path {
             id: "circle".to_string(),
@@ -57,7 +57,7 @@ fn main() {
                 ..Stroke::default()
             }),
             rendering_mode: Default::default(),
-            data: Rc::new(circle(circle_position.x(), circle_position.y(), 600.0)),
+            data: Rc::new(circle(circle_position.x, circle_position.y, 600.0)),
             ..Path::default()
         }))
         .unwrap();
@@ -67,7 +67,7 @@ fn main() {
             0,
             90,
             circle_position,
-            Points::Point2d(
+            Point::new(
                 resolution.width() as f64 / 2.0,
                 resolution.height() as f64 / 2.0,
             ),
@@ -115,7 +115,7 @@ fn main() {
         }))
         .unwrap();
 
-    let pixel_position = Points::Point2d(20.0, 20.0);
+    let pixel_position = Point::new(20.0, 20.0);
     layer
         .add_to_root(NodeKind::Path(Path {
             id: "rect".to_string(),
@@ -127,8 +127,8 @@ fn main() {
                 }
             },
             data: Rc::new(rect(
-                pixel_position.x(),
-                pixel_position.y(),
+                pixel_position.x,
+                pixel_position.y,
                 resolution.width() as f64 / 2.0,
                 resolution.height() as f64 / 3.0,
             )),
