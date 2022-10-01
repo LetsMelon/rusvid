@@ -1,6 +1,6 @@
 use usvg::{Color, PathSegment};
 
-use crate::animation::curves::Points;
+use crate::animation::curves::Point;
 
 pub fn color_from_hex(hex_color: String) -> Option<Color> {
     if !(hex_color.len() != 6 || hex_color.len() != 8) {
@@ -22,7 +22,7 @@ pub fn map(value: f64, low1: f64, high1: f64, low2: f64, high2: f64) -> f64 {
     low2 + (value - low1) * (high2 - low2) / (high1 - low1)
 }
 
-pub fn set_path(segments: &mut [PathSegment], cords: Points) {
+pub fn set_path(segments: &mut [PathSegment], cords: Point) {
     for seg in segments {
         match seg {
             PathSegment::MoveTo { x, y } => {
@@ -49,11 +49,9 @@ pub fn set_path(segments: &mut [PathSegment], cords: Points) {
 }
 
 #[inline]
-fn apply_to(x: &mut f64, y: &mut f64, cords: &Points) {
-    *x = cords.x();
-    if let Points::Point2d(_, _) = cords {
-        *y = cords.y();
-    }
+fn apply_to(x: &mut f64, y: &mut f64, cords: &Point) {
+    *x = cords.x;
+    *y = cords.y;
 }
 
 #[cfg(test)]

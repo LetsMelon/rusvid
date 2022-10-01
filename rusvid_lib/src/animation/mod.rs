@@ -16,7 +16,7 @@ pub trait Animation: std::fmt::Debug {
 }
 
 pub mod prelude {
-    pub use super::curves::Points;
+    pub use super::curves::Point;
     pub use super::curves::*;
     pub use super::position_animation::PositionAnimation;
 }
