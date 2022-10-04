@@ -1,9 +1,9 @@
+use std::fmt::Debug;
 use std::fs::{canonicalize, read};
-use std::ops::{Deref, DerefMut};
+
 use std::path::Path;
 
 use anyhow::{bail, Result};
-use debug_ignore::DebugIgnore;
 use usvg::{Fill, Node, NodeExt, NodeKind, Options, Paint, Tree};
 
 use crate::animation::manager::AnimationManager;
@@ -20,13 +20,22 @@ pub trait LayerLogic {
     fn add_animation<T: Animation + 'static>(&mut self, animation: T);
 }
 
-#[derive(Debug)]
 pub struct Layer {
     name: String,
 
-    rtree: DebugIgnore<Tree>,
+    rtree: Tree,
 
     animations: AnimationManager,
+}
+
+impl Debug for Layer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Layer")
+            .field("name", &self.name)
+            .field("rtree", &"NOT_PRINTABLE")
+            .field("animations", &self.animations)
+            .finish()
+    }
 }
 
 impl Layer {
@@ -34,7 +43,7 @@ impl Layer {
     pub fn new(resolution: Resolution) -> Self {
         Layer {
             name: "layer_0".to_string(),
-            rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(resolution)),
+            rtree: CompositionBuilder::create_tree_from_resolution(resolution),
             animations: AnimationManager::new(),
         }
     }
@@ -89,12 +98,12 @@ impl Layer {
 impl LayerLogic for Layer {
     #[inline(always)]
     fn rtree(&self) -> Option<&Tree> {
-        Some(self.rtree.deref())
+        Some(&self.rtree)
     }
 
     #[inline(always)]
     fn rtree_mut(&mut self) -> Option<&mut Tree> {
-        Some(self.rtree.deref_mut())
+        Some(&mut self.rtree)
     }
 
     #[inline(always)]

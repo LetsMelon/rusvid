@@ -147,12 +147,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "debug-ignore"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b48b0b49e2f473c499ddcd133e78f0f2629aaa997ee61adadb2d1753e6af4cf"
-
-[[package]]
 name = "easer"
 version = "0.3.0"
 source = "git+https://github.com/orhanbalci/rust-easing?rev=872ea2c#872ea2c77d24f53d5f03e4b68b69d65d5f4ba05a"
@@ -471,7 +465,6 @@ version = "0.1.1"
 dependencies = [
  "anyhow",
  "approx",
- "debug-ignore",
  "easer",
  "glam",
  "image",
