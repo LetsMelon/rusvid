@@ -74,6 +74,7 @@ impl Renderer for FfmpegRenderer {
 
         let frames = composition.frames();
         for i in 0..frames {
+            // TODO remove hardcoded ":03"
             println!("{:03}/{:03}", i + 1, frames);
 
             let _ = &composition.update(i)?;
