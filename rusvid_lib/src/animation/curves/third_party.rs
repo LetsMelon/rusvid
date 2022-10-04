@@ -154,8 +154,9 @@ generate_ease_struct!(Sine);
 mod tests {
     #[cfg(test)]
     mod start_is_start_value_and_end_is_end_value {
-        use crate::animation::prelude::*;
         use approx::assert_abs_diff_eq;
+
+        use crate::animation::prelude::*;
 
         const FRAME_START: usize = 10;
         const FRAME_END: usize = 30;
