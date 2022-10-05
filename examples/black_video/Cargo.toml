@@ -9,7 +9,7 @@ edition = "2021"
 rusvid_lib = { path = "../../rusvid_lib" }
 
 [profile.dev]
-opt-level = 1
+opt-level = 3
 
 [profile.dev.package."*"]
 opt-level = 3
