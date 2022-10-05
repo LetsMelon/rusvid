@@ -7,9 +7,3 @@ edition = "2021"
 
 [dependencies]
 rusvid_lib = { path = "../../rusvid_lib" }
-
-[profile.dev]
-inherits = "release"
-
-[profile.dev.package."*"]
-inherits = "release"
