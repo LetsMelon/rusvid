@@ -1,5 +1,5 @@
 [package]
-name = "example_black_video"
+name = "black_video"
 version = "0.1.0"
 edition = "2021"
 
