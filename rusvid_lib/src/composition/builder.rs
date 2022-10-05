@@ -31,7 +31,7 @@ impl Default for CompositionBuilder {
 
 impl CompositionBuilder {
     pub(crate) fn create_tree_from_resolution(resolution: Resolution) -> Result<Tree> {
-        let size = Size::new(resolution.width() as f64, resolution.height() as f64)
+        let size = Size::new(resolution.x(), resolution.y())
             .context("Width oder height must be greater 0")?;
 
         Ok(Tree::create(Svg {
@@ -48,11 +48,7 @@ impl CompositionBuilder {
             resolution: self.resolution,
             framerate: self.framerate,
             duration: self.duration,
-            name: self.name, /*
-                             rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(
-                                 self.resolution,
-                             )),
-                             animations: AnimationManager::new(), */
+            name: self.name,
             layers: self.layers,
         }
     }

@@ -67,10 +67,7 @@ fn main() {
             0,
             90,
             circle_position,
-            Point::new(
-                resolution.width() as f64 / 2.0,
-                resolution.height() as f64 / 2.0,
-            ),
+            Point::new(resolution.x() / 2.0, resolution.y() / 2.0),
             EaseType::Out,
         )
         .unwrap(),
@@ -129,8 +126,8 @@ fn main() {
             data: Rc::new(rect(
                 pixel_position.x,
                 pixel_position.y,
-                resolution.width() as f64 / 2.0,
-                resolution.height() as f64 / 3.0,
+                resolution.x() / 2.0,
+                resolution.y() / 3.0,
             )),
             ..Path::default()
         }))

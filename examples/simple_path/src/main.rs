@@ -20,8 +20,8 @@ fn main() {
 
     let rect_size = Point::new(250.0, 250.0);
     let pixel_position = Point::new(
-        (resolution.width() as f64 / 2.0) - (rect_size.x / 2.0),
-        (resolution.height() as f64 / 2.0) - (rect_size.y / 2.0),
+        (resolution.x() / 2.0) - (rect_size.x / 2.0),
+        (resolution.y() / 2.0) - (rect_size.y / 2.0),
     );
     layer
         .add_to_root(NodeKind::Path(Path {

@@ -39,10 +39,7 @@ fn main() {
             0,
             frames,
             rect_pos,
-            Point::new(
-                resolution.width() as f64 - rect_size.x,
-                resolution.height() as f64 - rect_size.y,
-            ),
+            Point::new(resolution.x() - rect_size.x, resolution.y() - rect_size.y),
             EaseType::InOut,
         )
         .unwrap(),
