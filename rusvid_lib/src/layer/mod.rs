@@ -1,6 +1,5 @@
 use std::fmt::Debug;
 use std::fs::{canonicalize, read};
-
 use std::path::Path;
 
 use anyhow::{bail, Result};

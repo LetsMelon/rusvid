@@ -168,6 +168,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "example_read_svg_file"
+version = "0.1.0"
+dependencies = [
+ "rusvid_lib",
+]
+
+[[package]]
 name = "example_simple_path"
 version = "0.1.0"
 dependencies = [
