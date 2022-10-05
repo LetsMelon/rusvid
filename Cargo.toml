@@ -1,6 +1,9 @@
 [workspace]
+default-members = [
+    "rusvid_cli",
+]
 members = [
+    "examples/*",
     "rusvid_lib",
     "rusvid_cli",
-    "examples/*",
 ]
