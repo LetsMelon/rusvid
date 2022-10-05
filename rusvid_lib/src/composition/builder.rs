@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use usvg::{AspectRatio, Size, Svg, Tree, ViewBox};
 
 use crate::composition::Composition;
@@ -29,16 +30,17 @@ impl Default for CompositionBuilder {
 }
 
 impl CompositionBuilder {
-    pub(crate) fn create_tree_from_resolution(resolution: Resolution) -> Tree {
-        let size = Size::new(resolution.width() as f64, resolution.height() as f64).unwrap();
+    pub(crate) fn create_tree_from_resolution(resolution: Resolution) -> Result<Tree> {
+        let size = Size::new(resolution.width() as f64, resolution.height() as f64)
+            .context("Width oder height must be greater 0")?;
 
-        Tree::create(Svg {
+        Ok(Tree::create(Svg {
             size,
             view_box: ViewBox {
                 rect: size.to_rect(0.0, 0.0),
                 aspect: AspectRatio::default(),
             },
-        })
+        }))
     }
 
     pub fn build(self) -> Composition {
