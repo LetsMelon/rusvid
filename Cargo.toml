@@ -1,5 +1,13 @@
 [workspace]
+default-members = [
+    "rusvid_cli",
+]
 members = [
+    "examples/black_video",
+    "examples/simple_path",
+    "examples/layers",
+    "examples/simple_animation",
+    "examples/read_svg_file",
     "rusvid_lib",
-    "rusvid_cli"
+    "rusvid_cli",
 ]

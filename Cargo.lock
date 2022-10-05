@@ -60,6 +60,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
+name = "black_video"
+version = "0.1.0"
+dependencies = [
+ "rusvid_lib",
+]
+
+[[package]]
 name = "bytemuck"
 version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -259,6 +266,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "layers"
+version = "0.1.0"
+dependencies = [
+ "rusvid_lib",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.133"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -401,6 +415,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ae028b272a6e99d9f8260ceefa3caa09300a8d6c8d2b2001316474bc52122e9"
 
 [[package]]
+name = "read_svg_file"
+version = "0.1.0"
+dependencies = [
+ "rusvid_lib",
+]
+
+[[package]]
 name = "resvg"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -488,6 +509,20 @@ name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
+
+[[package]]
+name = "simple_animation"
+version = "0.1.0"
+dependencies = [
+ "rusvid_lib",
+]
+
+[[package]]
+name = "simple_path"
+version = "0.1.0"
+dependencies = [
+ "rusvid_lib",
+]
 
 [[package]]
 name = "simplecss"
