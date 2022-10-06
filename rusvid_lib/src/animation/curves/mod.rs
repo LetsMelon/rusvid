@@ -25,7 +25,7 @@ impl Default for EaseType {
 /// ```rust
 /// use rusvid_lib::animation::curves::Linear;
 /// use rusvid_lib::animation::curves::Function;
-/// use rusvid_lib::animation::curves::Point;
+/// use rusvid_lib::types::Point;
 ///
 /// let linear = Linear::new(30, 90, Point::new(100.0, 100.0), Point::new(300.0, 300.0)).unwrap();
 ///
