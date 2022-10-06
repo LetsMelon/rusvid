@@ -5,8 +5,8 @@ macro_rules! generate_ease_struct {
         pub struct $struct_name {
             start_frame: usize,
             end_frame: usize,
-            start: crate::animation::curves::Point,
-            end: crate::animation::curves::Point,
+            start: crate::types::Point,
+            end: crate::types::Point,
 
             ease_type: crate::animation::curves::EaseType,
 
@@ -19,8 +19,8 @@ macro_rules! generate_ease_struct {
             fn new(
                 start_frame: usize,
                 end_frame: usize,
-                start: crate::animation::curves::Point,
-                end: crate::animation::curves::Point,
+                start: crate::types::Point,
+                end: crate::types::Point,
             ) -> anyhow::Result<Self>
             where
                 Self: Sized,
@@ -39,7 +39,7 @@ macro_rules! generate_ease_struct {
                 })
             }
 
-            fn calc_ease_in(&self, frame_number: usize) -> crate::animation::curves::Point {
+            fn calc_ease_in(&self, frame_number: usize) -> crate::types::Point {
                 use easer::functions::Easing;
 
                 let frame_number = (frame_number - self.start_frame) as f64;
@@ -56,10 +56,10 @@ macro_rules! generate_ease_struct {
                     self.d_y,
                     self.d_t,
                 );
-                crate::animation::curves::Point::new(x, y)
+                crate::types::Point::new(x, y)
             }
 
-            fn calc_ease_out(&self, frame_number: usize) -> crate::animation::curves::Point {
+            fn calc_ease_out(&self, frame_number: usize) -> crate::types::Point {
                 use easer::functions::Easing;
 
                 let frame_number = (frame_number - self.start_frame) as f64;
@@ -76,10 +76,10 @@ macro_rules! generate_ease_struct {
                     self.d_y,
                     self.d_t,
                 );
-                crate::animation::curves::Point::new(x, y)
+                crate::types::Point::new(x, y)
             }
 
-            fn calc_ease_in_out(&self, frame_number: usize) -> crate::animation::curves::Point {
+            fn calc_ease_in_out(&self, frame_number: usize) -> crate::types::Point {
                 use easer::functions::Easing;
 
                 let frame_number = (frame_number - self.start_frame) as f64;
@@ -96,7 +96,7 @@ macro_rules! generate_ease_struct {
                     self.d_y,
                     self.d_t,
                 );
-                crate::animation::curves::Point::new(x, y)
+                crate::types::Point::new(x, y)
             }
 
             fn start_frame(&self) -> usize {
@@ -111,11 +111,11 @@ macro_rules! generate_ease_struct {
                 self.d_t as usize
             }
 
-            fn start(&self) -> crate::animation::curves::Point {
+            fn start(&self) -> crate::types::Point {
                 self.start
             }
 
-            fn end(&self) -> crate::animation::curves::Point {
+            fn end(&self) -> crate::types::Point {
                 self.end
             }
 
@@ -123,7 +123,7 @@ macro_rules! generate_ease_struct {
                 self.ease_type = ease_type;
             }
 
-            fn calc_raw(&self, frame_number: usize) -> crate::animation::curves::Point {
+            fn calc_raw(&self, frame_number: usize) -> crate::types::Point {
                 match &self.ease_type {
                     crate::animation::curves::EaseType::In => self.calc_ease_in(frame_number),
                     crate::animation::curves::EaseType::Out => self.calc_ease_out(frame_number),
@@ -131,7 +131,7 @@ macro_rules! generate_ease_struct {
                 }
             }
 
-            fn delta_raw(&self, frame_number: usize) -> crate::animation::curves::Point {
+            fn delta_raw(&self, frame_number: usize) -> crate::types::Point {
                 self.calc_raw(frame_number) - self.calc_raw(frame_number - 1)
             }
         }
@@ -157,6 +157,7 @@ mod tests {
         use approx::assert_abs_diff_eq;
 
         use crate::animation::prelude::*;
+        use crate::types::Point;
 
         const FRAME_START: usize = 10;
         const FRAME_END: usize = 30;

@@ -24,4 +24,5 @@ pub mod prelude {
     pub use crate::renderer::frame_image_format::FrameImageFormat;
     pub use crate::renderer::Renderer;
     pub use crate::resolution::Resolution;
+    pub use crate::types::*;
 }

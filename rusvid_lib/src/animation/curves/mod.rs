@@ -1,13 +1,13 @@
 use std::fmt::Debug;
 
 use anyhow::Result;
-use glam::DVec2;
+
+use crate::types::Point;
 
 // #[rustfmt::skip]
 mod third_party;
 
 pub use third_party::*;
-pub type Point = DVec2;
 
 #[derive(Debug)]
 pub enum EaseType {
