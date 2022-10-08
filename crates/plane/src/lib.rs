@@ -49,7 +49,7 @@ impl Plane {
         let height = image.height() as SIZE;
 
         let mut plane = Plane::new(width, height)?;
-        let data = plane.get_pixels_mut();
+        let data = plane.pixels_mut();
 
         assert_eq!(data.len() * 4, pixels.len());
 
@@ -76,7 +76,7 @@ impl Plane {
 
     /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
     #[inline]
-    pub fn get_pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
+    pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
         if x > self.width {
             return None;
         }
@@ -89,7 +89,8 @@ impl Plane {
 
     /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
     #[inline]
-    pub fn get_pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
+    #[cfg(feature = "unsafe")]
+    pub fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
         unsafe {
             self.data
                 .get_unchecked(self.position_to_index(x, y) as usize)
@@ -98,7 +99,7 @@ impl Plane {
 
     /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
     #[inline]
-    pub fn get_pixel_mut(&mut self, x: SIZE, y: SIZE) -> Option<&mut Pixel> {
+    pub fn pixel_mut(&mut self, x: SIZE, y: SIZE) -> Option<&mut Pixel> {
         if x > self.width {
             return None;
         }
@@ -111,17 +112,18 @@ impl Plane {
 
     /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
     #[inline]
-    pub fn get_pixel_unchecked_mut(&mut self, x: SIZE, y: SIZE) -> &Pixel {
+    #[cfg(feature = "unsafe")]
+    pub fn pixel_unchecked_mut(&mut self, x: SIZE, y: SIZE) -> &Pixel {
         unsafe { self.data.get_unchecked_mut((y + self.height * x) as usize) }
     }
 
     #[inline]
-    pub fn get_pixels(&self) -> &[Pixel] {
+    pub fn pixels(&self) -> &[Pixel] {
         self.data.as_slice()
     }
 
     #[inline]
-    pub fn get_pixels_mut(&mut self) -> &mut [Pixel] {
+    pub fn pixels_mut(&mut self) -> &mut [Pixel] {
         self.data.as_mut_slice()
     }
 }
@@ -156,22 +158,25 @@ mod tests {
             .unwrap();
 
             let pixel: Pixel = [255, 0, 0, 255];
-            assert_eq!(plane.get_pixel(0, 0).unwrap(), &pixel);
+            assert_eq!(plane.pixel(0, 0).unwrap(), &pixel);
             let pixel: Pixel = [0, 255, 0, 255];
-            assert_eq!(plane.get_pixel(1, 0).unwrap(), &pixel);
+            assert_eq!(plane.pixel(1, 0).unwrap(), &pixel);
             let pixel: Pixel = [0, 0, 255, 255];
-            assert_eq!(plane.get_pixel(0, 1).unwrap(), &pixel);
+            assert_eq!(plane.pixel(0, 1).unwrap(), &pixel);
             let pixel: Pixel = [255, 255, 255, 255];
-            assert_eq!(plane.get_pixel(1, 1).unwrap(), &pixel);
+            assert_eq!(plane.pixel(1, 1).unwrap(), &pixel);
 
-            let pixel: Pixel = [255, 0, 0, 255];
-            assert_eq!(plane.get_pixel_unchecked(0, 0), &pixel);
-            let pixel: Pixel = [0, 255, 0, 255];
-            assert_eq!(plane.get_pixel_unchecked(1, 0), &pixel);
-            let pixel: Pixel = [0, 0, 255, 255];
-            assert_eq!(plane.get_pixel_unchecked(0, 1), &pixel);
-            let pixel: Pixel = [255, 255, 255, 255];
-            assert_eq!(plane.get_pixel_unchecked(1, 1), &pixel);
+            #[cfg(feature = "unsafe")]
+            let _ = {
+                let pixel: Pixel = [255, 0, 0, 255];
+                assert_eq!(plane.pixel_unchecked(0, 0), &pixel);
+                let pixel: Pixel = [0, 255, 0, 255];
+                assert_eq!(plane.pixel_unchecked(1, 0), &pixel);
+                let pixel: Pixel = [0, 0, 255, 255];
+                assert_eq!(plane.pixel_unchecked(0, 1), &pixel);
+                let pixel: Pixel = [255, 255, 255, 255];
+                assert_eq!(plane.pixel_unchecked(1, 1), &pixel);
+            };
         }
     }
 }
