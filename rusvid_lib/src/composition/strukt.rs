@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use usvg::{Fill, Node, NodeKind, Tree};
 
 use crate::animation::Animation;
@@ -40,7 +40,7 @@ impl Composition {
     #[inline]
     fn check_or_create_layer(&mut self) -> Result<()> {
         if self.layers.len() == 0 {
-            self.create_layer().unwrap();
+            self.create_layer().context("Couldn't create a layer")?;
         };
         Ok(())
     }
@@ -103,7 +103,7 @@ impl LayerLogic for Composition {
         if self.layers.len() == 0 {
             None
         } else {
-            Some(self.layers[0].rtree().unwrap())
+            Some(self.layers[0].rtree()?)
         }
     }
 
@@ -112,19 +112,19 @@ impl LayerLogic for Composition {
         if self.layers.len() == 0 {
             None
         } else {
-            Some(self.layers[0].rtree_mut().unwrap())
+            Some(self.layers[0].rtree_mut()?)
         }
     }
 
     #[inline]
     fn add_to_defs(&mut self, kind: NodeKind) -> Result<Node> {
-        self.check_or_create_layer();
+        self.check_or_create_layer()?;
         self.layers[0].add_to_defs(kind)
     }
 
     #[inline]
     fn add_to_root(&mut self, kind: NodeKind) -> Result<Node> {
-        self.check_or_create_layer();
+        self.check_or_create_layer()?;
         self.layers[0].add_to_root(kind)
     }
 
@@ -139,7 +139,7 @@ impl LayerLogic for Composition {
 
     #[inline]
     fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
-        self.check_or_create_layer();
+        self.check_or_create_layer().unwrap();
         self.layers[0].add_animation(animation);
     }
 

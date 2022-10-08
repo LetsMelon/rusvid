@@ -23,12 +23,24 @@ impl Resolution {
         }
     }
 
+    #[inline]
     pub fn width(&self) -> usize {
         self.value().0
     }
 
+    #[inline]
     pub fn height(&self) -> usize {
         self.value().1
+    }
+
+    #[inline]
+    pub fn x(&self) -> f64 {
+        self.width() as f64
+    }
+
+    #[inline]
+    pub fn y(&self) -> f64 {
+        self.height() as f64
     }
 }
 

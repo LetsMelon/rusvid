@@ -14,14 +14,15 @@ keywords = ["svg", "graphics", "animation"]
 resvg = "0.23.0"
 tiny-skia = "0.6.5"
 usvg = "0.23.0"
-debug-ignore = "1.0.3"
-anyhow = "1.0.64"
-image = "0.24.3"
+anyhow = "1.0.65"
+image = { version = "0.24", default-features = false, features = ["png", "bmp", "jpeg"] }
+easer = { git = "https://github.com/orhanbalci/rust-easing", rev = "872ea2c" }
+glam = { version = "0.21.3", features = ["approx"] }
+rusvid_plane = { path = "../crates/plane" }
 
 [dev-dependencies]
-criterion = "0.3"
-rayon = "1.5"
+rayon = "*"
+approx = "*"
 
-[[bench]]
-name = "image_render"
-harness = false
+[features]
+parallel = ["image/jpeg_rayon"]

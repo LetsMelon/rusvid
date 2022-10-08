@@ -1,5 +1,6 @@
-use anyhow::Result;
 use std::rc::Rc;
+
+use anyhow::Result;
 use usvg::PathData;
 
 pub mod curves;
@@ -12,4 +13,9 @@ pub trait Animation: std::fmt::Debug {
     unsafe fn update(&mut self, path: Rc<PathData>, frame_count: &usize) -> Result<()>;
 
     fn object_id(&self) -> &str;
+}
+
+pub mod prelude {
+    pub use super::curves::*;
+    pub use super::position_animation::PositionAnimation;
 }

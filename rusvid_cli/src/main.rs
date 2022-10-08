@@ -1,11 +1,14 @@
+use std::path::PathBuf;
+use std::rc::Rc;
+
+use rusvid_lib::animation::prelude::*;
+use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 use rusvid_lib::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
     StopOffset, Stroke, StrokeWidth, Transform, Units,
 };
 use rusvid_lib::utils::color_from_hex;
-use std::path::PathBuf;
-use std::rc::Rc;
 
 fn main() {
     let resolution = Resolution::FourK;
@@ -44,7 +47,7 @@ fn main() {
         }))
         .unwrap();
 
-    let circle_position = animation::Points::Point2d(700.0, 850.0);
+    let circle_position = Point::new(700.0, 850.0);
     layer
         .add_to_root(NodeKind::Path(Path {
             id: "circle".to_string(),
@@ -54,24 +57,18 @@ fn main() {
                 ..Stroke::default()
             }),
             rendering_mode: Default::default(),
-            data: Rc::new(figures::circle(
-                circle_position.x(),
-                circle_position.y(),
-                600.0,
-            )),
+            data: Rc::new(circle(circle_position.x, circle_position.y, 600.0)),
             ..Path::default()
         }))
         .unwrap();
-    layer.add_animation(animation::PositionAnimation::new(
+    layer.add_animation(PositionAnimation::new(
         "circle".to_string(),
-        animation::functions::S::new(
+        Elastic::new_with_ease_type(
             0,
             90,
             circle_position,
-            animation::Points::Point2d(
-                resolution.width() as f64 / 2.0,
-                resolution.height() as f64 / 2.0,
-            ),
+            Point::new(resolution.x() / 2.0, resolution.y() / 2.0),
+            EaseType::Out,
         )
         .unwrap(),
     ));
@@ -104,7 +101,7 @@ fn main() {
         }))
         .unwrap();
 
-    let mut path = figures::equilateral_triangle(400.0, 400.0, 350.0);
+    let mut path = equilateral_triangle(400.0, 400.0, 350.0);
     path.transform(Transform::new_rotate(2.5));
     layer
         .add_to_root(NodeKind::Path(Path {
@@ -115,7 +112,7 @@ fn main() {
         }))
         .unwrap();
 
-    let pixel_position = animation::Points::Point2d(20.0, 20.0);
+    let pixel_position = Point::new(20.0, 20.0);
     layer
         .add_to_root(NodeKind::Path(Path {
             id: "rect".to_string(),
@@ -126,30 +123,27 @@ fn main() {
                     Some(f)
                 }
             },
-            data: Rc::new(figures::rect(
-                pixel_position.x(),
-                pixel_position.y(),
-                resolution.width() as f64 / 2.0,
-                resolution.height() as f64 / 3.0,
+            data: Rc::new(rect(
+                pixel_position.x,
+                pixel_position.y,
+                resolution.x() / 2.0,
+                resolution.y() / 3.0,
             )),
             ..Path::default()
         }))
         .unwrap();
-    layer.add_animation(animation::PositionAnimation::new(
+    layer.add_animation(PositionAnimation::new(
         "rect".to_string(),
-        animation::functions::Linear::new(0, 200, pixel_position, (1250.0, 500.0).into()).unwrap(),
+        Linear::new(0, 200, pixel_position, (1250.0, 500.0).into()).unwrap(),
     ));
-    layer.add_animation(animation::PositionAnimation::new(
+    layer.add_animation(PositionAnimation::new(
         "rect".to_string(),
-        animation::functions::Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into())
-            .unwrap(),
+        Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap(),
     ));
 
     let out_path = PathBuf::from("out.mp4");
     let tmp_path = PathBuf::from("./out");
 
-    // TODO add builder pattern for video- & image-render
-    let mut renderer = FfmpegRenderer::new(out_path, tmp_path);
-    renderer.set_image_render(PngRender::new());
+    let mut renderer = FfmpegRenderer::new(out_path, tmp_path, FrameImageFormat::Bmp);
     renderer.render(composition).unwrap()
 }

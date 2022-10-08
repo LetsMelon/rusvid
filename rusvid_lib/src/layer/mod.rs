@@ -1,8 +1,8 @@
-use anyhow::{bail, Result};
-use debug_ignore::DebugIgnore;
+use std::fmt::Debug;
 use std::fs::{canonicalize, read};
-use std::ops::{Deref, DerefMut};
 use std::path::Path;
+
+use anyhow::{bail, Context, Result};
 use usvg::{Fill, Node, NodeExt, NodeKind, Options, Paint, Tree};
 
 use crate::animation::manager::AnimationManager;
@@ -25,15 +25,24 @@ pub trait LayerLogic {
     }
 }
 
-#[derive(Debug)]
 pub struct Layer {
     name: String,
 
-    rtree: DebugIgnore<Tree>,
+    rtree: Tree,
 
     animations: AnimationManager,
 
     effects: Vec<Box<dyn EffectLogic>>,
+}
+
+impl Debug for Layer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Layer")
+            .field("name", &self.name)
+            .field("rtree", &"NOT_PRINTABLE")
+            .field("animations", &self.animations)
+            .finish()
+    }
 }
 
 impl Layer {
@@ -41,7 +50,8 @@ impl Layer {
     pub fn new(resolution: Resolution) -> Self {
         Layer {
             name: "layer_0".to_string(),
-            rtree: DebugIgnore(CompositionBuilder::create_tree_from_resolution(resolution)),
+            // TODO: remove unwrap
+            rtree: CompositionBuilder::create_tree_from_resolution(resolution).unwrap(),
             animations: AnimationManager::new(),
         }
     }
@@ -96,17 +106,20 @@ impl Layer {
 impl LayerLogic for Layer {
     #[inline(always)]
     fn rtree(&self) -> Option<&Tree> {
-        Some(self.rtree.deref())
+        Some(&self.rtree)
     }
 
     #[inline(always)]
     fn rtree_mut(&mut self) -> Option<&mut Tree> {
-        Some(self.rtree.deref_mut())
+        Some(&mut self.rtree)
     }
 
     #[inline(always)]
     fn add_to_defs(&mut self, kind: NodeKind) -> Result<Node> {
-        Ok(self.rtree_mut().unwrap().append_to_defs(kind))
+        Ok(self
+            .rtree_mut()
+            .context("Error in getting mutable reference to rtree")?
+            .append_to_defs(kind))
     }
 
     #[inline(always)]
@@ -115,7 +128,11 @@ impl LayerLogic for Layer {
             self.animations
                 .add_reference(path.id.clone(), path.data.clone());
         }
-        Ok(self.rtree().unwrap().root().append_kind(kind))
+        Ok(self
+            .rtree()
+            .context("Error in getting reference to rtree")?
+            .root()
+            .append_kind(kind))
     }
 
     #[inline(always)]

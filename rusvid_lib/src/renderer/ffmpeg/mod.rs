@@ -1,18 +1,17 @@
-use anyhow::Result;
-use debug_ignore::DebugIgnore;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
-use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+
+use anyhow::Result;
 
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
 use crate::renderer::ffmpeg::codec::VideoCodec;
 use crate::renderer::ffmpeg::pixel_formats::PixelFormats;
-use crate::renderer::png::PngRender;
-use crate::renderer::{CliArgument, CliCommand, ImageRender, Renderer};
+use crate::renderer::frame_image_format::FrameImageFormat;
+use crate::renderer::{CliArgument, CliCommand, Renderer};
 use crate::types::FPS;
 
 pub mod codec;
@@ -25,7 +24,7 @@ pub struct FfmpegRenderer {
     pub codec_video: VideoCodec,
     pub pixel_format: Option<PixelFormats>,
     pub framerate: FPS,
-    pub image_render: DebugIgnore<Box<dyn ImageRender>>,
+    frame_output_format: FrameImageFormat,
     out_path: PathBuf,
     tmp_dir_path: PathBuf,
 }
@@ -37,7 +36,7 @@ impl Default for FfmpegRenderer {
             codec_video: VideoCodec::default(),
             pixel_format: Some(PixelFormats::default()),
             framerate: Composition::default().framerate,
-            image_render: DebugIgnore(Box::new(PngRender::new())),
+            frame_output_format: FrameImageFormat::default(),
             out_path: PathBuf::new(),
             tmp_dir_path: PathBuf::new(),
         }
@@ -45,20 +44,17 @@ impl Default for FfmpegRenderer {
 }
 
 impl FfmpegRenderer {
-    pub fn new(out_path: PathBuf, tmp_dir_path: PathBuf) -> Self {
+    pub fn new(
+        out_path: PathBuf,
+        tmp_dir_path: PathBuf,
+        frame_output_format: FrameImageFormat,
+    ) -> Self {
         FfmpegRenderer {
             out_path,
             tmp_dir_path,
+            frame_output_format,
             ..FfmpegRenderer::default()
         }
-    }
-
-    fn image_render(&self) -> &Box<dyn ImageRender> {
-        self.image_render.deref()
-    }
-
-    pub fn set_image_render<T: ImageRender + 'static>(&mut self, image_render: T) {
-        self.image_render = DebugIgnore(Box::new(image_render));
     }
 }
 
@@ -66,6 +62,8 @@ impl Renderer for FfmpegRenderer {
     fn render(&mut self, mut composition: Composition) -> Result<()> {
         self.framerate = composition.framerate;
 
+        let file_extension = self.frame_output_format.file_extension();
+        let file_extension_format = self.frame_output_format.as_image_format();
         let out_path = self.out_path().to_path_buf();
         let tmp_path = self.tmp_dir_path().to_path_buf();
 
@@ -76,11 +74,15 @@ impl Renderer for FfmpegRenderer {
 
         let frames = composition.frames();
         for i in 0..frames {
+            // TODO remove hardcoded ":03"
             println!("{:03}/{:03}", i + 1, frames);
 
             let _ = &composition.update(i)?;
 
-            self.image_render().render(&composition, &tmp_path, i)?;
+            let file_path = tmp_path.join(format!("{}.{}", i, file_extension));
+            let raw_buffer = self.render_rgba_image(&composition)?;
+
+            let _ = raw_buffer.save_with_format(file_path, file_extension_format)?;
         }
 
         let mut command = self.build_command(&out_path, &tmp_path);
@@ -119,7 +121,10 @@ impl CliCommand for FfmpegRenderer {
             OsString::from("-framerate"),
             OsString::from(self.framerate.to_string().as_str()),
             OsString::from("-i"),
-            OsString::from(format!("./out/%d.{}", self.image_render().file_extension())), // TODO use tmp_path
+            OsString::from(format!(
+                "./out/%d.{}",
+                self.frame_output_format.file_extension()
+            )), // TODO use tmp_path
         ]);
 
         command.args([OsString::from("-c:a"), OsString::from(self.codec.as_str())]);
