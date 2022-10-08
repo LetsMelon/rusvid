@@ -491,8 +491,16 @@ dependencies = [
  "image",
  "rayon",
  "resvg",
+ "rusvid_plane",
  "tiny-skia",
  "usvg",
+]
+
+[[package]]
+name = "rusvid_plane"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
 ]
 
 [[package]]

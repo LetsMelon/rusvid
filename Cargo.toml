@@ -10,4 +10,5 @@ members = [
     "examples/read_svg_file",
     "rusvid_lib",
     "rusvid_cli",
+    "crates/*",
 ]
