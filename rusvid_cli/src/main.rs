@@ -144,6 +144,7 @@ fn main() {
     let out_path = PathBuf::from("out.mp4");
     let tmp_path = PathBuf::from("./out");
 
+    // TODO make it possible to use a default for mp4, gif, av1, ...
     let mut renderer = FfmpegRenderer::new(out_path, tmp_path, FrameImageFormat::Bmp);
     renderer.render(composition).unwrap()
 }
