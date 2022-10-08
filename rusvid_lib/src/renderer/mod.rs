@@ -126,6 +126,7 @@ pub trait Renderer {
         Ok(image)
     }
 
+    #[deprecated(since="0.1.2", note="use `render_plane` instead")]
     fn render_pixmap(&self, composition: &Composition) -> Result<Pixmap> {
         let image = self.render_rgba_image(&composition)?;
         let pixels = image.to_vec();
