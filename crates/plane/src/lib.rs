@@ -13,6 +13,13 @@ pub struct Plane {
     pub(crate) data: Vec<Pixel>,
 }
 
+#[doc(hidden)]
+macro_rules! position_to_index {
+    ($x:expr, $y:expr, $height:expr) => {
+        ($x + $height * $y) as usize
+    };
+}
+
 impl Plane {
     pub fn new(width: SIZE, height: SIZE) -> Result<Self> {
         if width == 0 {
@@ -67,13 +74,6 @@ impl Plane {
         Ok(plane)
     }
 
-    // TODO replace with a macro, so that unsafe can use it
-    #[doc(hidden)]
-    #[inline(always)]
-    fn position_to_index(&self, x: SIZE, y: SIZE) -> SIZE {
-        x + self.height * y
-    }
-
     /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
     #[inline]
     pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
@@ -84,7 +84,7 @@ impl Plane {
             return None;
         }
 
-        self.data.get(self.position_to_index(x, y) as usize)
+        self.data.get(position_to_index!(x, y, self.height))
     }
 
     /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
@@ -93,7 +93,7 @@ impl Plane {
     pub fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
         unsafe {
             self.data
-                .get_unchecked(self.position_to_index(x, y) as usize)
+                .get_unchecked(position_to_index!(x, y, self.height))
         }
     }
 
@@ -107,14 +107,14 @@ impl Plane {
             return None;
         }
 
-        self.data.get_mut((y + self.height * x) as usize)
+        self.data.get_mut(position_to_index!(x, y, self.height))
     }
 
     /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
     #[inline]
     #[cfg(feature = "unsafe")]
     pub fn pixel_unchecked_mut(&mut self, x: SIZE, y: SIZE) -> &Pixel {
-        unsafe { self.data.get_unchecked_mut((y + self.height * x) as usize) }
+        unsafe { self.data.get_unchecked_mut(position_to_index!(x, y, self.height)) }
     }
 
     #[inline]
