@@ -1,4 +1,6 @@
 use anyhow::{bail, Result};
+#[cfg(feature = "rgba_image")]
+use image::RgbaImage;
 
 pub type Pixel = [u8; 4];
 
@@ -39,7 +41,33 @@ impl Plane {
         Ok(plane)
     }
 
-    // TODO transform into an macro, so that unsafe can use it
+    #[cfg(feature = "rgba_image")]
+    pub fn from_rgba_image(image: RgbaImage) -> Result<Self> {
+        let pixels = image.to_vec();
+
+        let width = image.width() as SIZE;
+        let height = image.height() as SIZE;
+
+        let mut plane = Plane::new(width, height)?;
+        let data = plane.get_pixels_mut();
+
+        assert_eq!(data.len() * 4, pixels.len());
+
+        for i in 0..data.len() {
+            let color = [
+                pixels[(i * 4) + 0],
+                pixels[(i * 4) + 1],
+                pixels[(i * 4) + 2],
+                pixels[(i * 4) + 3],
+            ];
+
+            data[i] = color;
+        }
+
+        Ok(plane)
+    }
+
+    // TODO replace with a macro, so that unsafe can use it
     #[doc(hidden)]
     #[inline(always)]
     fn position_to_index(&self, x: SIZE, y: SIZE) -> SIZE {
@@ -88,13 +116,13 @@ impl Plane {
     }
 
     #[inline]
-    pub fn get_pixels(&self) -> &Vec<Pixel> {
-        &self.data
+    pub fn get_pixels(&self) -> &[Pixel] {
+        self.data.as_slice()
     }
 
     #[inline]
-    pub fn get_pixels_mut(&mut self) -> &mut Vec<Pixel> {
-        &mut self.data
+    pub fn get_pixels_mut(&mut self) -> &mut [Pixel] {
+        self.data.as_mut_slice()
     }
 }
 
