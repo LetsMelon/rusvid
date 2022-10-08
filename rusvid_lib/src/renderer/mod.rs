@@ -2,8 +2,9 @@ use std::ffi::OsString;
 use std::path::Path;
 use std::process::Command;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use image::{Rgba, RgbaImage};
+use rusvid_plane::Plane;
 use tiny_skia::{Pixmap, PremultipliedColorU8};
 
 use crate::composition::Composition;
@@ -12,7 +13,7 @@ use crate::layer::{Layer, LayerLogic};
 pub mod ffmpeg;
 pub mod frame_image_format;
 
-fn render_pixmap_layer(layer: &Layer) -> anyhow::Result<Pixmap> {
+fn render_pixmap_layer(layer: &Layer) -> Result<Pixmap> {
     let pixmap_size = layer
         .rtree()
         .expect("Expect a tree in the given layer")
@@ -101,12 +102,12 @@ fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
 }
 
 pub trait Renderer {
-    fn render(&mut self, composition: Composition) -> anyhow::Result<()>;
+    fn render(&mut self, composition: Composition) -> Result<()>;
 
     fn out_path(&self) -> &Path;
     fn tmp_dir_path(&self) -> &Path;
 
-    fn render_rgba_image(&self, composition: &Composition) -> anyhow::Result<RgbaImage> {
+    fn render_rgba_image(&self, composition: &Composition) -> Result<RgbaImage> {
         let layers = composition.get_layers();
         if layers.len() == 0 {
             bail!("TODO: error")
@@ -125,7 +126,7 @@ pub trait Renderer {
         Ok(image)
     }
 
-    fn render_pixmap(&self, composition: &Composition) -> anyhow::Result<Pixmap> {
+    fn render_pixmap(&self, composition: &Composition) -> Result<Pixmap> {
         let image = self.render_rgba_image(&composition)?;
         let pixels = image.to_vec();
 
@@ -150,6 +151,12 @@ pub trait Renderer {
         }
 
         Ok(pixmap)
+    }
+
+    fn render_plane(&self, composition: &Composition) -> Result<Plane> {
+        let image = self.render_rgba_image(composition)?;
+        let plane = Plane::from_rgba_image(image)?;
+        Ok(plane)
     }
 }
 
