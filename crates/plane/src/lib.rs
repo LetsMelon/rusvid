@@ -8,9 +8,9 @@ pub type SIZE = u32;
 
 #[derive(Debug)]
 pub struct Plane {
-    pub(crate) width: SIZE,
-    pub(crate) height: SIZE,
-    pub(crate) data: Vec<Pixel>,
+    width: SIZE,
+    height: SIZE,
+    data: Vec<Pixel>,
 }
 
 #[doc(hidden)]
@@ -20,6 +20,7 @@ macro_rules! position_to_index {
     };
 }
 
+/// Coordinate system used: <https://py.processing.org/tutorials/drawing/>
 impl Plane {
     pub fn new(width: SIZE, height: SIZE) -> Result<Self> {
         if width == 0 {
@@ -49,6 +50,7 @@ impl Plane {
     }
 
     #[cfg(feature = "rgba_image")]
+    /// Crates a `anyhow::Result<Plane>` from a `image::RgbaImage`
     pub fn from_rgba_image(image: RgbaImage) -> Result<Self> {
         let pixels = image.to_vec();
 
@@ -74,7 +76,18 @@ impl Plane {
         Ok(plane)
     }
 
-    /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
+    #[inline(always)]
+    /// Returns the plane's height in `SIZE`
+    pub fn width(&self) -> SIZE {
+        self.width
+    }
+
+    /// Returns the plane's width in `SIZE`
+    #[inline(always)]
+    pub fn height(&self) -> SIZE {
+        self.height
+    }
+
     #[inline]
     pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
         if x > self.width {
@@ -87,7 +100,6 @@ impl Plane {
         self.data.get(position_to_index!(x, y, self.height))
     }
 
-    /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
     #[inline]
     #[cfg(feature = "unsafe")]
     pub fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
@@ -97,7 +109,6 @@ impl Plane {
         }
     }
 
-    /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
     #[inline]
     pub fn pixel_mut(&mut self, x: SIZE, y: SIZE) -> Option<&mut Pixel> {
         if x > self.width {
@@ -110,11 +121,13 @@ impl Plane {
         self.data.get_mut(position_to_index!(x, y, self.height))
     }
 
-    /// Coordinate system: <https://py.processing.org/tutorials/drawing/>
     #[inline]
     #[cfg(feature = "unsafe")]
     pub fn pixel_unchecked_mut(&mut self, x: SIZE, y: SIZE) -> &Pixel {
-        unsafe { self.data.get_unchecked_mut(position_to_index!(x, y, self.height)) }
+        unsafe {
+            self.data
+                .get_unchecked_mut(position_to_index!(x, y, self.height))
+        }
     }
 
     #[inline]
@@ -125,6 +138,40 @@ impl Plane {
     #[inline]
     pub fn pixels_mut(&mut self) -> &mut [Pixel] {
         self.data.as_mut_slice()
+    }
+}
+
+impl IntoIterator for Plane {
+    type Item = Pixel;
+    type IntoIter = PlaneIntoIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        PlaneIntoIterator {
+            plane: self,
+            index: 0,
+        }
+    }
+}
+
+pub struct PlaneIntoIterator {
+    plane: Plane,
+    index: usize,
+}
+
+impl Iterator for PlaneIntoIterator {
+    type Item = Pixel;
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = self
+            .plane
+            .data
+            .get(self.index)
+            .and_then(|pixel| Some(*pixel));
+
+        if result.is_some() {
+            self.index += 1;
+        }
+
+        result
     }
 }
 
@@ -177,6 +224,33 @@ mod tests {
                 let pixel: Pixel = [255, 255, 255, 255];
                 assert_eq!(plane.pixel_unchecked(1, 1), &pixel);
             };
+        }
+    }
+
+    mod iterator {
+        use crate::Plane;
+
+        #[test]
+        fn just_works() {
+            let plane = Plane::from_data(
+                2,
+                2,
+                vec![
+                    [255, 0, 0, 255],
+                    [0, 255, 0, 255],
+                    [0, 0, 255, 255],
+                    [255, 255, 255, 255],
+                ],
+            )
+            .unwrap();
+
+            let mut iter = plane.into_iter();
+
+            assert_eq!(Some([255, 0, 0, 255]), iter.next());
+            assert_eq!(Some([0, 255, 0, 255]), iter.next());
+            assert_eq!(Some([0, 0, 255, 255]), iter.next());
+            assert_eq!(Some([255, 255, 255, 255]), iter.next());
+            assert_eq!(None, iter.next());
         }
     }
 }
