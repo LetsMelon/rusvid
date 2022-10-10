@@ -2,6 +2,8 @@ use anyhow::{Context, Result};
 use usvg::{AspectRatio, Size, Svg, Tree, ViewBox};
 
 use crate::composition::Composition;
+
+use crate::effect::EffectLogic;
 use crate::layer::Layer;
 use crate::resolution::Resolution;
 use crate::types::FPS;
@@ -13,6 +15,7 @@ pub struct CompositionBuilder {
     duration: u16,
     name: String,
     layers: Vec<Layer>,
+    effects: Vec<Box<dyn EffectLogic>>,
 }
 
 impl Default for CompositionBuilder {
@@ -25,6 +28,7 @@ impl Default for CompositionBuilder {
             duration: 10,
             name: "UNKNOWN".to_string(),
             layers: Vec::new(),
+            effects: Vec::new(),
         }
     }
 }
@@ -50,6 +54,7 @@ impl CompositionBuilder {
             duration: self.duration,
             name: self.name,
             layers: self.layers,
+            effects: self.effects,
         }
     }
 
@@ -75,6 +80,11 @@ impl CompositionBuilder {
 
     pub fn add_layer(mut self, layer: Layer) -> Self {
         self.layers.push(layer);
+        self
+    }
+
+    pub fn add_effect<T: EffectLogic + 'static>(mut self, effect: T) -> Self {
+        self.effects.push(Box::new(effect));
         self
     }
 }
