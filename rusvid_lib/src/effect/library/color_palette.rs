@@ -2,16 +2,34 @@ use anyhow::{bail, Result};
 use image::{Rgba, RgbaImage};
 use rusvid_plane::Pixel;
 
-use crate::effect::EffectLogic;
+use crate::effect::{EffectLogic, Element, ID};
 
 #[derive(Debug)]
 pub struct ColorPaletteEffect {
     color_palette: Vec<Pixel>,
+
+    id: Option<String>,
 }
 
 impl ColorPaletteEffect {
     pub fn new(color_palette: Vec<Pixel>) -> Self {
-        ColorPaletteEffect { color_palette }
+        ColorPaletteEffect {
+            color_palette,
+            id: None,
+        }
+    }
+
+    pub fn new_with_id(color_palette: Vec<Pixel>, id: impl Into<ID>) -> Self {
+        let mut cpe = Self::new(color_palette);
+        cpe.id = Some(id.into());
+
+        cpe
+    }
+}
+
+impl Element for ColorPaletteEffect {
+    fn id(&self) -> Option<&ID> {
+        self.id.as_ref()
     }
 }
 

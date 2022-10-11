@@ -19,7 +19,7 @@ pub mod prelude {
     pub use crate::animation::curves::Function;
     pub use crate::composition::Composition;
     pub use crate::composition::CompositionBuilder;
-    pub use crate::effect::{library::*, EffectLogic};
+    pub use crate::effect::{library::*, EffectLogic, Element};
     pub use crate::layer::{Layer, LayerLogic};
     pub use crate::metrics::{MetricsSize, MetricsVideo};
     pub use crate::renderer::ffmpeg::FfmpegRenderer;

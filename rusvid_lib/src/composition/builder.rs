@@ -2,7 +2,6 @@ use anyhow::{Context, Result};
 use usvg::{AspectRatio, Size, Svg, Tree, ViewBox};
 
 use crate::composition::Composition;
-
 use crate::effect::EffectLogic;
 use crate::layer::Layer;
 use crate::resolution::Resolution;

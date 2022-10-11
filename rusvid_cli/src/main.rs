@@ -17,7 +17,7 @@ fn main() {
         .resolution(resolution)
         .framerate(24)
         .duration(5)
-        .add_effect(ColorPaletteEffect::new(vec![[0,0,0,255], [255; 4]]))
+        .add_effect(ColorPaletteEffect::new(vec![[0, 0, 0, 255], [255; 4]]))
         .build();
 
     let layer = composition.create_layer().unwrap(); // Layer::new(composition.resolution());
