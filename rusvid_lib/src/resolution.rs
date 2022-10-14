@@ -1,4 +1,7 @@
-use crate::metrics::{MetricsSize, MetricsVideo};
+use crate::{
+    metrics::{MetricsSize, MetricsVideo},
+    types::Point,
+};
 
 pub type ResolutionType = (usize, usize);
 
@@ -13,6 +16,7 @@ pub enum Resolution {
 }
 
 impl Resolution {
+    #[inline]
     pub fn value(&self) -> ResolutionType {
         match self {
             Resolution::HD => (1280, 720),
@@ -21,6 +25,12 @@ impl Resolution {
             Resolution::FourK => (4096, 2160),
             Resolution::Custom(w, h) => (*w, *h),
         }
+    }
+
+    #[inline]
+    pub fn as_point(&self) -> Point {
+        let (width, height) = self.value();
+        Point::new(width as f64, height as f64)
     }
 
     #[inline]

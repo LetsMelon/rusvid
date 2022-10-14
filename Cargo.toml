@@ -8,6 +8,7 @@ members = [
     "examples/layers",
     "examples/simple_animation",
     "examples/read_svg_file",
+    "examples/grid",
     "rusvid_lib",
     "rusvid_cli",
     "crates/*",
