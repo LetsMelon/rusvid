@@ -1,5 +1,6 @@
 use crate::{
     metrics::{MetricsSize, MetricsVideo},
+    prelude::AsPoint,
     types::Point,
 };
 
@@ -25,12 +26,6 @@ impl Resolution {
             Resolution::FourK => (4096, 2160),
             Resolution::Custom(w, h) => (*w, *h),
         }
-    }
-
-    #[inline]
-    pub fn as_point(&self) -> Point {
-        let (width, height) = self.value();
-        Point::new(width as f64, height as f64)
     }
 
     #[inline]
@@ -78,5 +73,12 @@ impl MetricsSize for Resolution {
 impl Default for Resolution {
     fn default() -> Self {
         Resolution::FHD
+    }
+}
+
+impl AsPoint for Resolution {
+    fn as_point(&self) -> Point {
+        let (width, height) = self.value();
+        Point::new(width as f64, height as f64)
     }
 }
