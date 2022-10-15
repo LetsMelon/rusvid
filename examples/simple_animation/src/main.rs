@@ -34,7 +34,7 @@ fn main() {
         .unwrap();
 
     layer.add_animation(PositionAnimation::new(
-        "rect".to_string(),
+        "rect",
         Cubic::new_with_ease_type(
             0,
             frames,

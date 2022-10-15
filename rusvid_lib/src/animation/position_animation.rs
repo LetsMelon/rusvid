@@ -13,10 +13,10 @@ pub struct PositionAnimation {
 }
 
 impl PositionAnimation {
-    pub fn new<T: Function + 'static>(id: String, curve: T) -> Self {
+    pub fn new<T: Function + 'static>(id: impl Into<String>, curve: T) -> Self {
         PositionAnimation {
             curve: Box::new(curve),
-            object_id: id,
+            object_id: id.into(),
         }
     }
 }

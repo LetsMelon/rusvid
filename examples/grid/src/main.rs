@@ -69,7 +69,7 @@ fn main() {
         .unwrap();
 
     background_layer.add_animation(PositionAnimation::new(
-        "bg_obj".to_string(),
+        "bg_obj",
         Linear::new(0, frames, start_pos, Point::ZERO).unwrap(),
     ));
 
