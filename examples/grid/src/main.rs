@@ -73,8 +73,6 @@ fn main() {
         Linear::new(0, frames, start_pos, Point::ZERO).unwrap(),
     ));
 
-    // drop(background_layer);
-
     let grid_layer = composition.create_layer().unwrap();
 
     let grid_size = Point::new(32.0, 18.0);
