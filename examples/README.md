@@ -6,7 +6,7 @@ List (ordered by complexity):
 - `layers`: composition with two layers and per layer one path
 - `simple_animation`: composition with simple animation on rectangle
 - `read_svg_file`: composition with layer from `.svg`-file
-- `grid`: calculate a grid of squares with an animated background
+- `grid`: calculate a grid made out of squares with an animated background
 
 ### black_video
 
