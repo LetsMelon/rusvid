@@ -28,7 +28,12 @@ jobs:
           toolchain: nightly
           override: true
 
-      - uses: Swatinem/rust-cache@v2
+      - name: Cache Target
+        id: cache-target
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-target
 
       - name: Build
         run: cargo build --verbose --all-targets
