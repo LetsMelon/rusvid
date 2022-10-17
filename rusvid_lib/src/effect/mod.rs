@@ -31,5 +31,6 @@ pub trait EffectLogic: std::fmt::Debug + Element {
         self.depends_on_other_effects_ids().len() != 0
     }
 
+    #[allow(unused_variables)]
     fn add_depended_on_other_effect(&mut self, effect_id: &str) {}
 }
