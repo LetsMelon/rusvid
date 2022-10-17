@@ -45,13 +45,13 @@ impl Default for FfmpegRenderer {
 
 impl FfmpegRenderer {
     pub fn new(
-        out_path: PathBuf,
-        tmp_dir_path: PathBuf,
+        out_path: impl Into<PathBuf>,
+        tmp_dir_path: impl Into<PathBuf>,
         frame_output_format: FrameImageFormat,
     ) -> Self {
         FfmpegRenderer {
-            out_path,
-            tmp_dir_path,
+            out_path: out_path.into(),
+            tmp_dir_path: tmp_dir_path.into(),
             frame_output_format,
             ..FfmpegRenderer::default()
         }

@@ -33,7 +33,7 @@ fn renders_correctly_static() {
 
     // TODO why not with end_frame=1
     composition.add_animation(PositionAnimation::new(
-        "rect".to_string(),
+        "rect",
         Linear::new(0, 1, Point::ZERO, Point::new(50.0, 50.0)).unwrap(),
     ));
 

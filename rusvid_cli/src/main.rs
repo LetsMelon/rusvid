@@ -1,4 +1,3 @@
-use std::path::PathBuf;
 use std::rc::Rc;
 
 use rusvid_lib::animation::prelude::*;
@@ -15,8 +14,16 @@ fn main() {
 
     let mut composition = Composition::builder()
         .resolution(resolution)
-        .framerate(60)
+        .framerate(24)
         .duration(5)
+        // .add_effect(PixelateEffect::new(15, 15))
+        // .add_effect(GrayscaleEffect::new())
+        // .add_effect(ColorPaletteEffect::new(vec![
+        //     [10, 56, 120, 255],
+        //     [100, 100, 0, 255],
+        //     [100, 10, 100, 255],
+        //     [90, 12, 30, 255],
+        // ]))
         .build();
 
     let layer = composition.create_layer().unwrap(); // Layer::new(composition.resolution());
@@ -53,7 +60,7 @@ fn main() {
             id: "circle".to_string(),
             stroke: Some(Stroke {
                 paint: Paint::Link("lg2".into()),
-                width: StrokeWidth::new(10.0),
+                width: StrokeWidth::new(100.0),
                 ..Stroke::default()
             }),
             rendering_mode: Default::default(),
@@ -62,7 +69,7 @@ fn main() {
         }))
         .unwrap();
     layer.add_animation(PositionAnimation::new(
-        "circle".to_string(),
+        "circle",
         Elastic::new_with_ease_type(
             0,
             90,
@@ -133,18 +140,14 @@ fn main() {
         }))
         .unwrap();
     layer.add_animation(PositionAnimation::new(
-        "rect".to_string(),
+        "rect",
         Linear::new(0, 200, pixel_position, (1250.0, 500.0).into()).unwrap(),
     ));
     layer.add_animation(PositionAnimation::new(
-        "rect".to_string(),
+        "rect",
         Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap(),
     ));
 
-    let out_path = PathBuf::from("out.mp4");
-    let tmp_path = PathBuf::from("./out");
-
-    // TODO make it possible to use a default for mp4, gif, av1, ...
-    let mut renderer = FfmpegRenderer::new(out_path, tmp_path, FrameImageFormat::Bmp);
+    let mut renderer = FfmpegRenderer::new("out.mp4", "./out", FrameImageFormat::Png);
     renderer.render(composition).unwrap()
 }
