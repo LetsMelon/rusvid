@@ -19,6 +19,7 @@ image = { version = "0.24", default-features = false, features = ["png", "bmp", 
 easer = { git = "https://github.com/orhanbalci/rust-easing", rev = "872ea2c" }
 glam = { version = "0.21.3", features = ["approx"] }
 rusvid_plane = { path = "../crates/plane" }
+itertools = "0.10.5"
 
 [dev-dependencies]
 rayon = "*"

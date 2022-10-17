@@ -1,4 +1,5 @@
 #![feature(get_mut_unchecked)]
+#![feature(int_roundings)]
 
 pub mod animation;
 pub mod composition;
