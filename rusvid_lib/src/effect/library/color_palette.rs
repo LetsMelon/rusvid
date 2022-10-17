@@ -34,12 +34,12 @@ impl Element for ColorPaletteEffect {
 }
 
 impl EffectLogic for ColorPaletteEffect {
-    fn apply(&self, original: &RgbaImage) -> Result<RgbaImage> {
+    fn apply(&self, original: RgbaImage) -> Result<RgbaImage> {
         if self.color_palette.len() == 0 {
             bail!("Must have at least one color in the color palette");
         }
 
-        let mut result = original.clone();
+        let mut result = RgbaImage::new(original.width(), original.height());
 
         for x in 0..result.width() {
             for y in 0..result.height() {

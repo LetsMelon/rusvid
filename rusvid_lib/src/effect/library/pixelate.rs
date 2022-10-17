@@ -36,7 +36,7 @@ impl Element for PixelateEffect {
 }
 
 impl EffectLogic for PixelateEffect {
-    fn apply(&self, original: &RgbaImage) -> Result<RgbaImage> {
+    fn apply(&self, original: RgbaImage) -> Result<RgbaImage> {
         // TODO create extra config if last pixel in a row should be not fixed size or if the extra margin should be applied to the last pixel, (width & height)
         // eg.: pixel_width = 19px; width = 1920px; pixel_width * width = 1919px, last pixel either 1px wide or last one is 20px wide
         let pixels_count_width = original.width().div_ceil(self.pixel_width);

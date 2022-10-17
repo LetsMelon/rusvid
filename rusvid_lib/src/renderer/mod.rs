@@ -8,6 +8,7 @@ use rusvid_plane::Plane;
 use tiny_skia::{Pixmap, PremultipliedColorU8};
 
 use crate::composition::Composition;
+use crate::effect::EffectLogic;
 use crate::layer::{Layer, LayerLogic};
 
 pub mod ffmpeg;
@@ -101,6 +102,16 @@ fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
     combined_layer_image
 }
 
+fn apply_effects(original: RgbaImage, effects: &Vec<Box<dyn EffectLogic>>) -> Result<RgbaImage> {
+    let mut back = original.clone();
+
+    for effect in effects {
+        back = effect.apply(back)?;
+    }
+
+    Ok(back)
+}
+
 pub trait Renderer {
     fn render(&mut self, composition: Composition) -> Result<()>;
 
@@ -121,7 +132,9 @@ pub trait Renderer {
 
         let width = composition.resolution.width() as u32;
         let height = composition.resolution.height() as u32;
-        let image = combine_renders(width, height, pixmaps);
+        let mut image = combine_renders(width, height, pixmaps);
+
+        image = apply_effects(image, &composition.effects)?;
 
         Ok(image)
     }

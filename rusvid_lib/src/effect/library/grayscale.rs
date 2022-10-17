@@ -32,8 +32,8 @@ impl Element for GrayscaleEffect {
 }
 
 impl EffectLogic for GrayscaleEffect {
-    fn apply(&self, original: &RgbaImage) -> Result<RgbaImage> {
-        let mut result = original.clone();
+    fn apply(&self, original: RgbaImage) -> Result<RgbaImage> {
+        let mut result = RgbaImage::new(original.width(), original.height());
 
         for x in 0..result.width() {
             for y in 0..result.height() {

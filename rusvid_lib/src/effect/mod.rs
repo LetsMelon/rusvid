@@ -12,7 +12,7 @@ pub trait Element {
 
 pub trait EffectLogic: std::fmt::Debug + Element {
     // TODO switch to `Plane`
-    fn apply(&self, original: &RgbaImage) -> Result<RgbaImage>;
+    fn apply(&self, original: RgbaImage) -> Result<RgbaImage>;
 
     fn depends_on_other_effects_ids(&self) -> Vec<ID> {
         Vec::new()
