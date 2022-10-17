@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Created with Vectornator (http://vectornator.io/) -->
+<svg height="100%" stroke-miterlimit="10" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 1024 768" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:vectornator="http://vectornator.io" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+  <linearGradient gradientTransform="matrix(1 0 0 1 59.1259 47.0603)" gradientUnits="userSpaceOnUse" id="LinearGradient" x1="324.804" x2="534.693" y1="315.775" y2="315.775">
+    <stop offset="0" stop-color="#fe0505"/>
+    <stop offset="0.995947" stop-color="#efa507"/>
+  </linearGradient>
+</defs>
+<g id="Ebene-1" vectornator:layerName="Ebene 1">
+<path d="M538.397 464.787L439.351 464.787C408.743 464.787 383.93 439.974 383.93 409.366L383.93 316.305C383.93 285.696 408.743 260.883 439.351 260.883L538.397 260.883C569.006 260.883 593.819 285.696 593.819 316.305L593.819 409.366C593.819 439.974 569.006 464.787 538.397 464.787Z" fill="url(#LinearGradient)" fill-rule="nonzero" opacity="1" stroke="none"/>
+</g>
+</svg>

@@ -1,7 +1,8 @@
-use anyhow::Result;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::rc::Rc;
+
+use anyhow::Result;
 use usvg::PathData;
 
 use crate::animation::Animation;

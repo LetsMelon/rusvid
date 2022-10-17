@@ -1,25 +1,20 @@
-use anyhow::bail;
-use image::{Rgba, RgbaImage};
 use std::ffi::OsString;
 use std::path::Path;
 use std::process::Command;
+
+use anyhow::{bail, Result};
+use image::{Rgba, RgbaImage};
+use rusvid_plane::Plane;
 use tiny_skia::{Pixmap, PremultipliedColorU8};
 
 use crate::composition::Composition;
+use crate::effect::EffectLogic;
 use crate::layer::{Layer, LayerLogic};
 
 pub mod ffmpeg;
-pub mod png;
-pub mod raw;
+pub mod frame_image_format;
 
-pub trait Renderer {
-    fn render(&mut self, composition: Composition) -> anyhow::Result<()>;
-
-    fn out_path(&self) -> &Path;
-    fn tmp_dir_path(&self) -> &Path;
-}
-
-fn render_pixmap_layer(layer: &Layer) -> anyhow::Result<Pixmap> {
+fn render_pixmap_layer(layer: &Layer) -> Result<Pixmap> {
     let pixmap_size = layer
         .rtree()
         .expect("Expect a tree in the given layer")
@@ -99,31 +94,7 @@ fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
                     b = (mix_b * 255.0) as u8;
                 }
             };
-
-            /*
-            println!(
-                "c{} at {:?}({:?}): r {}, g {}, b {}, a {}",
-                layer_index,
-                (x, y),
-                array_index,
-                r,
-                g,
-                b,
-                a
-            );
-             */
         }
-        /*
-        println!(
-            "c at {:?}({:?}): r {}, g {}, b {}, a {}",
-            (x, y),
-            array_index,
-            r,
-            g,
-            b,
-            a
-        );
-         */
 
         Rgba([r, g, b, a])
     });
@@ -131,17 +102,23 @@ fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
     combined_layer_image
 }
 
-pub trait ImageRender {
-    fn generate_filepath(&self, tmp_dir_path: &Path, frame_count: usize) -> std::path::PathBuf;
-    fn file_extension(&self) -> String;
-    fn render(
-        &self,
-        composition: &Composition,
-        tmp_dir_path: &Path,
-        frame_number: usize,
-    ) -> anyhow::Result<()>;
+fn apply_effects(original: RgbaImage, effects: &Vec<Box<dyn EffectLogic>>) -> Result<RgbaImage> {
+    let mut back = original.clone();
 
-    fn render_rgba_image(&self, composition: &Composition) -> anyhow::Result<RgbaImage> {
+    for effect in effects {
+        back = effect.apply(back)?;
+    }
+
+    Ok(back)
+}
+
+pub trait Renderer {
+    fn render(&mut self, composition: Composition) -> Result<()>;
+
+    fn out_path(&self) -> &Path;
+    fn tmp_dir_path(&self) -> &Path;
+
+    fn render_rgba_image(&self, composition: &Composition) -> Result<RgbaImage> {
         let layers = composition.get_layers();
         if layers.len() == 0 {
             bail!("TODO: error")
@@ -155,12 +132,15 @@ pub trait ImageRender {
 
         let width = composition.resolution.width() as u32;
         let height = composition.resolution.height() as u32;
-        let image = combine_renders(width, height, pixmaps);
+        let mut image = combine_renders(width, height, pixmaps);
+
+        image = apply_effects(image, &composition.effects)?;
 
         Ok(image)
     }
 
-    fn render_pixmap(&self, composition: &Composition) -> anyhow::Result<Pixmap> {
+    #[deprecated(since = "0.1.2", note = "use `render_plane` instead")]
+    fn render_pixmap(&self, composition: &Composition) -> Result<Pixmap> {
         let image = self.render_rgba_image(&composition)?;
         let pixels = image.to_vec();
 
@@ -185,6 +165,12 @@ pub trait ImageRender {
         }
 
         Ok(pixmap)
+    }
+
+    fn render_plane(&self, composition: &Composition) -> Result<Plane> {
+        let image = self.render_rgba_image(composition)?;
+        let plane = Plane::from_rgba_image(image)?;
+        Ok(plane)
     }
 }
 

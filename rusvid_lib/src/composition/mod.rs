@@ -1,5 +1,5 @@
 mod builder;
-mod comp;
+mod strukt;
 
 pub use builder::CompositionBuilder;
-pub use comp::Composition;
+pub use strukt::Composition;
