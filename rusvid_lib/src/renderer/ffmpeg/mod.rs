@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use anyhow::Result;
+use log::{debug, info};
 
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
@@ -73,20 +74,22 @@ impl Renderer for FfmpegRenderer {
         fs::create_dir(&tmp_path)?;
 
         let frames = composition.frames();
+        info!("frames: {}", frames);
+        let frame_number_width = frames.to_string().len();
         for i in 0..frames {
-            // TODO remove hardcoded ":03"
-            println!("{:03}/{:03}", i + 1, frames);
+            info!("frame: {:01$}", i + 1, frame_number_width);
 
             let _ = &composition.update(i)?;
 
             let file_path = tmp_path.join(format!("{}.{}", i, file_extension));
             let raw_buffer = self.render_rgba_image(&composition)?;
 
-            let _ = raw_buffer.save_with_format(file_path, file_extension_format)?;
+            let _ = raw_buffer.save_with_format(file_path.clone(), file_extension_format)?;
+            debug!("Saved frame at: {:?}", file_path);
         }
 
         let mut command = self.build_command(&out_path, &tmp_path);
-        println!("{:?}", command);
+        debug!("ffmpeg command: {:?}", command);
 
         if out_path.exists() {
             fs::remove_file(&out_path)?;
@@ -97,7 +100,7 @@ impl Renderer for FfmpegRenderer {
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .output()?;
-        println!("Saved as: {:?}", &out_path);
+        info!("Saved at: {:?}", out_path);
 
         Ok(())
     }

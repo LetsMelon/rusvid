@@ -10,6 +10,8 @@ use rusvid_lib::usvg::{
 use rusvid_lib::utils::color_from_hex;
 
 fn main() {
+    env_logger::init();
+
     let resolution = Resolution::FourK;
 
     let mut composition = Composition::builder()
