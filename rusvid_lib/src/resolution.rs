@@ -10,11 +10,14 @@ pub type ResolutionType = (usize, usize);
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 /// Enum for common resolutions and custom ones
 ///
-/// Currently only has presets for resolutions with 16:9 format. For other format use `Resolution::Custom(width, height)`.
+/// Currently only has presets for resolutions with 16:9 format. For other formats use `Resolution::Custom(width, height)`.
 pub enum Resolution {
+    SD,
     HD,
     FHD,
+    QHD,
     UHD,
+    TwoK,
     FourK,
     /// width, height
     Custom(usize, usize),
@@ -34,9 +37,12 @@ impl Resolution {
     /// ```
     pub fn value(&self) -> ResolutionType {
         match self {
+            Resolution::SD => (640, 480),
             Resolution::HD => (1280, 720),
             Resolution::FHD => (1920, 1080),
+            Resolution::QHD => (2560, 1440),
             Resolution::UHD => (3840, 2160),
+            Resolution::TwoK => (2048, 1080),
             Resolution::FourK => (4096, 2160),
             Resolution::Custom(w, h) => (*w, *h),
         }
