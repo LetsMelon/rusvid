@@ -5,12 +5,14 @@ use crate::{
 };
 
 // TODO move into types.rs
-pub type ResolutionType = (usize, usize);
+pub type ResolutionType = (u32, u32);
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 /// Enum for common resolutions and custom ones
 ///
 /// Currently only has presets for resolutions with 16:9 format. For other formats use `Resolution::Custom(width, height)`.
+/// 
+/// Maximal resolution is 4_294_967_295 x 4_294_967_295.
 pub enum Resolution {
     SD,
     HD,
@@ -20,7 +22,7 @@ pub enum Resolution {
     TwoK,
     FourK,
     /// width, height
-    Custom(usize, usize),
+    Custom(u32, u32),
 }
 
 impl Resolution {
@@ -56,7 +58,7 @@ impl Resolution {
     /// let res = Resolution::HD;
     /// assert_eq!(res.width(), 1280);
     /// ```
-    pub fn width(&self) -> usize {
+    pub fn width(&self) -> u32 {
         self.value().0
     }
 
@@ -68,7 +70,7 @@ impl Resolution {
     /// let res = Resolution::HD;
     /// assert_eq!(res.height(), 720);
     /// ```
-    pub fn height(&self) -> usize {
+    pub fn height(&self) -> u32 {
         self.value().1
     }
 
@@ -116,7 +118,7 @@ impl MetricsVideo for Resolution {
     fn pixels(&self) -> usize {
         let res = self.value();
 
-        res.0 * res.1
+        (res.0 * res.1) as usize
     }
 }
 
