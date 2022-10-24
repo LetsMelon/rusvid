@@ -4,7 +4,7 @@ use std::process::Command;
 
 use anyhow::{bail, Result};
 use image::{Rgba, RgbaImage};
-use rusvid_plane::Plane;
+use rusvid_core::plane::Plane;
 use tiny_skia::{Pixmap, PremultipliedColorU8};
 
 use crate::composition::Composition;

@@ -1,17 +1,14 @@
 use crate::{
     metrics::{MetricsSize, MetricsVideo},
     prelude::AsPoint,
-    types::Point,
+    types::{Point, ResolutionType},
 };
-
-// TODO move into types.rs
-pub type ResolutionType = (u32, u32);
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 /// Enum for common resolutions and custom ones
 ///
 /// Currently only has presets for resolutions with 16:9 format. For other formats use `Resolution::Custom(width, height)`.
-/// 
+///
 /// Maximal resolution is 4_294_967_295 x 4_294_967_295.
 pub enum Resolution {
     SD,
