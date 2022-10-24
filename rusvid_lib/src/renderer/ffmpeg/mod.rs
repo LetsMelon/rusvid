@@ -1,10 +1,16 @@
+use core::slice::SlicePattern;
 use std::ffi::OsString;
 use std::fmt::Debug;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::time::Instant;
 
 use anyhow::Result;
+use image::{error::*, Rgba};
+use image::{ImageBuffer, ImageError, ImageResult};
+use ravif::{encode_rgba, ColorSpace, Config, Img, RGBA8};
+use rgb::AsPixels;
 
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
@@ -58,14 +64,44 @@ impl FfmpegRenderer {
     }
 }
 
+fn encode_as_img(data: &[u8], width: u32, height: u32) -> ImageResult<Img<&[RGBA8]>> {
+    // Error wrapping utility for color dependent buffer dimensions.
+    fn try_from_raw<P: image::Pixel + 'static>(
+        data: &[P::Subpixel],
+        width: u32,
+        height: u32,
+    ) -> ImageResult<ImageBuffer<P, &[P::Subpixel]>> {
+        ImageBuffer::from_raw(width, height, data).ok_or_else(|| {
+            ImageError::Parameter(ParameterError::from_kind(
+                ParameterErrorKind::DimensionMismatch,
+            ))
+        })
+    }
+
+    let img = try_from_raw::<Rgba<u8>>(data, width, height)?;
+    if img.pixels().len() == 0 {
+        return Err(ImageError::Parameter(ParameterError::from_kind(
+            ParameterErrorKind::DimensionMismatch,
+        )));
+    }
+
+    Ok(Img::new(
+        AsPixels::as_pixels(data),
+        width as usize,
+        height as usize,
+    ))
+}
+
 impl Renderer for FfmpegRenderer {
     fn render(&mut self, mut composition: Composition) -> Result<()> {
         self.framerate = composition.framerate;
 
         let file_extension = self.frame_output_format.file_extension();
-        let file_extension_format = self.frame_output_format.as_image_format();
         let out_path = self.out_path().to_path_buf();
         let tmp_path = self.tmp_dir_path().to_path_buf();
+
+        let width = composition.resolution().width();
+        let height = composition.resolution().height();
 
         if tmp_path.exists() {
             fs::remove_dir_all(&tmp_path)?;
@@ -73,7 +109,19 @@ impl Renderer for FfmpegRenderer {
         fs::create_dir(&tmp_path)?;
 
         let frames = composition.frames();
+
+        let encode_config = Config {
+            quality: 100.0,
+            alpha_quality: 100.0,
+            speed: 6,
+            premultiplied_alpha: false,
+            color_space: ColorSpace::RGB,
+            threads: Some(0),
+        };
+
         for i in 0..frames {
+            let now_loop = Instant::now();
+
             // TODO remove hardcoded ":03"
             println!("{:03}/{:03}", i + 1, frames);
 
@@ -82,7 +130,29 @@ impl Renderer for FfmpegRenderer {
             let file_path = tmp_path.join(format!("{}.{}", i, file_extension));
             let raw_buffer = self.render_rgba_image(&composition)?;
 
-            let _ = raw_buffer.save_with_format(file_path, file_extension_format)?;
+            let now_img = Instant::now();
+            // let _ = raw_buffer.save_with_format(file_path, file_extension_format)?;
+            // let avif_data = encode_rgba(todo!(), &encode_config).unwrap();
+
+            let data = raw_buffer.as_slice();
+            let buffer = encode_as_img(data, width, height)?;
+            let data = encode_rgba(buffer, &encode_config)
+                .map(|(data, _, _)| data)
+                .unwrap();
+            fs::write(file_path, data).expect("Unable to write file");
+
+            /*
+            let data = result.map_err(|err| {
+                ImageError::Encoding(EncodingError::new(ImageFormat::Avif.into(), err))
+            })?;
+            self.inner.write_all(&data)?;
+            Ok(()) */
+
+            let elapsed = now_img.elapsed();
+            println!("Elapsed for img: {:.2?}", elapsed);
+
+            let elapsed = now_loop.elapsed();
+            println!("Elapsed for loop: {:.2?}", elapsed);
         }
 
         let mut command = self.build_command(&out_path, &tmp_path);

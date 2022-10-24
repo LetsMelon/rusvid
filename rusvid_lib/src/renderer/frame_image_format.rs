@@ -5,6 +5,7 @@ pub enum FrameImageFormat {
     Png,
     Bmp,
     Jpg,
+    Avif,
 }
 
 impl FrameImageFormat {
@@ -14,6 +15,7 @@ impl FrameImageFormat {
             FrameImageFormat::Png => "png".to_string(),
             FrameImageFormat::Bmp => "bmp".to_string(),
             FrameImageFormat::Jpg => "jpg".to_string(),
+            FrameImageFormat::Avif => "avif".to_string(),
         }
     }
 
@@ -23,6 +25,7 @@ impl FrameImageFormat {
             FrameImageFormat::Png => ImageFormat::Png,
             FrameImageFormat::Bmp => ImageFormat::Bmp,
             FrameImageFormat::Jpg => ImageFormat::Jpeg,
+            FrameImageFormat::Avif => ImageFormat::Avif,
         }
     }
 }
@@ -44,6 +47,7 @@ mod tests {
         assert_eq!(&FrameImageFormat::Png.file_extension(), "png");
         assert_eq!(&FrameImageFormat::Bmp.file_extension(), "bmp");
         assert_eq!(&FrameImageFormat::Jpg.file_extension(), "jpg");
+        assert_eq!(&FrameImageFormat::Avif.file_extension(), "avif");
     }
 
     #[test]
@@ -51,5 +55,6 @@ mod tests {
         assert_eq!(FrameImageFormat::Png.as_image_format(), ImageFormat::Png);
         assert_eq!(FrameImageFormat::Bmp.as_image_format(), ImageFormat::Bmp);
         assert_eq!(FrameImageFormat::Jpg.as_image_format(), ImageFormat::Jpeg);
+        assert_eq!(FrameImageFormat::Avif.as_image_format(), ImageFormat::Avif);
     }
 }

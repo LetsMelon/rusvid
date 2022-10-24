@@ -148,6 +148,6 @@ fn main() {
         Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap(),
     ));
 
-    let mut renderer = FfmpegRenderer::new("out.mp4", "./out", FrameImageFormat::Png);
+    let mut renderer = FfmpegRenderer::new("out.mp4", "./out", FrameImageFormat::Avif);
     renderer.render(composition).unwrap()
 }

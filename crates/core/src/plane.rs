@@ -9,6 +9,7 @@ pub type SIZE = u32;
 pub struct Plane {
     width: SIZE,
     height: SIZE,
+    // TODO maybe it would be better for the performance to store the data in one Vec<u8>
     data: Vec<Pixel>,
 }
 
@@ -57,7 +58,7 @@ impl Plane {
 
         let mut plane = Plane::new(width, height)?;
         let data = plane.pixels_mut();
-
+        
         assert_eq!(data.len() * 4, pixels.len());
 
         for i in 0..data.len() {
