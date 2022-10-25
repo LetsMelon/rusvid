@@ -1,5 +1,5 @@
 [package]
-name = "rusvid_plane"
+name = "rusvid_core"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,6 +10,6 @@ anyhow = "1.0.66"
 image = { version = "0.24.4", default-features = false, optional = true }
 
 [features]
-default = ["rgba_image"]
-rgba_image = ["dep:image"]
+default = ["plane"]
+plane = ["dep:image"]
 unsafe = []

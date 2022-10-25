@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 use image::{Rgba, RgbaImage};
-use rusvid_plane::Pixel;
+use rusvid_core::plane::Pixel;
 
 use crate::effect::{EffectLogic, Element, ID};
 
