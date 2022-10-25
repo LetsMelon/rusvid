@@ -4,11 +4,12 @@ default-members = [
 ]
 members = [
     "examples/black_video",
-    "examples/simple_path",
-    "examples/layers",
-    "examples/simple_animation",
-    "examples/read_svg_file",
+    "examples/comp_effect",
     "examples/grid",
+    "examples/layers",
+    "examples/read_svg_file",
+    "examples/simple_animation",
+    "examples/simple_path",
     "rusvid_lib",
     "rusvid_cli",
     "crates/*",
