@@ -143,4 +143,9 @@ impl LayerLogic for Composition {
         self.check_or_create_layer().unwrap();
         self.layers[0].add_animation(animation);
     }
+
+    #[inline]
+    fn add_effect<T: EffectLogic + 'static>(&mut self, effect: T) {
+        self.effects.push(Box::new(effect))
+    }
 }

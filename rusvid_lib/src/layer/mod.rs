@@ -8,6 +8,7 @@ use usvg::{Fill, Node, NodeExt, NodeKind, Options, Paint, Tree};
 use crate::animation::manager::AnimationManager;
 use crate::animation::Animation;
 use crate::composition::CompositionBuilder;
+use crate::prelude::EffectLogic;
 use crate::resolution::Resolution;
 
 pub trait LayerLogic {
@@ -17,6 +18,7 @@ pub trait LayerLogic {
     fn add_to_root(&mut self, kind: NodeKind) -> Result<Node>;
     fn fill_with_link(&self, id: &str) -> Option<Fill>;
     fn add_animation<T: Animation + 'static>(&mut self, animation: T);
+    fn add_effect<T: EffectLogic + 'static>(&mut self, effect: T);
 }
 
 pub struct Layer {
@@ -25,6 +27,9 @@ pub struct Layer {
     rtree: Tree,
 
     animations: AnimationManager,
+
+    // TODO maybe use an EffectManger, here and in `rusvid_lib/src/composition/strukt.rs::Composition.effects`
+    pub(crate) effects: Vec<Box<dyn EffectLogic>>,
 }
 
 impl Debug for Layer {
@@ -33,6 +38,7 @@ impl Debug for Layer {
             .field("name", &self.name)
             .field("rtree", &"NOT_PRINTABLE")
             .field("animations", &self.animations)
+            .field("effects", &self.effects)
             .finish()
     }
 }
@@ -45,6 +51,7 @@ impl Layer {
             // TODO: remove unwrap
             rtree: CompositionBuilder::create_tree_from_resolution(resolution).unwrap(),
             animations: AnimationManager::new(),
+            effects: Vec::new(),
         }
     }
 
@@ -140,5 +147,10 @@ impl LayerLogic for Layer {
     #[inline(always)]
     fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
         self.animations.add_animation(animation);
+    }
+
+    #[inline(always)]
+    fn add_effect<T: EffectLogic + 'static>(&mut self, effect: T) {
+        self.effects.push(Box::new(effect))
     }
 }
