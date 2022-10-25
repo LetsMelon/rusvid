@@ -39,7 +39,9 @@ jobs:
         run: cargo build --verbose --all-targets
 
       - name: Test
-        run: cd rusvid_lib && cargo test
+        run: |
+          cd rusvid_lib && cargo test && cd .. &&
+          cd crates/core && cargo test
 
 #      - name: Bench
 #        run: cargo bench
