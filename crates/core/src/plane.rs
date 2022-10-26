@@ -1,5 +1,6 @@
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use image::RgbaImage;
+use tiny_skia::Pixmap;
 
 pub type Pixel = [u8; 4];
 
@@ -72,6 +73,47 @@ impl Plane {
         }
 
         Ok(plane)
+    }
+
+    pub fn as_rgba_image(self) -> Result<RgbaImage> {
+        let buf = self.data.iter().flatten().map(|x| *x).collect::<Vec<u8>>();
+
+        assert_eq!(self.width() * self.height() * 4, buf.len() as SIZE);
+
+        RgbaImage::from_vec(self.width(), self.height(), buf)
+            .ok_or(anyhow!("Error while creating an `image::RgbaImage`"))
+    }
+
+    /// Crates a `anyhow::Result<Plane>` from a `tiny_skia::Pixmap`
+    pub fn from_pixmap(pixmap: Pixmap) -> Result<Self> {
+        let data = pixmap
+            .pixels()
+            .iter()
+            .map(|x| {
+                let r = x.red();
+                let g = x.green();
+                let b = x.blue();
+                let a = x.alpha();
+
+                [r, g, b, a]
+            })
+            .collect::<Vec<Pixel>>();
+
+        Self::from_data(pixmap.width(), pixmap.height(), data)
+    }
+
+    pub fn as_pixmap(self) -> Result<Pixmap> {
+        let mut pixmap = Pixmap::new(self.width(), self.height())
+            .ok_or(anyhow!("Error while creating an `tiny_skia::Pixmap`"))?;
+
+        let data = pixmap.data_mut();
+
+        let buf = self.data.iter().flatten().map(|x| *x).collect::<Vec<u8>>();
+        for i in 0..buf.len() {
+            data[i] = buf[i];
+        }
+
+        Ok(pixmap)
     }
 
     #[inline(always)]
