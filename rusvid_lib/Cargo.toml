@@ -17,7 +17,7 @@ usvg = "0.23.0"
 anyhow = "1.0.65"
 image = { version = "0.24", default-features = false, features = ["png", "bmp", "jpeg"] }
 easer = { git = "https://github.com/orhanbalci/rust-easing", rev = "872ea2c" }
-glam = { version = "0.21.3", features = ["approx"] }
+glam = { version = "0.22.0", features = ["approx"] }
 rusvid_plane = { path = "../crates/plane" }
 itertools = "0.10.5"
 
