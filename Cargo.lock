@@ -19,9 +19,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.65"
+version = "1.0.66"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98161a4e3e2184da77bb14f02184cdd111e83bbbcc9979dfee3c44b9a85f5602"
+checksum = "216261ddc8289130e551ddcd5ce8a064710c0d064a4d2895c67151c92b5443f6"
 
 [[package]]
 name = "approx"
@@ -141,6 +141,13 @@ name = "core-foundation-sys"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5827cebf4670468b8772dd191856768aedcb1b0278a04f989f7766351917b9dc"
+
+[[package]]
+name = "comp_effect"
+version = "0.1.0"
+dependencies = [
+ "rusvid_lib",
+]
 
 [[package]]
 name = "crc32fast"
@@ -319,9 +326,9 @@ dependencies = [
 
 [[package]]
 name = "glam"
-version = "0.21.3"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "518faa5064866338b013ff9b2350dc318e14cc4fcd6cb8206d7e7c9886c98815"
+checksum = "12f597d56c1bd55a811a1be189459e8fad2bbc272616375602443bdfb37fa774"
 dependencies = [
  "approx",
 ]
@@ -663,6 +670,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "rusvid_core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "image",
+]
+
+[[package]]
 name = "rusvid_lib"
 version = "0.1.1"
 dependencies = [
@@ -675,17 +690,9 @@ dependencies = [
  "log",
  "rayon",
  "resvg",
- "rusvid_plane",
+ "rusvid_core",
  "tiny-skia",
  "usvg",
-]
-
-[[package]]
-name = "rusvid_plane"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "image",
 ]
 
 [[package]]

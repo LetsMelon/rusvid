@@ -6,6 +6,8 @@ pub type FPS = u8;
 /// A 2-dimensional vector.
 pub type Point = DVec2;
 
+pub type ResolutionType = (u32, u32);
+
 /// Trait to transform struct into a [crate::types::Point]
 pub trait AsPoint {
     /// Returns values of the struct as [crate::types::Point].

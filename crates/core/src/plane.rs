@@ -1,5 +1,4 @@
 use anyhow::{bail, Result};
-#[cfg(feature = "rgba_image")]
 use image::RgbaImage;
 
 pub type Pixel = [u8; 4];
@@ -49,7 +48,6 @@ impl Plane {
         Ok(plane)
     }
 
-    #[cfg(feature = "rgba_image")]
     /// Crates a `anyhow::Result<Plane>` from a `image::RgbaImage`
     pub fn from_rgba_image(image: RgbaImage) -> Result<Self> {
         let pixels = image.to_vec();
@@ -101,7 +99,7 @@ impl Plane {
     }
 
     #[inline]
-    #[cfg(feature = "unsafe")]
+    #[cfg(all(feature = "unsafe", feature = "plane"))]
     pub fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
         unsafe {
             self.data
@@ -122,7 +120,7 @@ impl Plane {
     }
 
     #[inline]
-    #[cfg(feature = "unsafe")]
+    #[cfg(all(feature = "unsafe", feature = "plane"))]
     pub fn pixel_unchecked_mut(&mut self, x: SIZE, y: SIZE) -> &Pixel {
         unsafe {
             self.data
@@ -178,7 +176,7 @@ impl Iterator for PlaneIntoIterator {
 #[cfg(test)]
 mod tests {
     mod new {
-        use crate::Plane;
+        use crate::plane::Plane;
 
         #[test]
         fn just_works() {
@@ -188,7 +186,7 @@ mod tests {
     }
 
     mod get_pixel {
-        use crate::{Pixel, Plane};
+        use crate::plane::{Pixel, Plane};
 
         #[test]
         fn just_works() {
@@ -228,7 +226,7 @@ mod tests {
     }
 
     mod iterator {
-        use crate::Plane;
+        use crate::plane::Plane;
 
         #[test]
         fn just_works() {

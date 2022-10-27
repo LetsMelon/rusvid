@@ -4,7 +4,7 @@ use std::process::Command;
 
 use anyhow::{bail, Result};
 use image::{Rgba, RgbaImage};
-use rusvid_plane::Plane;
+use rusvid_core::plane::Plane;
 use tiny_skia::{Pixmap, PremultipliedColorU8};
 
 use crate::composition::Composition;
@@ -35,23 +35,39 @@ fn render_pixmap_layer(layer: &Layer) -> Result<Pixmap> {
     Ok(pixmap)
 }
 
-fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
-    let as_pixels: Vec<&[PremultipliedColorU8]> = pixmaps.iter().map(|x| x.pixels()).collect();
+fn pixmap_to_rgba_image(pixmap: Pixmap) -> RgbaImage {
+    let buf: Vec<u8> = pixmap
+        .pixels()
+        .iter()
+        .flat_map(|x| {
+            let r = x.red();
+            let g = x.green();
+            let b = x.blue();
+            let a = x.alpha();
 
-    let combined_layer_image = RgbaImage::from_fn(width, height, |x, y| {
+            [r, g, b, a]
+        })
+        .collect();
+
+    assert_eq!(pixmap.width() * pixmap.height() * 4, buf.len() as u32);
+
+    RgbaImage::from_vec(pixmap.width(), pixmap.height(), buf).unwrap()
+}
+
+fn combine_renders(width: u32, height: u32, images: Vec<RgbaImage>) -> RgbaImage {
+    RgbaImage::from_fn(width, height, |x, y| {
         let mut r = 0;
         let mut g = 0;
         let mut b = 0;
         let mut a = 0;
 
-        let array_index = (y * width + x) as usize;
-        for layer_index in 0..as_pixels.len() {
-            let c = as_pixels[layer_index][array_index].get();
+        for layer_index in 0..images.len() {
+            let c = images[layer_index].get_pixel(x, y);
 
-            let new_r = (c & 0xFF) as u8;
-            let new_g = ((c >> 8) & 0xFF) as u8;
-            let new_b = ((c >> 16) & 0xFF) as u8;
-            let new_a = ((c >> 24) & 0xFF) as u8;
+            let new_r = c[0] as u8;
+            let new_g = c[1] as u8;
+            let new_b = c[2] as u8;
+            let new_a = c[3] as u8;
 
             match (a, new_a) {
                 (0, 0) => (), // both colors are fully transparent -> do nothing
@@ -97,9 +113,7 @@ fn combine_renders(width: u32, height: u32, pixmaps: Vec<Pixmap>) -> RgbaImage {
         }
 
         Rgba([r, g, b, a])
-    });
-
-    combined_layer_image
+    })
 }
 
 fn apply_effects(original: RgbaImage, effects: &Vec<Box<dyn EffectLogic>>) -> Result<RgbaImage> {
@@ -124,15 +138,20 @@ pub trait Renderer {
             bail!("TODO: error")
         }
 
-        let mut pixmaps = Vec::new();
+        let mut images = Vec::new();
         for layer in layers {
-            let pixmap = render_pixmap_layer(layer)?;
-            pixmaps.push(pixmap);
+            let mut image = pixmap_to_rgba_image(render_pixmap_layer(layer)?);
+
+            if layer.effects.len() != 0 {
+                image = apply_effects(image, &layer.effects)?;
+            }
+
+            images.push(image);
         }
 
         let width = composition.resolution.width() as u32;
         let height = composition.resolution.height() as u32;
-        let mut image = combine_renders(width, height, pixmaps);
+        let mut image = combine_renders(width, height, images);
 
         image = apply_effects(image, &composition.effects)?;
 
