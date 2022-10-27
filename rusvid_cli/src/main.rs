@@ -1,5 +1,8 @@
 use std::rc::Rc;
 
+use chrono::Local;
+use fern::{log_file, Dispatch};
+use log::LevelFilter;
 use rusvid_lib::animation::prelude::*;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
@@ -9,7 +12,27 @@ use rusvid_lib::usvg::{
 };
 use rusvid_lib::utils::color_from_hex;
 
+fn setup_logger() -> Result<(), fern::InitError> {
+    Dispatch::new()
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "{}[{}][{}] {}",
+                Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
+                record.target(),
+                record.level(),
+                message
+            ))
+        })
+        .level(LevelFilter::Debug)
+        .chain(std::io::stdout())
+        .chain(log_file("output.log")?)
+        .apply()?;
+    Ok(())
+}
+
 fn main() {
+    setup_logger().unwrap();
+
     let resolution = Resolution::FourK;
 
     let mut composition = Composition::builder()

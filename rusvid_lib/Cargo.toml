@@ -16,6 +16,7 @@ easer = { git = "https://github.com/orhanbalci/rust-easing", rev = "872ea2c" }
 glam = { version = "0.22.0", features = ["approx"] }
 image = { version = "0.24", default-features = false, features = ["png", "bmp", "jpeg"] }
 itertools = "0.10.5"
+log = "0.4"
 resvg = "0.23.0"
 rusvid_core = { path = "../crates/core" }
 tiny-skia = "0.6.5"
