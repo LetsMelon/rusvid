@@ -188,8 +188,7 @@ pub trait Renderer {
 
     fn render_plane(&self, composition: &Composition) -> Result<Plane> {
         let image = self.render_rgba_image(composition)?;
-        let plane = Plane::from_rgba_image(image)?;
-        Ok(plane)
+        Plane::from_rgba_image(image)
     }
 }
 
