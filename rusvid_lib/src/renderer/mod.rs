@@ -36,22 +36,8 @@ fn render_pixmap_layer(layer: &Layer) -> Result<Pixmap> {
 }
 
 fn pixmap_to_rgba_image(pixmap: Pixmap) -> RgbaImage {
-    let buf: Vec<u8> = pixmap
-        .pixels()
-        .iter()
-        .flat_map(|x| {
-            let r = x.red();
-            let g = x.green();
-            let b = x.blue();
-            let a = x.alpha();
-
-            [r, g, b, a]
-        })
-        .collect();
-
-    assert_eq!(pixmap.width() * pixmap.height() * 4, buf.len() as u32);
-
-    RgbaImage::from_vec(pixmap.width(), pixmap.height(), buf).unwrap()
+    let plane = Plane::from_pixmap(pixmap).unwrap();
+    plane.as_rgba_image().unwrap()
 }
 
 fn combine_renders(width: u32, height: u32, images: Vec<RgbaImage>) -> RgbaImage {
