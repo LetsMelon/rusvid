@@ -1,8 +1,10 @@
 use std::rc::Rc;
+use std::time::{SystemTime, UNIX_EPOCH};
 
+use anyhow::Result;
 use chrono::Local;
 use fern::{log_file, Dispatch};
-use log::LevelFilter;
+use log::{debug, LevelFilter};
 use rusvid_lib::animation::prelude::*;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
@@ -12,26 +14,30 @@ use rusvid_lib::usvg::{
 };
 use rusvid_lib::utils::color_from_hex;
 
-fn setup_logger() -> Result<(), fern::InitError> {
+fn setup_logger() -> Result<String> {
+    let time_stamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+    let log_file_path = format!("output_{}.log", time_stamp);
+
     Dispatch::new()
         .format(|out, message, record| {
             out.finish(format_args!(
                 "{}[{}][{}] {}",
-                Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
+                Local::now().format("[%Y-%m-%d][%H:%M:%S.%f]"),
                 record.target(),
                 record.level(),
                 message
             ))
         })
-        .level(LevelFilter::Debug)
+        .level(LevelFilter::Trace)
         .chain(std::io::stdout())
-        .chain(log_file("output.log")?)
+        .chain(log_file(log_file_path.clone())?)
         .apply()?;
-    Ok(())
+    Ok(log_file_path)
 }
 
 fn main() {
-    setup_logger().unwrap();
+    let log_file_path = setup_logger().unwrap();
+    debug!("Save log file as {}", log_file_path);
 
     let resolution = Resolution::FourK;
 
@@ -40,13 +46,13 @@ fn main() {
         .framerate(24)
         .duration(5)
         // .add_effect(PixelateEffect::new(15, 15))
-        // .add_effect(GrayscaleEffect::new())
         // .add_effect(ColorPaletteEffect::new(vec![
         //     [10, 56, 120, 255],
         //     [100, 100, 0, 255],
         //     [100, 10, 100, 255],
         //     [90, 12, 30, 255],
         // ]))
+        // .add_effect(GrayscaleEffect::new())
         .build();
 
     let layer = composition.create_layer().unwrap(); // Layer::new(composition.resolution());
