@@ -9,7 +9,7 @@ pub struct PixelateEffect {
     pixel_width: u32,
     pixel_height: u32,
 
-    id: Option<String>,
+    id: Option<ID>,
 }
 
 impl PixelateEffect {

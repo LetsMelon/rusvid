@@ -53,6 +53,7 @@ fn main() {
         //     [90, 12, 30, 255],
         // ]))
         // .add_effect(GrayscaleEffect::new())
+        // .add_effect(BoxBlur::new(5).unwrap())
         .build();
 
     let layer = composition.create_layer().unwrap(); // Layer::new(composition.resolution());
