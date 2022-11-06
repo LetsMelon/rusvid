@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
-use image::{Rgba, RgbaImage};
 use itertools::Itertools;
+use rusvid_core::plane::Plane;
 
 use crate::effect::{EffectLogic, Element, ID};
 
@@ -67,8 +67,8 @@ impl Element for BoxBlur {
 }
 
 impl EffectLogic for BoxBlur {
-    fn apply(&self, original: image::RgbaImage) -> Result<RgbaImage> {
-        let mut result = original.clone();
+    fn apply(&self, original: Plane) -> Result<Plane> {
+        let mut result = Plane::new(original.width(), original.height())?;
 
         for x in (self.abs_d_x as u32)..(result.width() - self.abs_d_x as u32) {
             for y in (self.abs_d_y as u32)..(result.height() - self.abs_d_y as u32) {
@@ -78,7 +78,7 @@ impl EffectLogic for BoxBlur {
                 let count = (self.kernel_x * self.kernel_y) as u32;
                 let sum = ((self.abs_d_y * -1)..=self.abs_d_y)
                     .cartesian_product((self.abs_d_x * -1)..=self.abs_d_x)
-                    .map(|(i_x, i_y)| *original.get_pixel((x + i_x) as u32, (y + i_y) as u32))
+                    .map(|(i_x, i_y)| *original.pixel_unchecked((x + i_x) as u32, (y + i_y) as u32))
                     .fold([0_u32; 4], |mut acc, val| {
                         acc[0] += val[0] as u32;
                         acc[1] += val[1] as u32;
@@ -88,12 +88,16 @@ impl EffectLogic for BoxBlur {
                         acc
                     });
 
-                *result.get_pixel_mut(x as u32, y as u32) = Rgba([
-                    (sum[0] / count) as u8,
-                    (sum[1] / count) as u8,
-                    (sum[2] / count) as u8,
-                    (sum[3] / count) as u8,
-                ]);
+                result.put_pixel_unchecked(
+                    x as u32,
+                    y as u32,
+                    [
+                        (sum[0] / count) as u8,
+                        (sum[1] / count) as u8,
+                        (sum[2] / count) as u8,
+                        (sum[3] / count) as u8,
+                    ],
+                );
             }
         }
 

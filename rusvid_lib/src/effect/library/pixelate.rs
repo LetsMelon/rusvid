@@ -1,6 +1,6 @@
 use anyhow::Result;
-use image::{Rgba, RgbaImage};
 use itertools::Itertools;
+use rusvid_core::plane::Plane;
 
 use crate::effect::{EffectLogic, Element, ID};
 
@@ -36,13 +36,13 @@ impl Element for PixelateEffect {
 }
 
 impl EffectLogic for PixelateEffect {
-    fn apply(&self, original: RgbaImage) -> Result<RgbaImage> {
+    fn apply(&self, original: Plane) -> Result<Plane> {
         // TODO create extra config if last pixel in a row should be not fixed size or if the extra margin should be applied to the last pixel, (width & height)
         // eg.: pixel_width = 19px; width = 1920px; pixel_width * width = 1919px, last pixel either 1px wide or last one is 20px wide
         let pixels_count_width = original.width().div_ceil(self.pixel_width);
         let pixels_count_height = original.height().div_ceil(self.pixel_height);
 
-        let mut result = RgbaImage::new(original.width(), original.height());
+        let mut result = Plane::new(original.width(), original.height())?;
 
         for x in 0..pixels_count_width {
             for y in 0..pixels_count_height {
@@ -54,7 +54,7 @@ impl EffectLogic for PixelateEffect {
 
                 let sum = (from_pixels_width..to_pixels_width)
                     .cartesian_product(from_pixels_height..to_pixels_height)
-                    .map(|(i_x, i_y)| original.get_pixel(i_x, i_y).0)
+                    .map(|(i_x, i_y)| original.pixel_unchecked(i_x, i_y))
                     .fold([0_u64; 4], |acc, val| {
                         let mut back_value = acc;
 
@@ -70,16 +70,16 @@ impl EffectLogic for PixelateEffect {
                     * ((to_pixels_height + 1) - from_pixels_height))
                     as u64;
 
-                let new_color = Rgba([
+                let new_color = [
                     (sum[0] / summed_pixels) as u8,
                     (sum[1] / summed_pixels) as u8,
                     (sum[2] / summed_pixels) as u8,
                     (sum[3] / summed_pixels) as u8,
-                ]);
+                ];
 
                 for i_x in from_pixels_width..to_pixels_width {
                     for i_y in from_pixels_height..to_pixels_height {
-                        result.put_pixel(i_x, i_y, new_color);
+                        result.put_pixel_unchecked(i_x, i_y, new_color);
                     }
                 }
             }
