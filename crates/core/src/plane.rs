@@ -126,7 +126,6 @@ impl Plane {
         }
 
         let index = position_to_index(x, y, self.width);
-        println!("{:?} =>{}", (x, y), index);
         self.data.get(index)
     }
 
