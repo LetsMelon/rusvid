@@ -1,11 +1,9 @@
-use std::{
-    f64::consts::{E, PI},
-    time::Instant,
-};
+use std::f64::consts::{E, PI};
 
-use image::Rgba;
+use anyhow::Result;
 use itertools::Itertools;
 use log::info;
+use rusvid_core::plane::Plane;
 
 use crate::effect::{EffectLogic, Element, ID};
 
@@ -29,7 +27,6 @@ fn kernel_size(stdev: f64) -> i32 {
 
 #[derive(Debug)]
 pub struct GaussianBlur {
-    stdev: f64,
     kernel: i32,
 
     abs_d: i32,
@@ -49,35 +46,12 @@ impl GaussianBlur {
             stdev, kernel, abs_d
         );
 
-        //             y
-        //             -1
-        //             0
-        //             1
-        // x: -1 0 +1  _
-
-        // index = (y + abs_d) * kernel + x
-
         let weights = ((abs_d * -1)..=abs_d)
             .cartesian_product((abs_d * -1)..=abs_d)
-            .map(|(x, y)| gaussian_function(stdev, x, y))
+            .map(|(x, y)| gaussian_function(stdev.abs(), x, y))
             .collect::<Vec<f64>>();
-        /*         itertools::assert_equal(
-            weights,
-            vec![
-                (-1, -1),
-                (-1, 0),
-                (-1, 1),
-                (0, -1),
-                (0, 0),
-                (0, 1),
-                (1, -1),
-                (1, 0),
-                (1, 1),
-            ],
-        ); */
 
         GaussianBlur {
-            stdev: stdev.abs(),
             kernel,
             abs_d,
             weights,
@@ -101,8 +75,8 @@ impl Element for GaussianBlur {
 }
 
 impl EffectLogic for GaussianBlur {
-    fn apply(&self, original: image::RgbaImage) -> anyhow::Result<image::RgbaImage> {
-        let mut result = original.clone();
+    fn apply(&self, original: Plane) -> Result<Plane> {
+        let mut result = Plane::new(original.width(), original.height())?;
 
         for x in (self.kernel)..(result.width() as i32 - self.kernel) {
             for y in (self.kernel)..(result.height() as i32 - self.kernel) {
@@ -111,7 +85,7 @@ impl EffectLogic for GaussianBlur {
                     .map(|(i_x, i_y)| {
                         let cord_x = (x + i_x) as u32;
                         let cord_y = (y + i_y) as u32;
-                        (*original.get_pixel(cord_x, cord_y), i_x, i_y)
+                        (*original.pixel_unchecked(cord_x, cord_y), i_x, i_y)
                     })
                     .fold([0.0; 4], |mut acc, val| {
                         // TODO check if it's the right index
@@ -125,8 +99,11 @@ impl EffectLogic for GaussianBlur {
                         acc
                     });
 
-                *result.get_pixel_mut(x as u32, y as u32) =
-                    Rgba([sum[0] as u8, sum[1] as u8, sum[2] as u8, sum[3] as u8]);
+                result.put_pixel_unchecked(
+                    x as u32,
+                    y as u32,
+                    [sum[0] as u8, sum[1] as u8, sum[2] as u8, sum[3] as u8],
+                );
             }
         }
 
