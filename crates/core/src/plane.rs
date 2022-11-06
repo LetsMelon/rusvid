@@ -13,11 +13,9 @@ pub struct Plane {
     data: Vec<Pixel>,
 }
 
-#[doc(hidden)]
-macro_rules! position_to_index {
-    ($x:expr, $y:expr, $height:expr) => {
-        ($x + $height * $y) as usize
-    };
+#[inline(always)]
+fn position_to_index(x: SIZE, y: SIZE, multi: SIZE) -> usize {
+    (x + multi * y) as usize
 }
 
 /// Coordinate system used: <https://py.processing.org/tutorials/drawing/>
@@ -33,7 +31,7 @@ impl Plane {
         Ok(Plane {
             width,
             height,
-            data: Vec::with_capacity((width * height) as usize),
+            data: vec![[0; 4]; (width * height) as usize],
         })
     }
 
@@ -51,25 +49,15 @@ impl Plane {
 
     /// Crates a `anyhow::Result<Plane>` from a `image::RgbaImage`
     pub fn from_rgba_image(image: RgbaImage) -> Result<Self> {
-        let pixels = image.to_vec();
-
         let width = image.width() as SIZE;
         let height = image.height() as SIZE;
 
         let mut plane = Plane::new(width, height)?;
-        let data = plane.pixels_mut();
 
-        assert_eq!(data.len() * 4, pixels.len());
-
-        for i in 0..data.len() {
-            let color = [
-                pixels[(i * 4) + 0],
-                pixels[(i * 4) + 1],
-                pixels[(i * 4) + 2],
-                pixels[(i * 4) + 3],
-            ];
-
-            data[i] = color;
+        for x in 0..plane.width() {
+            for y in 0..plane.height() {
+                *plane.pixel_mut_unchecked(x, y) = image.get_pixel(x, y).0;
+            }
         }
 
         Ok(plane)
@@ -137,16 +125,14 @@ impl Plane {
             return None;
         }
 
-        self.data.get(position_to_index!(x, y, self.height))
+        let index = position_to_index(x, y, self.width);
+        println!("{:?} =>{}", (x, y), index);
+        self.data.get(index)
     }
 
     #[inline]
-    #[cfg(feature = "unsafe")]
     pub fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
-        unsafe {
-            self.data
-                .get_unchecked(position_to_index!(x, y, self.height))
-        }
+        unsafe { self.data.get_unchecked(position_to_index(x, y, self.width)) }
     }
 
     #[inline]
@@ -158,15 +144,14 @@ impl Plane {
             return None;
         }
 
-        self.data.get_mut(position_to_index!(x, y, self.height))
+        self.data.get_mut(position_to_index(x, y, self.width))
     }
 
     #[inline]
-    #[cfg(all(feature = "unsafe", feature = "plane"))]
-    pub fn pixel_unchecked_mut(&mut self, x: SIZE, y: SIZE) -> &Pixel {
+    pub fn pixel_mut_unchecked(&mut self, x: SIZE, y: SIZE) -> &mut Pixel {
         unsafe {
             self.data
-                .get_unchecked_mut(position_to_index!(x, y, self.height))
+                .get_unchecked_mut(position_to_index(x, y, self.width))
         }
     }
 
@@ -217,6 +202,28 @@ impl Iterator for PlaneIntoIterator {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn position_to_index_test() {
+        use crate::plane::position_to_index;
+
+        let width = 5;
+        // could be used like this:
+        // let height = 2;
+        // let arr = (0..(width * height)).collect::<Vec<u32>>();
+
+        let index = position_to_index(0, 0, width);
+        assert_eq!(index, 0);
+
+        let index = position_to_index(4, 0, width);
+        assert_eq!(index, 4);
+
+        let index = position_to_index(0, 1, width);
+        assert_eq!(index, 5);
+
+        let index = position_to_index(5, 1, width);
+        assert_eq!(index, 10);
+    }
+
     mod new {
         use crate::plane::Plane;
 
@@ -228,42 +235,60 @@ mod tests {
     }
 
     mod get_pixel {
-        use crate::plane::{Pixel, Plane};
+        use crate::plane::Plane;
 
         #[test]
-        fn just_works() {
-            let plane = Plane::from_data(
-                2,
-                2,
-                vec![
-                    [255, 0, 0, 255],
-                    [0, 255, 0, 255],
-                    [0, 0, 255, 255],
-                    [255, 255, 255, 255],
-                ],
-            )
-            .unwrap();
+        fn not_mutable() {
+            let data = vec![
+                [255, 0, 0, 255],
+                [0, 255, 0, 255],
+                [0; 4],
+                [0, 0, 255, 255],
+                [255, 255, 255, 255],
+                [255 / 2; 4],
+            ];
+            let plane = Plane::from_data(3, 2, data.clone()).unwrap();
 
-            let pixel: Pixel = [255, 0, 0, 255];
-            assert_eq!(plane.pixel(0, 0).unwrap(), &pixel);
-            let pixel: Pixel = [0, 255, 0, 255];
-            assert_eq!(plane.pixel(1, 0).unwrap(), &pixel);
-            let pixel: Pixel = [0, 0, 255, 255];
-            assert_eq!(plane.pixel(0, 1).unwrap(), &pixel);
-            let pixel: Pixel = [255, 255, 255, 255];
-            assert_eq!(plane.pixel(1, 1).unwrap(), &pixel);
+            assert_eq!(plane.pixel(0, 0).unwrap(), &data[0]);
+            assert_eq!(plane.pixel(1, 0).unwrap(), &data[1]);
+            assert_eq!(plane.pixel(2, 0).unwrap(), &data[2]);
+            assert_eq!(plane.pixel(0, 1).unwrap(), &data[3]);
+            assert_eq!(plane.pixel(1, 1).unwrap(), &data[4]);
+            assert_eq!(plane.pixel(2, 1).unwrap(), &data[5]);
 
-            #[cfg(feature = "unsafe")]
-            let _ = {
-                let pixel: Pixel = [255, 0, 0, 255];
-                assert_eq!(plane.pixel_unchecked(0, 0), &pixel);
-                let pixel: Pixel = [0, 255, 0, 255];
-                assert_eq!(plane.pixel_unchecked(1, 0), &pixel);
-                let pixel: Pixel = [0, 0, 255, 255];
-                assert_eq!(plane.pixel_unchecked(0, 1), &pixel);
-                let pixel: Pixel = [255, 255, 255, 255];
-                assert_eq!(plane.pixel_unchecked(1, 1), &pixel);
-            };
+            assert_eq!(plane.pixel_unchecked(0, 0), &data[0]);
+            assert_eq!(plane.pixel_unchecked(1, 0), &data[1]);
+            assert_eq!(plane.pixel_unchecked(2, 0), &data[2]);
+            assert_eq!(plane.pixel_unchecked(0, 1), &data[3]);
+            assert_eq!(plane.pixel_unchecked(1, 1), &data[4]);
+            assert_eq!(plane.pixel_unchecked(2, 1), &data[5]);
+        }
+
+        #[test]
+        fn mutable() {
+            let data = vec![
+                [255, 0, 0, 255],
+                [0, 255, 0, 255],
+                [0; 4],
+                [0, 0, 255, 255],
+                [255, 255, 255, 255],
+                [255 / 2; 4],
+            ];
+            let mut plane = Plane::from_data(3, 2, data.clone()).unwrap();
+
+            assert_eq!(plane.pixel_mut(0, 0).unwrap(), &data[0]);
+            assert_eq!(plane.pixel_mut(1, 0).unwrap(), &data[1]);
+            assert_eq!(plane.pixel_mut(2, 0).unwrap(), &data[2]);
+            assert_eq!(plane.pixel_mut(0, 1).unwrap(), &data[3]);
+            assert_eq!(plane.pixel_mut(1, 1).unwrap(), &data[4]);
+            assert_eq!(plane.pixel_mut(2, 1).unwrap(), &data[5]);
+
+            assert_eq!(plane.pixel_mut_unchecked(0, 0), &data[0]);
+            assert_eq!(plane.pixel_mut_unchecked(1, 0), &data[1]);
+            assert_eq!(plane.pixel_mut_unchecked(2, 0), &data[2]);
+            assert_eq!(plane.pixel_mut_unchecked(0, 1), &data[3]);
+            assert_eq!(plane.pixel_mut_unchecked(1, 1), &data[4]);
+            assert_eq!(plane.pixel_mut_unchecked(2, 1), &data[5]);
         }
     }
 
@@ -291,6 +316,40 @@ mod tests {
             assert_eq!(Some([0, 0, 255, 255]), iter.next());
             assert_eq!(Some([255, 255, 255, 255]), iter.next());
             assert_eq!(None, iter.next());
+        }
+    }
+
+    mod rgba_image {
+        use anyhow::{anyhow, Result};
+        use image::{Rgba, RgbaImage};
+
+        use crate::plane::Plane;
+
+        #[test]
+        fn from() -> Result<()> {
+            fn generate_pixel(x: u32, y: u32) -> [u8; 4] {
+                [
+                    (x % 255) as u8,
+                    ((x + y) % 255) as u8,
+                    (y % 255) as u8,
+                    ((x + y) & 0xFF) as u8,
+                ]
+            }
+
+            let width = 20;
+            let height = 5;
+            let rgba_image = RgbaImage::from_fn(width, height, |x, y| Rgba(generate_pixel(x, y)));
+            let plane = Plane::from_rgba_image(rgba_image)?;
+
+            for x in 0..width {
+                for y in 0..height {
+                    let pixel = plane.pixel(x, y).ok_or(anyhow!("Out-off bound pixel"))?;
+
+                    assert_eq!(pixel, &generate_pixel(x, y), "x: {}, y: {}", x, y);
+                }
+            }
+
+            Ok(())
         }
     }
 }
