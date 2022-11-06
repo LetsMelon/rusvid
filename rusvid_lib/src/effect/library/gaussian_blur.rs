@@ -121,7 +121,7 @@ impl EffectLogic for GaussianBlur {
                         acc[1] += val.0[1] as f64 * weight;
                         acc[2] += val.0[2] as f64 * weight;
                         acc[3] += val.0[3] as f64 * weight;
-                        
+
                         acc
                     });
 

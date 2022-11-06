@@ -106,7 +106,7 @@ fn apply_effects(original: RgbaImage, effects: &Vec<Box<dyn EffectLogic>>) -> Re
     let mut back = original.clone();
 
     for effect in effects {
-        back = effect.apply(back)?;
+        back = effect.internal_apply(back)?;
     }
 
     Ok(back)
