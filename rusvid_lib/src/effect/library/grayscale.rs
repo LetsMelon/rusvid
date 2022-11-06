@@ -1,5 +1,5 @@
-use anyhow::Result;
-use image::{Rgba, RgbaImage};
+use anyhow::{anyhow, Result};
+use rusvid_core::plane::Plane;
 
 use crate::effect::{EffectLogic, Element, ID};
 
@@ -32,24 +32,24 @@ impl Element for GrayscaleEffect {
 }
 
 impl EffectLogic for GrayscaleEffect {
-    fn apply(&self, original: RgbaImage) -> Result<RgbaImage> {
-        let mut result = RgbaImage::new(original.width(), original.height());
+    fn apply(&self, original: Plane) -> Result<Plane> {
+        let mut result = Plane::new(original.width(), original.height())?;
 
         for x in 0..result.width() {
             for y in 0..result.height() {
-                let original_color = original.get_pixel(x, y);
+                let original_color = original.pixel(x, y).ok_or(anyhow!("Out off bound error"))?;
 
                 let grayscale_value = (original_color[0] as f32 * MULTIPLIER_RED
                     + original_color[1] as f32 * MULTIPLIER_GREEN
                     + original_color[2] as f32 * MULTIPLIER_BLUE)
                     as u8;
 
-                *result.get_pixel_mut(x, y) = Rgba([
+                *result.pixel_mut_unchecked(x, y) = [
                     grayscale_value,
                     grayscale_value,
                     grayscale_value,
                     original_color[3],
-                ]);
+                ];
             }
         }
 
