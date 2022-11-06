@@ -52,7 +52,7 @@ fn main() {
         //     [100, 10, 100, 255],
         //     [90, 12, 30, 255],
         // ]))
-        .add_effect(GrayscaleEffect::new())
+        // .add_effect(GrayscaleEffect::new())
         // .add_effect(BoxBlur::new(5).unwrap())
         // .add_effect(GaussianBlur::new(3.0))
         .build();
@@ -110,8 +110,8 @@ fn main() {
         )
         .unwrap(),
     ));
-    let _pixel_size = 20;
-    // layer.add_effect(PixelateEffect::new(pixel_size, pixel_size));
+    let pixel_size = 20;
+    layer.add_effect(PixelateEffect::new(pixel_size, pixel_size));
 
     let layer = composition.create_layer().unwrap();
     layer

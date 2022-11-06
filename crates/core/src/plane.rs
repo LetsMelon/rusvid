@@ -155,6 +155,18 @@ impl Plane {
     }
 
     #[inline]
+    pub fn put_pixel(&mut self, x: SIZE, y: SIZE, value: Pixel) -> Result<()> {
+        *self.pixel_mut(x, y).ok_or(anyhow!("Out off bound error"))? = value;
+
+        Ok(())
+    }
+
+    #[inline]
+    pub fn put_pixel_unchecked(&mut self, x: SIZE, y: SIZE, value: Pixel) {
+        *self.pixel_mut_unchecked(x, y) = value;
+    }
+
+    #[inline]
     pub fn pixels(&self) -> &[Pixel] {
         self.data.as_slice()
     }
