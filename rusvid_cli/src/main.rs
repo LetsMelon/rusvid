@@ -54,6 +54,7 @@ fn main() {
         // ]))
         // .add_effect(GrayscaleEffect::new())
         // .add_effect(BoxBlur::new(5).unwrap())
+        // .add_effect(GaussianBlur::new(3.0))
         .build();
 
     let layer = composition.create_layer().unwrap(); // Layer::new(composition.resolution());
