@@ -18,7 +18,7 @@ fn position_to_index(x: SIZE, y: SIZE, multi: SIZE) -> usize {
     (x + multi * y) as usize
 }
 
-/// Coordinate system used: <https://py.processing.org/tutorials/drawing/>
+/// Coordinate system used: <https://learn.adafruit.com/adafruit-gfx-graphics-library/coordinate-system-and-units>
 impl Plane {
     pub fn new(width: SIZE, height: SIZE) -> Result<Self> {
         if width == 0 {
