@@ -6,7 +6,7 @@ pub type Pixel = [u8; 4];
 
 pub type SIZE = u32;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Plane {
     width: SIZE,
     height: SIZE,
@@ -73,7 +73,7 @@ impl Plane {
     }
 
     /// Crates a `anyhow::Result<Plane>` from a `tiny_skia::Pixmap`
-    pub fn from_pixmap(pixmap: Pixmap) -> Result<Self> {
+    pub fn from_pixmap(pixmap: Pixmap) -> Self {
         let data = pixmap
             .pixels()
             .iter()
@@ -87,7 +87,11 @@ impl Plane {
             })
             .collect::<Vec<Pixel>>();
 
-        Self::from_data(pixmap.width(), pixmap.height(), data)
+        Plane {
+            width: pixmap.width(),
+            height: pixmap.height(),
+            data,
+        }
     }
 
     pub fn as_pixmap(self) -> Result<Pixmap> {
