@@ -1,5 +1,6 @@
-use anyhow::{anyhow, Result};
-use rusvid_core::plane::Plane;
+use anyhow::Result;
+use itertools::Itertools;
+use rusvid_core::plane::{Pixel, Plane};
 
 use crate::effect::{EffectLogic, Element, ID};
 
@@ -33,26 +34,25 @@ impl Element for GrayscaleEffect {
 
 impl EffectLogic for GrayscaleEffect {
     fn apply(&self, original: Plane) -> Result<Plane> {
-        let mut result = Plane::new(original.width(), original.height())?;
-
-        for x in 0..result.width() {
-            for y in 0..result.height() {
-                let original_color = original.pixel(x, y).ok_or(anyhow!("Out off bound error"))?;
-
+        let width = original.width();
+        let height = original.height();
+        let data = original
+            .into_iter()
+            .map(|original_color| {
                 let grayscale_value = (original_color[0] as f32 * MULTIPLIER_RED
                     + original_color[1] as f32 * MULTIPLIER_GREEN
                     + original_color[2] as f32 * MULTIPLIER_BLUE)
                     as u8;
 
-                *result.pixel_mut_unchecked(x, y) = [
+                [
                     grayscale_value,
                     grayscale_value,
                     grayscale_value,
                     original_color[3],
-                ];
-            }
-        }
+                ]
+            })
+            .collect();
 
-        Ok(result)
+        Ok(Plane::from_data_unchecked(width, height, data))
     }
 }
