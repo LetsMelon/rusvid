@@ -3,7 +3,7 @@ use std::path::Path;
 use std::process::Command;
 
 use anyhow::{bail, Result};
-use rusvid_core::plane::Plane;
+use rusvid_core::plane::{Pixel, Plane};
 use tiny_skia::Pixmap;
 
 use crate::composition::Composition;
@@ -14,72 +14,56 @@ pub mod ffmpeg;
 pub mod frame_image_format;
 
 fn combine_renders(width: u32, height: u32, images: Vec<Plane>) -> Result<Plane> {
-    let mut plane = Plane::new(width, height)?;
+    let images_as_data = images
+        .iter()
+        .map(|i| i.as_data())
+        .collect::<Vec<&Vec<Pixel>>>();
 
-    for x in 0..width {
-        for y in 0..height {
-            let mut r = 0;
-            let mut g = 0;
-            let mut b = 0;
-            let mut a = 0;
+    let data = (0..((width * height) as usize))
+        .map(|i| {
+            images_as_data.iter().fold([0_u8; 4], |acc, value| {
+                let value = value[i];
 
-            for layer_index in 0..images.len() {
-                let c = images[layer_index].pixel_unchecked(x, y);
-
-                let new_r = c[0] as u8;
-                let new_g = c[1] as u8;
-                let new_b = c[2] as u8;
-                let new_a = c[3] as u8;
-
-                match (a, new_a) {
-                    (0, 0) => (), // both colors are fully transparent -> do nothing
-                    (_, 0) => (), // new color is fully transparent -> do nothing
+                match (acc[3], value[3]) {
+                    (0, 0) => acc, // both colors are fully transparent -> do nothing
+                    (_, 0) => acc, // new color is fully transparent -> do nothing
                     // old color is transparent and the new color overrides it completely
-                    (0, _) => {
-                        r = new_r;
-                        g = new_g;
-                        b = new_b;
-                        a = new_a;
-                    }
+                    (0, _) => value,
                     // mix both colors into a new one
                     (255, 255) => {
                         // TODO add flag if the layer should override the old one or "merge", if merge then use calculation from beneath match closure
-                        r = new_r;
-                        g = new_g;
-                        b = new_b;
-                        a = new_a;
+                        value
                     }
                     // mix both colors into a new one
                     (_, _) => {
-                        let bg_r = (r as f64) / 255.0;
-                        let bg_g = (g as f64) / 255.0;
-                        let bg_b = (b as f64) / 255.0;
-                        let bg_a = (a as f64) / 255.0;
+                        let bg_r = (acc[0] as f64) / 255.0;
+                        let bg_g = (acc[1] as f64) / 255.0;
+                        let bg_b = (acc[2] as f64) / 255.0;
+                        let bg_a = (acc[3] as f64) / 255.0;
 
-                        let fg_r = (new_r as f64) / 255.0;
-                        let fg_g = (new_g as f64) / 255.0;
-                        let fg_b = (new_b as f64) / 255.0;
-                        let fg_a = (new_a as f64) / 255.0;
+                        let fg_r = (value[0] as f64) / 255.0;
+                        let fg_g = (value[1] as f64) / 255.0;
+                        let fg_b = (value[2] as f64) / 255.0;
+                        let fg_a = (value[3] as f64) / 255.0;
 
                         let mix_a = 1.0 - (1.0 - fg_a) * (1.0 - bg_a);
                         let mix_r = fg_r * fg_a / mix_a + bg_r * bg_a * (1.0 - fg_a) / mix_a;
                         let mix_g = fg_g * fg_a / mix_a + bg_g * bg_a * (1.0 - fg_a) / mix_a;
                         let mix_b = fg_b * fg_a / mix_a + bg_b * bg_a * (1.0 - fg_a) / mix_a;
 
-                        a = (mix_a * 255.0) as u8;
-                        r = (mix_r * 255.0) as u8;
-                        g = (mix_g * 255.0) as u8;
-                        b = (mix_b * 255.0) as u8;
+                        [
+                            (mix_r * 255.0) as u8,
+                            (mix_g * 255.0) as u8,
+                            (mix_b * 255.0) as u8,
+                            (mix_a * 255.0) as u8,
+                        ]
                     }
-                };
-            }
+                }
+            })
+        })
+        .collect();
 
-            let c = [r, g, b, a];
-            plane.put_pixel_unchecked(x, y, c);
-        }
-    }
-
-    Ok(plane)
+    Ok(Plane::from_data_unchecked(width, height, data))
 }
 
 fn apply_effects(original: Plane, effects: &Vec<Box<dyn EffectLogic>>) -> Result<Plane> {
