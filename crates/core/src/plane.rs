@@ -36,15 +36,23 @@ impl Plane {
     }
 
     pub fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Result<Self> {
-        let mut plane = Self::new(width, height)?;
-
-        if plane.width * plane.height != data.len() as SIZE {
+        if width * height != data.len() as SIZE {
             bail!("Data hasn't the right capacity");
         }
 
-        plane.data = data;
+        Ok(Self::from_data_unchecked(width, height, data))
+    }
 
-        Ok(plane)
+    pub fn from_data_unchecked(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Self {
+        Plane {
+            width,
+            height,
+            data,
+        }
+    }
+
+    pub fn as_data(&self) -> &Vec<Pixel> {
+        &self.data
     }
 
     /// Crates a `anyhow::Result<Plane>` from a `image::RgbaImage`
