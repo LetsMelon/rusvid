@@ -67,3 +67,81 @@ pub fn apply_effects(original: Plane, effects: &Vec<Box<dyn EffectLogic>>) -> Re
 
     Ok(back)
 }
+
+#[cfg(test)]
+mod tests {
+    fn generate_plane(width: u32, height: u32) -> Plane {
+        let data = (0..(width * height))
+            .map(|i| {
+                [
+                    i as u8,
+                    (i * 2) as u8,
+                    (i * 3) as u8,
+                    (100 - (i as isize)).abs() as u8,
+                ]
+            })
+            .collect();
+
+        Plane::from_data_unchecked(width, height, data)
+    }
+
+    use super::*;
+    mod apply_effects {
+        use super::{apply_effects, generate_plane};
+        use crate::effect::library::{BoxBlur, GrayscaleEffect};
+
+        #[test]
+        fn just_works() {
+            // What this test does:
+            // p -> grayscale -> test1 -> blur -> test2
+            // p -> grayscale & blur           -> test3
+            //                                 -> test2 == test3
+
+            let width = 6;
+            let height = 6;
+
+            let p = generate_plane(width, height);
+
+            let out_grayscale =
+                apply_effects(p.clone(), &vec![Box::new(GrayscaleEffect::new())]).unwrap();
+
+            // test1
+            assert_eq!(out_grayscale.as_data().len(), (width * height) as usize);
+            assert_ne!(p.as_data(), out_grayscale.as_data());
+
+            let out_grayscale_blur = apply_effects(
+                out_grayscale.clone(),
+                &vec![Box::new(BoxBlur::new(3).unwrap())],
+            )
+            .unwrap();
+
+            // test2
+            assert_eq!(
+                out_grayscale_blur.as_data().len(),
+                (width * height) as usize
+            );
+            assert_ne!(out_grayscale.as_data(), out_grayscale_blur.as_data());
+            assert_ne!(p.as_data(), out_grayscale_blur.as_data());
+
+            let out_list_grayscale_blur = apply_effects(
+                p.clone(),
+                &vec![
+                    Box::new(GrayscaleEffect::new()),
+                    Box::new(BoxBlur::new(3).unwrap()),
+                ],
+            )
+            .unwrap();
+
+            // test3
+            assert_eq!(
+                out_list_grayscale_blur.as_data().len(),
+                (width * height) as usize
+            );
+            assert_ne!(p.as_data(), out_list_grayscale_blur.as_data());
+            assert_eq!(
+                out_grayscale_blur.as_data(),
+                out_list_grayscale_blur.as_data()
+            );
+        }
+    }
+}
