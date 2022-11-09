@@ -72,16 +72,16 @@ fn renders_correctly_static() {
     let buffer = image_render.render_frame(&composition);
     if let Ok(buffer) = buffer {
         // Corners
-        assert_eq!(buffer.get_pixel(0, 0).0, [255, 0, 0, 255]);
-        assert_eq!(buffer.get_pixel(99, 0).0, [0, 255, 0, 255]);
-        assert_eq!(buffer.get_pixel(0, 99).0, [0, 0, 255, 255]);
-        assert_eq!(buffer.get_pixel(99, 99).0, [0, 0, 0, 0]);
+        assert_eq!(buffer.pixel_unchecked(0, 0), &[255, 0, 0, 255]);
+        assert_eq!(buffer.pixel_unchecked(99, 0), &[0, 255, 0, 255]);
+        assert_eq!(buffer.pixel_unchecked(0, 99), &[0, 0, 255, 255]);
+        assert_eq!(buffer.pixel_unchecked(99, 99), &[0, 0, 0, 0]);
 
         // Middle
-        assert_eq!(buffer.get_pixel(24, 24).0, [255, 0, 0, 255]);
-        assert_eq!(buffer.get_pixel(74, 24).0, [0, 255, 0, 255]);
-        assert_eq!(buffer.get_pixel(24, 74).0, [0, 0, 255, 255]);
-        assert_eq!(buffer.get_pixel(74, 74).0, [255, 240, 15, 255]);
+        assert_eq!(buffer.pixel_unchecked(24, 24), &[255, 0, 0, 255]);
+        assert_eq!(buffer.pixel_unchecked(74, 24), &[0, 255, 0, 255]);
+        assert_eq!(buffer.pixel_unchecked(24, 74), &[0, 0, 255, 255]);
+        assert_eq!(buffer.pixel_unchecked(74, 74), &[255, 240, 15, 255]);
     } else {
         assert!(false);
     }

@@ -1,5 +1,5 @@
 use anyhow::Result;
-use image::RgbaImage;
+use rusvid_core::plane::Plane;
 use rusvid_lib::composition::Composition;
 use rusvid_lib::renderer::Renderer;
 
@@ -21,7 +21,7 @@ impl Renderer for DummyRender {
 }
 
 impl DummyRender {
-    pub fn render_frame(&self, composition: &Composition) -> Result<RgbaImage> {
-        self.render_rgba_image(composition)
+    pub fn render_frame(&self, composition: &Composition) -> Result<Plane> {
+        self.render_single(composition)
     }
 }

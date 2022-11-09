@@ -42,7 +42,7 @@ impl EffectLogic for PixelateEffect {
         let pixels_count_width = original.width().div_ceil(self.pixel_width);
         let pixels_count_height = original.height().div_ceil(self.pixel_height);
 
-        let mut result = Plane::new(original.width(), original.height())?;
+        let mut result = original.clone();
 
         for x in 0..pixels_count_width {
             for y in 0..pixels_count_height {

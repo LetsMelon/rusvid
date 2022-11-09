@@ -47,15 +47,15 @@ fn renders_correctly_static() {
 
     match (frame_1, frame_2) {
         (Ok(frame_1), Ok(frame_2)) => {
-            assert_eq!(frame_1.get_pixel(0, 0).0, [255, 0, 0, 255]);
-            assert_eq!(frame_1.get_pixel(49, 49).0, [255, 0, 0, 255]);
-            assert_eq!(frame_1.get_pixel(50, 50).0, [0, 0, 0, 0]);
-            assert_eq!(frame_1.get_pixel(99, 99).0, [0, 0, 0, 0]);
+            assert_eq!(frame_1.pixel_unchecked(0, 0), &[255, 0, 0, 255]);
+            assert_eq!(frame_1.pixel_unchecked(49, 49), &[255, 0, 0, 255]);
+            assert_eq!(frame_1.pixel_unchecked(50, 50), &[0, 0, 0, 0]);
+            assert_eq!(frame_1.pixel_unchecked(99, 99), &[0, 0, 0, 0]);
 
-            assert_eq!(frame_2.get_pixel(0, 0).0, [0, 0, 0, 0]);
-            assert_eq!(frame_2.get_pixel(49, 49).0, [0, 0, 0, 0]);
-            assert_eq!(frame_2.get_pixel(50, 50).0, [255, 0, 0, 255]);
-            assert_eq!(frame_2.get_pixel(99, 99).0, [255, 0, 0, 255]);
+            assert_eq!(frame_2.pixel_unchecked(0, 0), &[0, 0, 0, 0]);
+            assert_eq!(frame_2.pixel_unchecked(49, 49), &[0, 0, 0, 0]);
+            assert_eq!(frame_2.pixel_unchecked(50, 50), &[255, 0, 0, 255]);
+            assert_eq!(frame_2.pixel_unchecked(99, 99), &[255, 0, 0, 255]);
         }
         (_, _) => assert!(false),
     };

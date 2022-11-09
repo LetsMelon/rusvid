@@ -1,5 +1,4 @@
 use anyhow::Result;
-use image::RgbaImage;
 use rusvid_core::plane::Plane;
 
 pub mod library;
@@ -13,13 +12,6 @@ pub trait Element {
 
 pub trait EffectLogic: std::fmt::Debug + Element {
     fn apply(&self, original: Plane) -> Result<Plane>;
-
-    // TODO remove after rusvid_lib uses `rusvid_core::plane::Plane` internal everywhere
-    fn internal_apply(&self, original: RgbaImage) -> Result<RgbaImage> {
-        Plane::from_rgba_image(original)
-            .and_then(|plane| self.apply(plane))
-            .and_then(|plane| plane.as_rgba_image())
-    }
 
     fn depends_on_other_effects_ids(&self) -> Vec<ID> {
         Vec::new()

@@ -227,4 +227,33 @@ mod tests {
             simple_test_ease_function!(Sine, ease_in_out);
         }
     }
+
+    mod implements_debug {
+        use crate::animation::prelude::*;
+
+        macro_rules! test_debug {
+            ($name:ident) => {
+                let function =
+                    $name::new(0, 100, crate::types::Point::ZERO, crate::types::Point::ONE)
+                        .unwrap();
+                let _ = format!("{:?}", function);
+                assert!(true);
+            };
+        }
+
+        #[test]
+        fn just_works() {
+            test_debug!(Back);
+            test_debug!(Bounce);
+            test_debug!(Circ);
+            test_debug!(Cubic);
+            test_debug!(Elastic);
+            test_debug!(Expo);
+            test_debug!(Linear);
+            test_debug!(Quad);
+            test_debug!(Quart);
+            test_debug!(Quint);
+            test_debug!(Sine);
+        }
+    }
 }
