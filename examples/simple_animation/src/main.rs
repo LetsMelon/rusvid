@@ -28,7 +28,12 @@ fn main() {
                 paint: Paint::Color(color_from_hex("#1212FF".to_string()).unwrap()),
                 ..Fill::default()
             }),
-            data: Rc::new(rect(rect_pos.x, rect_pos.y, rect_size.x, rect_size.y)),
+            data: Rc::new(rect(
+                rect_pos.x(),
+                rect_pos.y(),
+                rect_size.x(),
+                rect_size.y(),
+            )),
             ..Path::default()
         }))
         .unwrap();
@@ -39,7 +44,10 @@ fn main() {
             0,
             frames,
             rect_pos,
-            Point::new(resolution.x() - rect_size.x, resolution.y() - rect_size.y),
+            Point::new(
+                resolution.x() - rect_size.x(),
+                resolution.y() - rect_size.y(),
+            ),
             EaseType::InOut,
         )
         .unwrap(),

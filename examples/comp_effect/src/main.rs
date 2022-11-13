@@ -28,7 +28,7 @@ fn main() {
                 paint: Paint::Color(color_from_hex("#1212FF".to_string()).unwrap()),
                 ..Fill::default()
             }),
-            data: Rc::new(circle(circle_pos.x, circle_pos.y, circle_size.x)),
+            data: Rc::new(circle(circle_pos.x(), circle_pos.y(), circle_size.x())),
             ..Path::default()
         }))
         .unwrap();
@@ -39,7 +39,7 @@ fn main() {
             0,
             frames,
             circle_pos,
-            resolution.as_point() - (circle_size * 0.5),
+            resolution.as_point() - (circle_size * Point::new(0.5, 0.5)),
             EaseType::InOut,
         )
         .unwrap(),

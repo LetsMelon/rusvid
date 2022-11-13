@@ -59,10 +59,10 @@ fn main() {
             id: "bg_obj".to_string(),
             fill: background_layer.fill_with_link("bg"),
             data: Rc::new(rect(
-                start_pos.x,
-                start_pos.y,
-                resolution.as_point().x * 2.0,
-                resolution.as_point().y * 2.0,
+                start_pos.x(),
+                start_pos.y(),
+                resolution.as_point().x() * 2.0,
+                resolution.as_point().y() * 2.0,
             )),
             ..Path::default()
         }))
@@ -79,8 +79,8 @@ fn main() {
     let margin = Point::new(5.0, 5.0);
     let rect_size = (resolution.as_point() - (margin * (grid_size + Point::ONE))) / grid_size;
 
-    for x in 0..(grid_size.x as usize) {
-        for y in 0..(grid_size.y as usize) {
+    for x in 0..(grid_size.x() as usize) {
+        for y in 0..(grid_size.y() as usize) {
             let coordinates_as_point = Point::new(x as f64, y as f64);
             let extra_margin = margin * (coordinates_as_point + Point::ONE);
             let rect_pos = coordinates_as_point * rect_size + extra_margin;
@@ -92,7 +92,12 @@ fn main() {
                         paint: Paint::Color(Color::new_rgb(0, 0, 0)),
                         ..Fill::default()
                     }),
-                    data: Rc::new(rect(rect_pos.x, rect_pos.y, rect_size.x, rect_size.y)),
+                    data: Rc::new(rect(
+                        rect_pos.x(),
+                        rect_pos.y(),
+                        rect_size.x(),
+                        rect_size.y(),
+                    )),
                     ..Path::default()
                 }))
                 .unwrap();
