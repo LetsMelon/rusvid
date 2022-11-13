@@ -5,8 +5,8 @@ macro_rules! generate_ease_struct {
         pub struct $struct_name {
             start_frame: usize,
             end_frame: usize,
-            start: crate::types::Point,
-            end: crate::types::Point,
+            start: rusvid_core::point::Point,
+            end: rusvid_core::point::Point,
 
             ease_type: crate::animation::curves::EaseType,
 
@@ -19,8 +19,8 @@ macro_rules! generate_ease_struct {
             fn new(
                 start_frame: usize,
                 end_frame: usize,
-                start: crate::types::Point,
-                end: crate::types::Point,
+                start: rusvid_core::point::Point,
+                end: rusvid_core::point::Point,
             ) -> anyhow::Result<Self>
             where
                 Self: Sized,
@@ -33,70 +33,70 @@ macro_rules! generate_ease_struct {
                     start,
                     end,
                     ease_type: crate::animation::curves::EaseType::default(),
-                    d_x: delta.x,
-                    d_y: delta.y,
+                    d_x: delta.x(),
+                    d_y: delta.y(),
                     d_t: (end_frame - start_frame) as f64,
                 })
             }
 
-            fn calc_ease_in(&self, frame_number: usize) -> crate::types::Point {
+            fn calc_ease_in(&self, frame_number: usize) -> rusvid_core::point::Point {
                 use easer::functions::Easing;
 
                 let frame_number = (frame_number - self.start_frame) as f64;
 
                 let x = easer::functions::$struct_name::ease_in(
                     frame_number,
-                    self.start.x,
+                    self.start.x(),
                     self.d_x,
                     self.d_t,
                 );
                 let y = easer::functions::$struct_name::ease_in(
                     frame_number,
-                    self.start.y,
+                    self.start.y(),
                     self.d_y,
                     self.d_t,
                 );
-                crate::types::Point::new(x, y)
+                rusvid_core::point::Point::new(x, y)
             }
 
-            fn calc_ease_out(&self, frame_number: usize) -> crate::types::Point {
+            fn calc_ease_out(&self, frame_number: usize) -> rusvid_core::point::Point {
                 use easer::functions::Easing;
 
                 let frame_number = (frame_number - self.start_frame) as f64;
 
                 let x = easer::functions::$struct_name::ease_out(
                     frame_number,
-                    self.start.x,
+                    self.start.x(),
                     self.d_x,
                     self.d_t,
                 );
                 let y = easer::functions::$struct_name::ease_out(
                     frame_number,
-                    self.start.y,
+                    self.start.y(),
                     self.d_y,
                     self.d_t,
                 );
-                crate::types::Point::new(x, y)
+                rusvid_core::point::Point::new(x, y)
             }
 
-            fn calc_ease_in_out(&self, frame_number: usize) -> crate::types::Point {
+            fn calc_ease_in_out(&self, frame_number: usize) -> rusvid_core::point::Point {
                 use easer::functions::Easing;
 
                 let frame_number = (frame_number - self.start_frame) as f64;
 
                 let x = easer::functions::$struct_name::ease_in_out(
                     frame_number,
-                    self.start.x,
+                    self.start.x(),
                     self.d_x,
                     self.d_t,
                 );
                 let y = easer::functions::$struct_name::ease_in_out(
                     frame_number,
-                    self.start.y,
+                    self.start.y(),
                     self.d_y,
                     self.d_t,
                 );
-                crate::types::Point::new(x, y)
+                rusvid_core::point::Point::new(x, y)
             }
 
             fn start_frame(&self) -> usize {
@@ -111,11 +111,11 @@ macro_rules! generate_ease_struct {
                 self.d_t as usize
             }
 
-            fn start(&self) -> crate::types::Point {
+            fn start(&self) -> rusvid_core::point::Point {
                 self.start
             }
 
-            fn end(&self) -> crate::types::Point {
+            fn end(&self) -> rusvid_core::point::Point {
                 self.end
             }
 
@@ -123,7 +123,7 @@ macro_rules! generate_ease_struct {
                 self.ease_type = ease_type;
             }
 
-            fn calc_raw(&self, frame_number: usize) -> crate::types::Point {
+            fn calc_raw(&self, frame_number: usize) -> rusvid_core::point::Point {
                 match &self.ease_type {
                     crate::animation::curves::EaseType::In => self.calc_ease_in(frame_number),
                     crate::animation::curves::EaseType::Out => self.calc_ease_out(frame_number),
@@ -131,7 +131,7 @@ macro_rules! generate_ease_struct {
                 }
             }
 
-            fn delta_raw(&self, frame_number: usize) -> crate::types::Point {
+            fn delta_raw(&self, frame_number: usize) -> rusvid_core::point::Point {
                 self.calc_raw(frame_number) - self.calc_raw(frame_number - 1)
             }
         }
@@ -155,9 +155,9 @@ mod tests {
     #[cfg(test)]
     mod start_is_start_value_and_end_is_end_value {
         use approx::assert_abs_diff_eq;
+        use rusvid_core::point::Point;
 
         use crate::animation::prelude::*;
-        use crate::types::Point;
 
         const FRAME_START: usize = 10;
         const FRAME_END: usize = 30;
@@ -233,9 +233,13 @@ mod tests {
 
         macro_rules! test_debug {
             ($name:ident) => {
-                let function =
-                    $name::new(0, 100, crate::types::Point::ZERO, crate::types::Point::ONE)
-                        .unwrap();
+                let function = $name::new(
+                    0,
+                    100,
+                    rusvid_core::point::Point::ZERO,
+                    rusvid_core::point::Point::ONE,
+                )
+                .unwrap();
                 let _ = format!("{:?}", function);
                 assert!(true);
             };

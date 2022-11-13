@@ -52,7 +52,7 @@ fn main() {
         //     [100, 10, 100, 255],
         //     [90, 12, 30, 255],
         // ]))
-        // .add_effect(GrayscaleEffect::new())
+        .add_effect(GrayscaleEffect::new())
         // .add_effect(BoxBlur::new(5).unwrap())
         // .add_effect(GaussianBlur::new(3.0))
         .build();
@@ -95,7 +95,7 @@ fn main() {
                 ..Stroke::default()
             }),
             rendering_mode: Default::default(),
-            data: Rc::new(circle(circle_position.x, circle_position.y, 600.0)),
+            data: Rc::new(circle(circle_position.x(), circle_position.y(), 600.0)),
             ..Path::default()
         }))
         .unwrap();
@@ -164,8 +164,8 @@ fn main() {
                 }
             },
             data: Rc::new(rect(
-                pixel_position.x,
-                pixel_position.y,
+                pixel_position.x(),
+                pixel_position.y(),
                 resolution.x() / 2.0,
                 resolution.y() / 3.0,
             )),

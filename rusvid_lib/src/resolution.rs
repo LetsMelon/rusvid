@@ -1,7 +1,8 @@
+use rusvid_core::point::{AsPoint, Point};
+
 use crate::{
     metrics::{MetricsSize, MetricsVideo},
-    prelude::AsPoint,
-    types::{Point, ResolutionType},
+    types::ResolutionType,
 };
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
