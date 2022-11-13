@@ -684,6 +684,8 @@ name = "rusvid_core"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "approx",
+ "glam",
  "image",
  "tiny-skia",
 ]
@@ -729,6 +731,13 @@ checksum = "9c8132065adcfd6e02db789d9285a0deb2f3fcb04002865ab67d5fb103533898"
 
 [[package]]
 name = "simple_animation"
+version = "0.1.0"
+dependencies = [
+ "rusvid_lib",
+]
+
+[[package]]
+name = "simple_effect"
 version = "0.1.0"
 dependencies = [
  "rusvid_lib",
