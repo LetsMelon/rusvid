@@ -36,7 +36,7 @@ pub fn arc_segment(position: Point, radius: f64, a1: f64, a2: f64) -> (PathSegme
             x: p4x,
             y: p4y,
         },
-        Point::new(p1x, p1y)
+        Point::new(p1x, p1y),
     )
 }
 

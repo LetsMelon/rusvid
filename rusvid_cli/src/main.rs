@@ -164,10 +164,8 @@ fn main() {
                 }
             },
             data: Rc::new(rect(
-                pixel_position.x(),
-                pixel_position.y(),
-                resolution.x() / 2.0,
-                resolution.y() / 3.0,
+                pixel_position,
+                resolution.as_point() / Point::new(2.0, 3.0),
             )),
             ..Path::default()
         }))
