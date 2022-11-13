@@ -1,6 +1,5 @@
 use anyhow::Result;
-use itertools::Itertools;
-use rusvid_core::plane::{Pixel, Plane};
+use rusvid_core::plane::Plane;
 
 use crate::effect::{EffectLogic, Element, ID};
 
