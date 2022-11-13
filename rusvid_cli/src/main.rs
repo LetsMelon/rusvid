@@ -95,7 +95,7 @@ fn main() {
                 ..Stroke::default()
             }),
             rendering_mode: Default::default(),
-            data: Rc::new(circle(circle_position.x(), circle_position.y(), 600.0)),
+            data: Rc::new(circle(circle_position, 600.0)),
             ..Path::default()
         }))
         .unwrap();
