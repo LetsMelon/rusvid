@@ -737,13 +737,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "simple_effect"
-version = "0.1.0"
-dependencies = [
- "rusvid_lib",
-]
-
-[[package]]
 name = "simple_path"
 version = "0.1.0"
 dependencies = [
