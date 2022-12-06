@@ -187,6 +187,14 @@ impl Plane {
     pub fn pixels_mut(&mut self) -> &mut [Pixel] {
         self.data.as_mut_slice()
     }
+
+    pub fn into_coordinate_iter(self) -> CoordinateIterator {
+        CoordinateIterator {
+            plane: self,
+            x: 0,
+            y: 0,
+        }
+    }
 }
 
 impl IntoIterator for Plane {
@@ -217,6 +225,43 @@ impl Iterator for PlaneIntoIterator {
 
         if result.is_some() {
             self.index += 1;
+        }
+
+        result
+    }
+}
+
+pub struct CoordinateIterator {
+    plane: Plane,
+    x: SIZE,
+    y: SIZE,
+}
+
+pub struct CoordinateIteratorItem {
+    pub pixel: Pixel,
+    pub x: SIZE,
+    pub y: SIZE,
+}
+
+impl Iterator for CoordinateIterator {
+    type Item = CoordinateIteratorItem;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = self
+            .plane
+            .data
+            .get(position_to_index(self.x, self.y, self.plane.width))
+            .and_then(|p| {
+                Some(CoordinateIteratorItem {
+                    pixel: *p,
+                    x: self.x,
+                    y: self.y,
+                })
+            });
+
+        if result.is_some() {
+            self.x = (self.x + 1) % self.plane.width;
+            self.y = (self.y + 1) % self.plane.height;
         }
 
         result
