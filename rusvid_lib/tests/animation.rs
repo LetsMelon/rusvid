@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use rusvid_core::point::Point;
 use rusvid_lib::animation::prelude::*;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
@@ -26,7 +27,7 @@ fn renders_correctly_static() {
                 paint: Paint::Color(color_from_hex("ff0000".to_string()).unwrap()),
                 ..Fill::default()
             }),
-            data: Rc::new(rect(0.0, 0.0, 50.0, 50.0)),
+            data: Rc::new(rect(Point::ZERO, Point::new(50.0, 50.0))),
             ..Path::default()
         }))
         .unwrap();

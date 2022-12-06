@@ -99,7 +99,7 @@ impl UlpsEq for Point {
 }
 
 macro_rules! implement_math_operator {
-    ($operant:ident, $fct:ident) => {
+    ($operant:ident, $fct:ident, point for point) => {
         impl std::ops::$operant<Point> for Point {
             type Output = Point;
             #[inline]
@@ -108,39 +108,61 @@ macro_rules! implement_math_operator {
             }
         }
     };
+    ($operant:ident, $fct:ident, f64 for point) => {
+        impl std::ops::$operant<f64> for Point {
+            type Output = Point;
+            #[inline]
+            fn $fct(self, rhs: f64) -> Self::Output {
+                Point(self.0.$fct(rhs))
+            }
+        }
+    };
+    ($operant:ident, $fct:ident, point for f64) => {
+        impl std::ops::$operant<Point> for f64 {
+            type Output = Point;
+            #[inline]
+            fn $fct(self, rhs: Self::Output) -> Self::Output {
+                Point(DVec2 {
+                    x: self.$fct(rhs.x()),
+                    y: self.$fct(rhs.y()),
+                })
+            }
+        }
+    };
 }
 
-implement_math_operator!(Div, div);
-implement_math_operator!(Mul, mul);
-implement_math_operator!(Add, add);
-implement_math_operator!(Sub, sub);
-implement_math_operator!(Rem, rem);
+implement_math_operator!(Add, add, f64 for point);
+implement_math_operator!(Add, add, point for f64);
+implement_math_operator!(Add, add, point for point);
+
+implement_math_operator!(Div, div, f64 for point);
+implement_math_operator!(Div, div, point for f64);
+implement_math_operator!(Div, div, point for point);
+
+implement_math_operator!(Mul, mul, f64 for point);
+implement_math_operator!(Mul, mul, point for f64);
+implement_math_operator!(Mul, mul, point for point);
+
+implement_math_operator!(Rem, rem, f64 for point);
+implement_math_operator!(Rem, rem, point for f64);
+implement_math_operator!(Rem, rem, point for point);
+
+implement_math_operator!(Sub, sub, f64 for point);
+implement_math_operator!(Sub, sub, point for f64);
+implement_math_operator!(Sub, sub, point for point);
 
 /*
+! missing from `glam::DVec2`
 impl DivAssign<DVec2> for DVec2 {...}
-impl Div<f64> for DVec2 {...}
 impl DivAssign<f64> for DVec2 {...}
-impl Div<DVec2> for f64 {...}
-
 impl MulAssign<DVec2> for DVec2 {...}
-impl Mul<f64> for DVec2 {...}
 impl MulAssign<f64> for DVec2 {...}
-impl Mul<DVec2> for f64 {...}
-
 impl AddAssign<DVec2> for DVec2 {...}
-impl Add<f64> for DVec2 {...}
 impl AddAssign<f64> for DVec2 {...}
-impl Add<DVec2> for f64 {...}
-
 impl SubAssign<DVec2> for DVec2 {...}
-impl Sub<f64> for DVec2 {...}
 impl SubAssign<f64> for DVec2 {...}
-impl Sub<DVec2> for f64 {...}
-
 impl RemAssign<DVec2> for DVec2 {...}
-impl Rem<f64> for DVec2 {...}
 impl RemAssign<f64> for DVec2 {...}
-impl Rem<DVec2> for f64 {...}
  */
 
 /// Trait to transform struct into a [crate::types::Point]
