@@ -39,6 +39,11 @@ fn path_like_to_path_segment(path: &Vec<PathLike>) -> Vec<PathSegment> {
     path.iter().map(|p| p.to_usvg_path_segment()).collect()
 }
 
+#[derive(Debug)]
+pub enum Transform {
+    Move(Point),
+}
+
 impl Object {
     pub fn render(&self, width: SIZE, height: SIZE) -> Result<Plane> {
         let size = Size::new(width as f64, height as f64)
@@ -84,5 +89,25 @@ impl Object {
         );
 
         Ok(Plane::from_pixmap(pixmap))
+    }
+
+    pub fn transform(&mut self, transformation: Transform) -> Result<()> {
+        match transformation {
+            Transform::Move(point) => match &mut self.data {
+                Types::Svg(svg) => {
+                    svg.path = svg
+                        .path
+                        .iter()
+                        .map(|p| match p {
+                            PathLike::Move(og_p) => PathLike::Move(*og_p + point),
+                            PathLike::Line(og_p) => PathLike::Line(*og_p + point),
+                            PathLike::Close => PathLike::Close,
+                        })
+                        .collect::<Vec<_>>()
+                }
+            },
+        };
+
+        Ok(())
     }
 }

@@ -9,7 +9,7 @@ fn main() {
     path.push(PathLike::Line(Point::new(100.0, 200.0)));
     path.push(PathLike::Close);
 
-    let object = Object {
+    let mut object = Object {
         id: "custom_obj".to_string(),
         data: Types::Svg(Svg { path: path }),
     };
@@ -18,5 +18,12 @@ fn main() {
 
     let plane = object.render(1000, 1000).unwrap();
     let rgba_image = plane.as_rgba_image().unwrap();
-    rgba_image.save("test_img.jpg").unwrap();
+    rgba_image.save("test_img_og.jpg").unwrap();
+
+    object
+        .transform(Transform::Move(Point::new(100.0, 100.0)))
+        .unwrap();
+    let plane = object.render(1000, 1000).unwrap();
+    let rgba_image = plane.as_rgba_image().unwrap();
+    rgba_image.save("test_img_new.jpg").unwrap();
 }
