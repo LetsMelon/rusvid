@@ -62,7 +62,7 @@ mod tests {
     use super::*;
 
     // ! copied from rusvid_lib/src/utils.rs:51
-    pub(crate) fn equal_delta(v1: f64, v2: f64, delta: f64) -> bool {
+    fn equal_delta(v1: f64, v2: f64, delta: f64) -> bool {
         let diff = (v1 - v2).abs();
         diff <= delta.abs()
     }
@@ -162,5 +162,16 @@ mod tests {
             assert_ne!(PathLike::Move(Point::ONE), PathLike::Move(Point::NEG_ONE));
             assert_ne!(PathLike::Line(Point::ZERO), PathLike::Line(Point::NEG_ONE));
         }
+    }
+
+    #[test]
+    fn type_equal() {
+        assert!(PathLike::Move(Point::ONE).type_equal(&PathLike::Move(Point::ZERO)));
+        assert!(PathLike::Line(Point::ONE).type_equal(&PathLike::Line(Point::ZERO)));
+        assert!(PathLike::Close.type_equal(&PathLike::Close));
+
+        assert!(!PathLike::Move(Point::ONE).type_equal(&PathLike::Line(Point::ZERO)));
+        assert!(!PathLike::Line(Point::ONE).type_equal(&PathLike::Close));
+        assert!(!PathLike::Close.type_equal(&PathLike::Move(Point::ZERO)));
     }
 }
