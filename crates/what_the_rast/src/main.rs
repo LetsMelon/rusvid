@@ -1,6 +1,12 @@
 use rusvid_core::point::Point;
 use what_the_rast::*;
 
+fn render_and_save<P: AsRef<std::path::Path>>(object: &Object, path: P) {
+    let plane = object.render(1000, 1000).unwrap();
+    let rgba_image = plane.as_rgba_image().unwrap();
+    rgba_image.save(path).unwrap();
+}
+
 fn main() {
     let mut path = Vec::new();
     path.push(PathLike::Move(Point::new(100.0, 100.0)));
@@ -19,26 +25,18 @@ fn main() {
 
     println!("{:?}", object);
 
-    let plane = object.render(1000, 1000).unwrap();
-    let rgba_image = plane.as_rgba_image().unwrap();
-    rgba_image.save("test_img.jpg").unwrap();
+    render_and_save(&object, "test_img.jpg");
 
     object
         .transform(Transform::Move(Point::new(100.0, 100.0)))
         .unwrap();
-    let plane = object.render(1000, 1000).unwrap();
-    let rgba_image = plane.as_rgba_image().unwrap();
-    rgba_image.save("test_img_after_move.jpg").unwrap();
+    render_and_save(&object, "test_img_after_move.jpg");
 
     object
         .transform(Transform::Color(ColorLike::Color([0, 255, 200, 255])))
         .unwrap();
-    let plane = object.render(1000, 1000).unwrap();
-    let rgba_image = plane.as_rgba_image().unwrap();
-    rgba_image.save("test_img_after_color.jpg").unwrap();
+    render_and_save(&object, "test_img_after_color.jpg");
 
     object.transform(Transform::Visibility(false)).unwrap();
-    let plane = object.render(1000, 1000).unwrap();
-    let rgba_image = plane.as_rgba_image().unwrap();
-    rgba_image.save("test_img_after_visibility.jpg").unwrap();
+    render_and_save(&object, "test_img_after_visibility.jpg");
 }
