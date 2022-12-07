@@ -17,10 +17,7 @@ fn main() {
 
     let mut object = Object::new(
         "custom_obj".to_string(),
-        TypesLike::Svg(Svg {
-            path,
-            fill_color: ColorLike::Color([255, 100, 100, 255]),
-        }),
+        TypesLike::Svg(Svg::new(path, ColorLike::Color([255, 100, 100, 255]))),
     );
 
     println!("{:?}", object);

@@ -9,8 +9,8 @@ use crate::{ColorLike, PathLike, Transform, TypesLike};
 
 #[derive(Debug)]
 pub struct Object {
-    pub data: TypesLike,
-    pub id: String,
+    data: TypesLike,
+    id: String,
     visibility: bool,
 }
 
