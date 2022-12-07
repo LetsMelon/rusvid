@@ -33,6 +33,7 @@ pub enum Types {
 pub struct Object {
     pub data: Types,
     pub id: String,
+    visibility: bool,
 }
 
 fn path_like_to_path_segment(path: &Vec<PathLike>) -> Vec<PathSegment> {
@@ -42,9 +43,18 @@ fn path_like_to_path_segment(path: &Vec<PathLike>) -> Vec<PathSegment> {
 #[derive(Debug)]
 pub enum Transform {
     Move(Point),
+    Visibility(bool),
 }
 
 impl Object {
+    pub fn new(id: String, data: Types) -> Self {
+        Object {
+            data,
+            id,
+            visibility: true,
+        }
+    }
+
     pub fn render(&self, width: SIZE, height: SIZE) -> Result<Plane> {
         let size = Size::new(width as f64, height as f64)
             .context("Width oder height must be greater 0")?;
@@ -75,6 +85,11 @@ impl Object {
                 opacity: Opacity::new(1.0),
                 ..Default::default()
             }),
+            visibility: if self.visibility {
+                usvg::Visibility::Visible
+            } else {
+                usvg::Visibility::Hidden
+            },
             data: Rc::new(path),
             ..Default::default()
         }));
@@ -103,9 +118,10 @@ impl Object {
                             PathLike::Line(og_p) => PathLike::Line(*og_p + point),
                             PathLike::Close => PathLike::Close,
                         })
-                        .collect::<Vec<_>>()
+                        .collect::<Vec<PathLike>>()
                 }
             },
+            Transform::Visibility(visibility) => self.visibility = visibility,
         };
 
         Ok(())

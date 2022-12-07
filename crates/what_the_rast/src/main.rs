@@ -9,21 +9,23 @@ fn main() {
     path.push(PathLike::Line(Point::new(100.0, 200.0)));
     path.push(PathLike::Close);
 
-    let mut object = Object {
-        id: "custom_obj".to_string(),
-        data: Types::Svg(Svg { path: path }),
-    };
+    let mut object = Object::new("custom_obj".to_string(), Types::Svg(Svg { path }));
 
     println!("{:?}", object);
 
     let plane = object.render(1000, 1000).unwrap();
     let rgba_image = plane.as_rgba_image().unwrap();
-    rgba_image.save("test_img_og.jpg").unwrap();
+    rgba_image.save("test_img.jpg").unwrap();
 
     object
         .transform(Transform::Move(Point::new(100.0, 100.0)))
         .unwrap();
     let plane = object.render(1000, 1000).unwrap();
     let rgba_image = plane.as_rgba_image().unwrap();
-    rgba_image.save("test_img_new.jpg").unwrap();
+    rgba_image.save("test_img_after_move.jpg").unwrap();
+
+    object.transform(Transform::Visibility(false)).unwrap();
+    let plane = object.render(1000, 1000).unwrap();
+    let rgba_image = plane.as_rgba_image().unwrap();
+    rgba_image.save("test_img_after_visibility.jpg").unwrap();
 }
