@@ -42,6 +42,10 @@ impl PathLike {
             PathLike::Close => PathSegment::ClosePath,
         }
     }
+
+    pub fn to_usvg_path_segments(path: &Vec<PathLike>) -> Vec<PathSegment> {
+        path.iter().map(|p| p.to_usvg_path_segment()).collect()
+    }
 }
 
 #[cfg(test)]

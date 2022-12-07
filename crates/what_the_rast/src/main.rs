@@ -1,5 +1,5 @@
 use rusvid_core::point::Point;
-use what_the_rast::{path_like::PathLike, *};
+use what_the_rast::*;
 
 fn main() {
     let mut path = Vec::new();
@@ -9,7 +9,7 @@ fn main() {
     path.push(PathLike::Line(Point::new(100.0, 200.0)));
     path.push(PathLike::Close);
 
-    let mut object = Object::new("custom_obj".to_string(), Types::Svg(Svg { path }));
+    let mut object = Object::new("custom_obj".to_string(), TypesLike::Svg(Svg { path }));
 
     println!("{:?}", object);
 
