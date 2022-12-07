@@ -6,5 +6,6 @@ use crate::ColorLike;
 pub enum Transform {
     Visibility(bool),
     Move(Point),
+    Position(Point),
     Color(ColorLike),
 }

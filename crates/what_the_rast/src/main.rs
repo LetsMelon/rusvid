@@ -37,6 +37,11 @@ fn main() {
         .unwrap();
     render_and_save(&object, "test_img_after_color.jpg");
 
+    object
+        .transform(Transform::Position(Point::new(0.0, 0.0)))
+        .unwrap();
+    render_and_save(&object, "test_img_after_position.jpg");
+
     object.transform(Transform::Visibility(false)).unwrap();
     render_and_save(&object, "test_img_after_visibility.jpg");
 }

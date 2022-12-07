@@ -106,6 +106,24 @@ impl Object {
                     svg.fill_color = color;
                 }
             },
+            Transform::Position(position) => match &mut self.data {
+                TypesLike::Svg(svg) => match svg.path[0] {
+                    PathLike::Move(point) => {
+                        let offset = position - point;
+
+                        svg.path = svg
+                            .path
+                            .iter()
+                            .map(|p| match p {
+                                PathLike::Move(og_p) => PathLike::Move(*og_p + offset),
+                                PathLike::Line(og_p) => PathLike::Line(*og_p + offset),
+                                PathLike::Close => PathLike::Close,
+                            })
+                            .collect::<Vec<PathLike>>();
+                    }
+                    _ => todo!(),
+                },
+            },
         };
 
         Ok(())

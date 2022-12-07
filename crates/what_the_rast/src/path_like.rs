@@ -46,6 +46,15 @@ impl PathLike {
     pub fn to_usvg_path_segments(path: &Vec<PathLike>) -> Vec<PathSegment> {
         path.iter().map(|p| p.to_usvg_path_segment()).collect()
     }
+
+    pub fn type_equal(&self, other: &PathLike) -> bool {
+        match (self, other) {
+            (PathLike::Move(_), PathLike::Move(_))
+            | (PathLike::Line(_), PathLike::Line(_))
+            | (PathLike::Close, PathLike::Close) => true,
+            _ => false,
+        }
+    }
 }
 
 #[cfg(test)]
