@@ -42,6 +42,14 @@ fn main() {
         .unwrap();
     render_and_save(&object, "test_img_after_position.jpg");
 
+    object
+        .transforms(vec![
+            Transform::Move(Point::new(400.0, 400.0)),
+            Transform::Color(ColorLike::Color([100, 100, 255, 255])),
+        ])
+        .unwrap();
+    render_and_save(&object, "test_img_after_transformations.jpg");
+
     object.transform(Transform::Visibility(false)).unwrap();
     render_and_save(&object, "test_img_after_visibility.jpg");
 }

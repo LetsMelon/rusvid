@@ -128,4 +128,12 @@ impl Object {
 
         Ok(())
     }
+
+    pub fn transforms(&mut self, transformations: Vec<Transform>) -> Result<()> {
+        for transformation in transformations.iter() {
+            self.transform(*transformation)?;
+        }
+
+        Ok(())
+    }
 }
