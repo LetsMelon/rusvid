@@ -9,7 +9,13 @@ fn main() {
     path.push(PathLike::Line(Point::new(100.0, 200.0)));
     path.push(PathLike::Close);
 
-    let mut object = Object::new("custom_obj".to_string(), TypesLike::Svg(Svg { path }));
+    let mut object = Object::new(
+        "custom_obj".to_string(),
+        TypesLike::Svg(Svg {
+            path,
+            fill_color: ColorLike::Color([255, 100, 100, 255]),
+        }),
+    );
 
     println!("{:?}", object);
 
@@ -23,6 +29,13 @@ fn main() {
     let plane = object.render(1000, 1000).unwrap();
     let rgba_image = plane.as_rgba_image().unwrap();
     rgba_image.save("test_img_after_move.jpg").unwrap();
+
+    object
+        .transform(Transform::Color(ColorLike::Color([0, 255, 200, 255])))
+        .unwrap();
+    let plane = object.render(1000, 1000).unwrap();
+    let rgba_image = plane.as_rgba_image().unwrap();
+    rgba_image.save("test_img_after_color.jpg").unwrap();
 
     object.transform(Transform::Visibility(false)).unwrap();
     let plane = object.render(1000, 1000).unwrap();

@@ -1,7 +1,7 @@
-use crate::path_like::PathLike;
+use crate::{path_like::PathLike, ColorLike};
 
 #[derive(Debug)]
 pub struct Svg {
     pub path: Vec<PathLike>,
-    // pub fill_color: Option<ColorLike>,
+    pub fill_color: ColorLike,
 }

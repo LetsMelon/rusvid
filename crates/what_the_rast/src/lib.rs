@@ -48,21 +48,32 @@ impl Object {
         let usvg_path = match &self.data {
             TypesLike::Svg(svg) => PathLike::to_usvg_path_segments(&svg.path),
         };
-
         let mut path = PathData::with_capacity(usvg_path.len());
         path.extend_from_slice(&usvg_path);
 
+        let color = if let TypesLike::Svg(svg) = &self.data {
+            let channels = if let ColorLike::Color(c) = &svg.fill_color {
+                Some(*c)
+            } else {
+                None
+            };
+
+            channels.map(|channels| usvg::Fill {
+                paint: usvg::Paint::Color(usvg::Color {
+                    red: channels[0],
+                    green: channels[1],
+                    blue: channels[2],
+                }),
+                opacity: Opacity::new((channels[3] as f64) / 255.0),
+                ..Default::default()
+            })
+        } else {
+            None
+        };
+
         tree.root().append_kind(usvg::NodeKind::Path(usvg::Path {
             id: self.id.clone(),
-            fill: Some(usvg::Fill {
-                paint: usvg::Paint::Color(usvg::Color {
-                    red: 200,
-                    green: 0,
-                    blue: 0,
-                }),
-                opacity: Opacity::new(1.0),
-                ..Default::default()
-            }),
+            fill: color,
             visibility: if self.visibility {
                 usvg::Visibility::Visible
             } else {
@@ -100,6 +111,11 @@ impl Object {
                 }
             },
             Transform::Visibility(visibility) => self.visibility = visibility,
+            Transform::Color(color) => match &mut self.data {
+                TypesLike::Svg(svg) => {
+                    svg.fill_color = color;
+                }
+            },
         };
 
         Ok(())
