@@ -16,4 +16,7 @@ pub enum Transform {
 
     /// Set the color of the object to `ColorLike`
     Color(ColorLike),
+    // TODO's
+    // Rotate(f32), // Rotate by angle
+    // Scale(Point), // Scale x by Point.x and y by Point.y
 }
