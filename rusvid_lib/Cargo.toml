@@ -11,16 +11,16 @@ keywords = ["svg", "graphics", "animation"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.66"
+anyhow = { workspace = true }
 easer = { git = "https://github.com/orhanbalci/rust-easing", rev = "872ea2c" }
 glam = { version = "0.22.0", features = ["approx"] }
-image = { version = "0.24", default-features = false, features = ["png", "bmp", "jpeg"] }
+image = { workspace = true, features = ["png", "bmp", "jpeg"] }
 itertools = "0.10.5"
 log = "0.4"
-resvg = "0.23.0"
+resvg = { workspace = true }
 rusvid_core = { path = "../crates/core" }
-tiny-skia = "0.6.5"
-usvg = "0.23.0"
+tiny-skia = { workspace = true }
+usvg = { workspace = true }
 
 [dev-dependencies]
 rayon = "*"
