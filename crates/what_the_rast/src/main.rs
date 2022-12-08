@@ -56,19 +56,7 @@ fn main_path() {
 
 fn main_image() -> Result<()> {
     let png = image::io::Reader::open("crates/what_the_rast/data/cat.jpg")?.decode()?;
-
-    let width = png.width();
-    let height = png.height();
-
-    let data = png
-        .as_bytes()
-        .clone()
-        .iter()
-        .array_chunks()
-        .map(|[r, g, b]| [*r, *g, *b, 255])
-        .collect::<Vec<_>>();
-
-    let cat_image = Plane::from_data(width, height, data)?;
+    let cat_image = Plane::from_dynamic_image(png)?;
 
     let image_holder = ImageHolder::new_fit(Point::new(500.0, 300.0), cat_image);
 

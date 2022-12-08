@@ -1,5 +1,5 @@
 use anyhow::{anyhow, bail, Result};
-use image::RgbaImage;
+use image::{DynamicImage, RgbaImage};
 use tiny_skia::Pixmap;
 
 pub type Pixel = [u8; 4];
@@ -78,6 +78,20 @@ impl Plane {
 
         RgbaImage::from_vec(self.width(), self.height(), buf)
             .ok_or(anyhow!("Error while creating an `image::RgbaImage`"))
+    }
+
+    pub fn from_dynamic_image(image: DynamicImage) -> Result<Self> {
+        let width = image.width() as SIZE;
+        let height = image.height() as SIZE;
+
+        let data = image
+            .as_bytes()
+            .iter()
+            .array_chunks()
+            .map(|[r, g, b]| [*r, *g, *b, 255])
+            .collect::<Vec<_>>();
+
+        Plane::from_data(width, height, data)
     }
 
     /// Crates a `anyhow::Result<Plane>` from a `tiny_skia::Pixmap`
