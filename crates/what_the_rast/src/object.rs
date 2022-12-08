@@ -85,15 +85,18 @@ impl Object {
             TypesLike::Image(image_holder) => {
                 let mut plane = Plane::new(width, height)?;
 
+                // TODO add offset (image.x.abs()) to enumerate
+                // image.x < 0
                 if self.visibility {
-                    let x_iter = (image_holder.coordinates.x() as u32)
-                        ..((image_holder.coordinates + image_holder.size).x() as u32);
+                    let x_iter = (image_holder.coordinates.x() as u32).min(width)
+                        ..((image_holder.coordinates + image_holder.size).x() as u32).min(width);
 
                     for (x_image_cord, x_plane_cord) in x_iter.enumerate() {
                         let x_image_cord = x_image_cord as u32;
 
-                        let y_iter = (image_holder.coordinates.y() as u32)
-                            ..((image_holder.coordinates + image_holder.size).y() as u32);
+                        let y_iter = (image_holder.coordinates.y() as u32).min(height)
+                            ..((image_holder.coordinates + image_holder.size).y() as u32)
+                                .min(height);
 
                         for (y_image_cord, y_plane_cord) in y_iter.enumerate() {
                             let pixel = image_holder

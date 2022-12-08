@@ -70,7 +70,7 @@ fn main_image() -> Result<()> {
     render_and_save(&object, "test_image_02_after_color.jpg");
 
     object
-        .transform(Transform::Move(Point::new(100.0, 50.0)))
+        .transform(Transform::Move(Point::new(100.0, 300.0)))
         .unwrap();
     render_and_save(&object, "test_image_03_after_move.jpg");
 
