@@ -131,8 +131,7 @@ impl Object {
                         .collect::<Vec<PathLike>>()
                 }
                 TypesLike::Image(image_holder) => {
-                    // TODO implement `+=` for `Point` += `Point`
-                    image_holder.coordinates = image_holder.coordinates + point;
+                    image_holder.coordinates += point;
                 }
             },
             Transform::Visibility(visibility) => self.visibility = visibility,
