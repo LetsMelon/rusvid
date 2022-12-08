@@ -1,5 +1,5 @@
-use rusvid_core::plane::Plane;
-use rusvid_core::point::Point;
+use crate::plane::Plane;
+use crate::point::Point;
 
 #[derive(Debug)]
 pub enum ImageMode {

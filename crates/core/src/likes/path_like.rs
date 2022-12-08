@@ -1,5 +1,6 @@
-use rusvid_core::point::Point;
 use usvg::PathSegment;
+
+use crate::point::Point;
 
 const DELTA: f64 = 0.0001;
 

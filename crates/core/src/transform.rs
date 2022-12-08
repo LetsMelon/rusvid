@@ -1,6 +1,5 @@
-use rusvid_core::point::Point;
-
-use crate::ColorLike;
+use crate::likes::color_like::ColorLike;
+use crate::point::Point;
 
 #[derive(Debug, Clone, Copy)]
 /// Visual guide: [Link](https://css-tricks.com/transforms-on-svg-elements/)

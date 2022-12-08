@@ -679,18 +679,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rusvid_collectione"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "image",
- "resvg",
- "rusvid_core",
- "tiny-skia",
- "usvg",
-]
-
-[[package]]
 name = "rusvid_core"
 version = "0.1.0"
 dependencies = [
@@ -698,7 +686,9 @@ dependencies = [
  "approx",
  "glam",
  "image",
+ "resvg",
  "tiny-skia",
+ "usvg",
 ]
 
 [[package]]

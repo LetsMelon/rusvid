@@ -10,4 +10,6 @@ anyhow = { workspace = true }
 approx = "0.5.1"
 glam = { version = "0.22.0", features = ["approx"] }
 image = { workspace = true }
+resvg = { workspace = true }
 tiny-skia = { workspace = true }
+usvg = { workspace = true }

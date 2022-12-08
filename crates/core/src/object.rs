@@ -1,11 +1,14 @@
 use std::rc::Rc;
 
 use anyhow::{Context, Result};
-use rusvid_core::plane::{Plane, SIZE};
 use tiny_skia::Pixmap;
 use usvg::{AspectRatio, NodeExt, Opacity, PathData, Size, Tree, ViewBox};
 
-use crate::{ColorLike, PathLike, Transform, TypesLike};
+use crate::likes::color_like::ColorLike;
+use crate::likes::path_like::PathLike;
+use crate::likes::types_like::TypesLike;
+use crate::plane::{Plane, SIZE};
+use crate::transform::Transform;
 
 #[derive(Debug)]
 pub struct Object {
@@ -43,7 +46,7 @@ impl Object {
 
                 let color = {
                     let channels = if let ColorLike::Color(c) = &svg.fill_color {
-                        Some(*c)
+                        Some(c)
                     } else {
                         None
                     };

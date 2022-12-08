@@ -1,4 +1,4 @@
-use rusvid_core::plane::Pixel;
+use crate::plane::Pixel;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ColorLike {
