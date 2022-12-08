@@ -679,6 +679,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "rusvid_collectione"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "image",
+ "resvg",
+ "rusvid_core",
+ "tiny-skia",
+ "usvg",
+]
+
+[[package]]
 name = "rusvid_core"
 version = "0.1.0"
 dependencies = [
@@ -979,18 +991,6 @@ name = "weezl"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
-
-[[package]]
-name = "what_the_rast"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "image",
- "resvg",
- "rusvid_core",
- "tiny-skia",
- "usvg",
-]
 
 [[package]]
 name = "winapi"

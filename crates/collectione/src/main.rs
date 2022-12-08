@@ -1,8 +1,8 @@
 #![feature(iter_array_chunks)]
 
 use anyhow::Result;
+use rusvid_collectione::*;
 use rusvid_core::{plane::Plane, point::Point};
-use what_the_rast::*;
 
 fn render_and_save<P: AsRef<std::path::Path>>(object: &Object, path: P) {
     let plane = object.render(1000, 1000).unwrap();
