@@ -58,12 +58,7 @@ fn main() {
         .add_to_root(NodeKind::Path(Path {
             id: "bg_obj".to_string(),
             fill: background_layer.fill_with_link("bg"),
-            data: Rc::new(rect(
-                start_pos.x(),
-                start_pos.y(),
-                resolution.as_point().x() * 2.0,
-                resolution.as_point().y() * 2.0,
-            )),
+            data: Rc::new(rect(start_pos, resolution.as_point() * 2.0)),
             ..Path::default()
         }))
         .unwrap();
@@ -92,12 +87,7 @@ fn main() {
                         paint: Paint::Color(Color::new_rgb(0, 0, 0)),
                         ..Fill::default()
                     }),
-                    data: Rc::new(rect(
-                        rect_pos.x(),
-                        rect_pos.y(),
-                        rect_size.x(),
-                        rect_size.y(),
-                    )),
+                    data: Rc::new(rect(rect_pos, rect_size)),
                     ..Path::default()
                 }))
                 .unwrap();
