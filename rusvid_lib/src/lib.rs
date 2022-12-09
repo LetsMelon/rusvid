@@ -15,11 +15,13 @@ pub mod utils;
 /// Repackage the usvg library so the end-user don't have to install `rusvid-lib` and `usvg`
 /// and so that the user always uses the same `usvg` like the library
 pub use resvg;
+pub use rusvid_core as core;
 
 pub mod prelude {
     pub use crate::animation::curves::Function;
     pub use crate::composition::Composition;
     pub use crate::composition::CompositionBuilder;
+    pub use crate::core::*;
     pub use crate::effect::{library::*, EffectLogic, Element};
     pub use crate::layer::{Layer, LayerLogic};
     pub use crate::metrics::{MetricsSize, MetricsVideo};
