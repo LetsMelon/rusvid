@@ -44,12 +44,7 @@ impl Object {
                 };
 
                 let mut path = PathData::new();
-                // TODO maybe implement this method into `PathLike` like `pub fn(&self, path: &mut PathData) { ... }`
-                svg.path.iter().for_each(|svg_path| match svg_path {
-                    PathLike::Move(point) => path.push_move_to(point.x(), point.y()),
-                    PathLike::Line(point) => path.push_line_to(point.x(), point.y()),
-                    PathLike::Close => path.push_close_path(),
-                });
+                PathLike::extend_path_from_slice(&mut path, &svg.path);
 
                 let color = {
                     let channels = if let ColorLike::Color(c) = &svg.fill_color {

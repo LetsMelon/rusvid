@@ -1,4 +1,4 @@
-use resvg::usvg::PathSegment;
+use resvg::usvg::{PathData, PathSegment};
 
 use crate::point::Point;
 
@@ -55,6 +55,20 @@ impl PathLike {
             | (PathLike::Close, PathLike::Close) => true,
             _ => false,
         }
+    }
+
+    pub fn extend_path_from_self(&self, path: &mut PathData) {
+        match self {
+            PathLike::Move(point) => path.push_move_to(point.x(), point.y()),
+            PathLike::Line(point) => path.push_line_to(point.x(), point.y()),
+            PathLike::Close => path.push_close_path(),
+        }
+    }
+
+    pub fn extend_path_from_slice(path: &mut PathData, slice: &Vec<Self>) {
+        slice
+            .iter()
+            .for_each(|item| item.extend_path_from_self(path))
     }
 }
 
