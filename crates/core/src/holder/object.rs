@@ -4,11 +4,11 @@ use anyhow::{Context, Result};
 use tiny_skia::Pixmap;
 use usvg::{AspectRatio, NodeExt, Opacity, PathData, Size, Tree, ViewBox};
 
-use crate::likes::color_like::ColorLike;
-use crate::likes::path_like::PathLike;
-use crate::likes::types_like::TypesLike;
+use crate::holder::likes::color_like::ColorLike;
+use crate::holder::likes::path_like::PathLike;
+use crate::holder::likes::types_like::TypesLike;
+use crate::holder::transform::Transform;
 use crate::plane::{Plane, SIZE};
-use crate::transform::Transform;
 
 #[derive(Debug)]
 pub struct Object {

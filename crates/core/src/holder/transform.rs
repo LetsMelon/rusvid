@@ -1,4 +1,4 @@
-use crate::likes::color_like::ColorLike;
+use crate::holder::likes::color_like::ColorLike;
 use crate::point::Point;
 
 #[derive(Debug, Clone, Copy)]

@@ -1,5 +1,5 @@
-use crate::likes::color_like::ColorLike;
-use crate::likes::path_like::PathLike;
+use crate::holder::likes::color_like::ColorLike;
+use crate::holder::likes::path_like::PathLike;
 
 #[derive(Debug)]
 pub struct Svg {
