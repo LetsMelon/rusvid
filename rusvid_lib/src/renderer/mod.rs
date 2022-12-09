@@ -3,8 +3,8 @@ use std::path::Path;
 use std::process::Command;
 
 use anyhow::{bail, Result};
+use resvg::tiny_skia::Pixmap;
 use rusvid_core::plane::Plane;
-use tiny_skia::Pixmap;
 
 use crate::composition::Composition;
 use crate::layer::LayerLogic;
@@ -38,11 +38,11 @@ pub trait Renderer {
             resvg::render(
                 layer.rtree().expect("Expect a tree in the given layer"),
                 usvg::FitTo::Original,
-                tiny_skia::Transform::default(),
+                resvg::tiny_skia::Transform::default(),
                 pixmap.as_mut(),
             )
             .expect("Error while rendering");
-            let mut frame = Plane::from_pixmap(pixmap);
+            let mut frame = Plane::from_resvg_pixmap(pixmap);
 
             if layer.effects.len() != 0 {
                 frame = apply_effects(frame, &layer.effects)?;

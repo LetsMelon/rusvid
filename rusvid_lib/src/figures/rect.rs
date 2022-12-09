@@ -1,8 +1,10 @@
 use rusvid_core::point::Point;
 use usvg::{PathData, PathSegment};
 
+use super::utils::extend_path_from_slice;
+
 #[inline]
-pub fn rect_raw(position: Point, size: Point) -> [PathSegment; 5] {
+pub fn rect_raw(position: Point, size: Point) -> Vec<PathSegment> {
     let x = position.x();
     let y = position.y();
     let width = size.x();
@@ -18,11 +20,15 @@ pub fn rect_raw(position: Point, size: Point) -> [PathSegment; 5] {
         PathSegment::LineTo { x, y: y + height },
         PathSegment::ClosePath,
     ]
+    .to_vec()
 }
 
 #[inline]
 pub fn rect(position: Point, size: Point) -> PathData {
-    let mut path = PathData::with_capacity(5);
-    path.extend_from_slice(&rect_raw(position, size));
+    let mut path = PathData::new();
+
+    let rect_path = rect_raw(position, size);
+    extend_path_from_slice(&mut path, rect_path);
+
     path
 }

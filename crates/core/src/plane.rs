@@ -116,6 +116,27 @@ impl Plane {
         }
     }
 
+    pub fn from_resvg_pixmap(pixmap: resvg::tiny_skia::Pixmap) -> Self {
+        let data = pixmap
+            .pixels()
+            .iter()
+            .map(|x| {
+                let r = x.red();
+                let g = x.green();
+                let b = x.blue();
+                let a = x.alpha();
+
+                [r, g, b, a]
+            })
+            .collect::<Vec<Pixel>>();
+
+        Plane {
+            width: pixmap.width(),
+            height: pixmap.height(),
+            data,
+        }
+    }
+
     pub fn as_pixmap(self) -> Result<Pixmap> {
         let mut pixmap = Pixmap::new(self.width(), self.height())
             .ok_or(anyhow!("Error while creating an `tiny_skia::Pixmap`"))?;

@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use anyhow::{Context, Result};
-use tiny_skia::Pixmap;
-use usvg::{AspectRatio, NodeExt, Opacity, PathData, Size, Tree, ViewBox};
+use resvg::tiny_skia::Pixmap;
+use usvg::{AspectRatio, Node, NodeExt, NormalizedF64, Opacity, PathData, Size, Tree, ViewBox};
 
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
@@ -32,17 +32,22 @@ impl Object {
                 let size = Size::new(width as f64, height as f64)
                     .context("Width oder height must be greater 0")?;
 
-                let tree = Tree::create(usvg::Svg {
+                let mut tree = Tree {
                     size,
                     view_box: ViewBox {
                         rect: size.to_rect(0.0, 0.0),
                         aspect: AspectRatio::default(),
                     },
-                });
+                    root: usvg::Node::new(usvg::NodeKind::Group(usvg::Group::default())),
+                };
 
-                let usvg_path = PathLike::to_usvg_path_segments(&svg.path);
-                let mut path = PathData::with_capacity(usvg_path.len());
-                path.extend_from_slice(&usvg_path);
+                let mut path = PathData::new();
+                // TODO maybe implement this method into `PathLike` like `pub fn(&self, path: &mut PathData) { ... }`
+                svg.path.iter().for_each(|svg_path| match svg_path {
+                    PathLike::Move(point) => path.push_move_to(point.x(), point.y()),
+                    PathLike::Line(point) => path.push_line_to(point.x(), point.y()),
+                    PathLike::Close => path.push_close_path(),
+                });
 
                 let color = {
                     let channels = if let ColorLike::Color(c) = &svg.fill_color {
@@ -57,12 +62,12 @@ impl Object {
                             green: channels[1],
                             blue: channels[2],
                         }),
-                        opacity: Opacity::new((channels[3] as f64) / 255.0),
+                        opacity: NormalizedF64::new_u8(channels[3]),
                         ..Default::default()
                     })
                 };
 
-                tree.root().append_kind(usvg::NodeKind::Path(usvg::Path {
+                tree.root.append_kind(usvg::NodeKind::Path(usvg::Path {
                     id: self.id.clone(),
                     fill: color,
                     visibility: if self.visibility {
@@ -79,11 +84,11 @@ impl Object {
                 resvg::render(
                     &tree,
                     usvg::FitTo::Original,
-                    tiny_skia::Transform::default(),
+                    resvg::tiny_skia::Transform::default(),
                     pixmap.as_mut(),
                 );
 
-                Ok(Plane::from_pixmap(pixmap))
+                Ok(Plane::from_resvg_pixmap(pixmap))
             }
             TypesLike::Image(image_holder) => {
                 let mut plane = Plane::new(width, height)?;
