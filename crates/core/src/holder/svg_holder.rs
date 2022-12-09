@@ -2,13 +2,14 @@ use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 
 #[derive(Debug)]
-pub struct Svg {
+pub struct SvgHolder {
     pub(crate) path: Vec<PathLike>,
     pub(crate) fill_color: ColorLike,
 }
 
-impl Svg {
+impl SvgHolder {
+    #[inline]
     pub fn new(path: Vec<PathLike>, fill_color: ColorLike) -> Self {
-        Svg { path, fill_color }
+        Self { path, fill_color }
     }
 }

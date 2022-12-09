@@ -1,7 +1,8 @@
 use crate::holder::image_holder::ImageHolder;
+use crate::holder::svg_holder::SvgHolder;
 
 #[derive(Debug)]
 pub enum TypesLike {
-    Svg(crate::holder::svg::Svg),
+    Svg(SvgHolder),
     Image(ImageHolder),
 }
