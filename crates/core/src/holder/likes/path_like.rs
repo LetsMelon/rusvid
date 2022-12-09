@@ -70,6 +70,22 @@ impl PathLike {
             .iter()
             .for_each(|item| item.extend_path_from_self(path))
     }
+
+    pub fn from_path_segment(other: PathSegment) -> PathLike {
+        match other {
+            PathSegment::MoveTo { x, y } => PathLike::Move(Point::new(x, y)),
+            PathSegment::LineTo { x, y } => PathLike::Line(Point::new(x, y)),
+            PathSegment::CurveTo {
+                x1,
+                y1,
+                x2,
+                y2,
+                x,
+                y,
+            } => todo!("Conversion for PathSegment::CurveTo is not implemented"),
+            PathSegment::ClosePath => PathLike::Close,
+        }
+    }
 }
 
 #[cfg(test)]
