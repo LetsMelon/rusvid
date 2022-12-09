@@ -76,7 +76,7 @@ impl Layer {
         options.keep_named_groups = true;
 
         let svg_data = read(path)?;
-        let rtree = Tree::from_data(&svg_data, &options.to_ref())?;
+        let rtree = Tree::from_data(&svg_data, &options)?;
 
         for node in rtree.root.descendants() {
             let node = &*node.borrow();
