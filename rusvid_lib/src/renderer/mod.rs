@@ -37,12 +37,12 @@ pub trait Renderer {
 
             resvg::render(
                 layer.rtree().expect("Expect a tree in the given layer"),
-                usvg::FitTo::Original,
+                resvg::usvg::FitTo::Original,
                 resvg::tiny_skia::Transform::default(),
                 pixmap.as_mut(),
             )
             .expect("Error while rendering");
-            let mut frame = Plane::from_resvg_pixmap(pixmap);
+            let mut frame = Plane::from_pixmap(pixmap);
 
             if layer.effects.len() != 0 {
                 frame = apply_effects(frame, &layer.effects)?;

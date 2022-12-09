@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use std::rc::Rc;
 
 use anyhow::Result;
-use usvg::PathData;
+use resvg::usvg::PathData;
 
 use crate::animation::Animation;
 

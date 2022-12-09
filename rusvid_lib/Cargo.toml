@@ -19,8 +19,6 @@ itertools = "0.10.5"
 log = "0.4"
 resvg = { workspace = true }
 rusvid_core = { path = "../crates/core" }
-tiny-skia = { workspace = true }
-usvg = { workspace = true }
 
 [dev-dependencies]
 rayon = "*"

@@ -5,7 +5,7 @@ use std::path::Path;
 use std::rc::Rc;
 
 use anyhow::{bail, Context, Result};
-use usvg::{Fill, LinearGradient, Node, NodeExt, NodeKind, Options, Paint, Tree};
+use resvg::usvg::{Fill, LinearGradient, Node, NodeExt, NodeKind, Options, Paint, Tree};
 
 use crate::animation::manager::AnimationManager;
 use crate::animation::Animation;
@@ -76,7 +76,7 @@ impl Layer {
         options.keep_named_groups = true;
 
         let svg_data = read(path)?;
-        let mut rtree = Tree::from_data(&svg_data, &options.to_ref())?;
+        let rtree = Tree::from_data(&svg_data, &options.to_ref())?;
 
         for node in rtree.root.descendants() {
             let node = &*node.borrow();

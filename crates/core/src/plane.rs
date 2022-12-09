@@ -1,6 +1,6 @@
 use anyhow::{anyhow, bail, Result};
 use image::{DynamicImage, RgbaImage};
-use tiny_skia::Pixmap;
+use resvg::tiny_skia::Pixmap;
 
 pub type Pixel = [u8; 4];
 
@@ -94,29 +94,8 @@ impl Plane {
         Plane::from_data(width, height, data)
     }
 
-    /// Crates a `anyhow::Result<Plane>` from a `tiny_skia::Pixmap`
+    /// Crates a `anyhow::Result<Plane>` from a `resvg::tiny_skia::Pixmap`
     pub fn from_pixmap(pixmap: Pixmap) -> Self {
-        let data = pixmap
-            .pixels()
-            .iter()
-            .map(|x| {
-                let r = x.red();
-                let g = x.green();
-                let b = x.blue();
-                let a = x.alpha();
-
-                [r, g, b, a]
-            })
-            .collect::<Vec<Pixel>>();
-
-        Plane {
-            width: pixmap.width(),
-            height: pixmap.height(),
-            data,
-        }
-    }
-
-    pub fn from_resvg_pixmap(pixmap: resvg::tiny_skia::Pixmap) -> Self {
         let data = pixmap
             .pixels()
             .iter()

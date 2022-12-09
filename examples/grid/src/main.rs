@@ -3,7 +3,7 @@ use std::rc::Rc;
 use rusvid_lib::animation::prelude::*;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
-use rusvid_lib::usvg::{
+use rusvid_lib::resvg::usvg::{
     BaseGradient, Color, Fill, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
     StopOffset, Transform, Units,
 };
@@ -21,37 +21,35 @@ fn main() {
 
     let background_layer = composition.create_layer().unwrap();
 
-    background_layer
-        .add_to_defs(NodeKind::LinearGradient(LinearGradient {
-            id: "bg".into(),
-            x1: 0.0,
-            y1: 0.0,
-            x2: 1.0,
-            y2: 0.0,
-            base: BaseGradient {
-                units: Units::ObjectBoundingBox,
-                transform: Transform::new_rotate(35.0),
-                spread_method: SpreadMethod::Pad,
-                stops: vec![
-                    Stop {
-                        offset: StopOffset::new(0.0),
-                        color: Color::new_rgb(0, 215, 255),
-                        opacity: Opacity::new(1.0),
-                    },
-                    Stop {
-                        offset: StopOffset::new(0.5),
-                        color: Color::new_rgb(9, 9, 121),
-                        opacity: Opacity::new(1.0),
-                    },
-                    Stop {
-                        offset: StopOffset::new(1.0),
-                        color: Color::new_rgb(0, 215, 255),
-                        opacity: Opacity::new(1.0),
-                    },
-                ],
-            },
-        }))
-        .unwrap();
+    background_layer.add_linear_gradient(LinearGradient {
+        id: "bg".into(),
+        x1: 0.0,
+        y1: 0.0,
+        x2: 1.0,
+        y2: 0.0,
+        base: BaseGradient {
+            units: Units::ObjectBoundingBox,
+            transform: Transform::new_rotate(35.0),
+            spread_method: SpreadMethod::Pad,
+            stops: vec![
+                Stop {
+                    offset: StopOffset::ZERO,
+                    color: Color::new_rgb(0, 215, 255),
+                    opacity: Opacity::ONE,
+                },
+                Stop {
+                    offset: StopOffset::new(0.5).unwrap(),
+                    color: Color::new_rgb(9, 9, 121),
+                    opacity: Opacity::ONE,
+                },
+                Stop {
+                    offset: StopOffset::ONE,
+                    color: Color::new_rgb(0, 215, 255),
+                    opacity: Opacity::ONE,
+                },
+            ],
+        },
+    });
 
     let start_pos = resolution.as_point() * Point::NEG_ONE;
     background_layer

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use anyhow::Result;
-use usvg::PathData;
+use resvg::usvg::PathData;
 
 pub mod curves;
 pub mod manager;

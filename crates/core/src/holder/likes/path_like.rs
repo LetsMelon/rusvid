@@ -1,4 +1,4 @@
-use usvg::PathSegment;
+use resvg::usvg::PathSegment;
 
 use crate::point::Point;
 
@@ -136,9 +136,8 @@ mod tests {
     }
 
     mod equal {
-        use rusvid_core::point::Point;
-
-        use crate::path_like::{PathLike, DELTA};
+        use crate::holder::likes::path_like::{PathLike, DELTA};
+        use crate::point::Point;
 
         #[test]
         fn path_like_to_path_like() {

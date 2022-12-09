@@ -1,4 +1,4 @@
-use usvg::{PathData, PathSegment};
+use resvg::usvg::{PathData, PathSegment};
 
 use super::utils::extend_path_from_slice;
 

@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use anyhow::{Context, Result};
 use resvg::tiny_skia::Pixmap;
-use usvg::{AspectRatio, Node, NodeExt, NormalizedF64, Opacity, PathData, Size, Tree, ViewBox};
+use resvg::usvg::{AspectRatio, NodeExt, NormalizedF64, PathData, Size, Tree, ViewBox};
 
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
@@ -38,7 +38,9 @@ impl Object {
                         rect: size.to_rect(0.0, 0.0),
                         aspect: AspectRatio::default(),
                     },
-                    root: usvg::Node::new(usvg::NodeKind::Group(usvg::Group::default())),
+                    root: resvg::usvg::Node::new(resvg::usvg::NodeKind::Group(
+                        resvg::usvg::Group::default(),
+                    )),
                 };
 
                 let mut path = PathData::new();
@@ -56,8 +58,8 @@ impl Object {
                         None
                     };
 
-                    channels.map(|channels| usvg::Fill {
-                        paint: usvg::Paint::Color(usvg::Color {
+                    channels.map(|channels| resvg::usvg::Fill {
+                        paint: resvg::usvg::Paint::Color(resvg::usvg::Color {
                             red: channels[0],
                             green: channels[1],
                             blue: channels[2],
@@ -67,28 +69,29 @@ impl Object {
                     })
                 };
 
-                tree.root.append_kind(usvg::NodeKind::Path(usvg::Path {
-                    id: self.id.clone(),
-                    fill: color,
-                    visibility: if self.visibility {
-                        usvg::Visibility::Visible
-                    } else {
-                        usvg::Visibility::Hidden
-                    },
-                    data: Rc::new(path),
-                    ..Default::default()
-                }));
+                tree.root
+                    .append_kind(resvg::usvg::NodeKind::Path(resvg::usvg::Path {
+                        id: self.id.clone(),
+                        fill: color,
+                        visibility: if self.visibility {
+                            resvg::usvg::Visibility::Visible
+                        } else {
+                            resvg::usvg::Visibility::Hidden
+                        },
+                        data: Rc::new(path),
+                        ..Default::default()
+                    }));
 
                 let mut pixmap = Pixmap::new(width, height).context("sth error")?;
 
                 resvg::render(
                     &tree,
-                    usvg::FitTo::Original,
+                    resvg::usvg::FitTo::Original,
                     resvg::tiny_skia::Transform::default(),
                     pixmap.as_mut(),
                 );
 
-                Ok(Plane::from_resvg_pixmap(pixmap))
+                Ok(Plane::from_pixmap(pixmap))
             }
             TypesLike::Image(image_holder) => {
                 let mut plane = Plane::new(width, height)?;

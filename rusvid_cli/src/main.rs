@@ -8,9 +8,9 @@ use log::{debug, LevelFilter};
 use rusvid_lib::animation::prelude::*;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
-use rusvid_lib::usvg::{
+use rusvid_lib::resvg::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, NonZeroPositiveF64, NormalizedF64, Opacity,
-    Paint, Path, SpreadMethod, Stop, StopOffset, Stroke, StrokeWidth, Transform, Units,
+    Path, SpreadMethod, Stop, StopOffset, Stroke, Transform, Units,
 };
 use rusvid_lib::utils::color_from_hex;
 
