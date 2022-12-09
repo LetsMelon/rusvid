@@ -36,7 +36,7 @@ jobs:
           key: ${{ runner.os }}-target
 
       - name: Build
-        run: cargo build --verbose --all-targets
+        run: cargo build --verbose --all-targets --all
 
       - name: Test
         run: cargo test --workspace
