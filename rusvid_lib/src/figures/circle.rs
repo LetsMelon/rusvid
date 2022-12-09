@@ -1,5 +1,7 @@
+use resvg::usvg::{PathData, PathSegment};
 use rusvid_core::point::Point;
-use usvg::{PathData, PathSegment};
+
+use super::utils::extend_path_from_slice;
 
 #[inline]
 fn sin_radius(angle: f64, radius: f64) -> f64 {
@@ -84,8 +86,11 @@ pub fn circle_raw(position: Point, radius: f64) -> Vec<PathSegment> {
 
 #[inline]
 pub fn circle(position: Point, radius: f64) -> PathData {
-    let mut path = PathData::with_capacity(9);
-    path.extend_from_slice(&circle_raw(position, radius));
+    let mut path = PathData::new();
+
+    let circle_path = circle_raw(position, radius);
+    extend_path_from_slice(&mut path, circle_path);
+
     path
 }
 

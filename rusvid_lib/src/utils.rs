@@ -1,4 +1,4 @@
-use usvg::Color;
+use resvg::usvg::Color;
 
 #[inline(always)]
 fn hex_to_u8(value: &str) -> Option<u8> {
@@ -56,7 +56,7 @@ pub(crate) fn equal_delta(v1: f64, v2: f64, delta: f64) -> bool {
 #[cfg(test)]
 mod tests {
     mod color {
-        use usvg::Color;
+        use resvg::usvg::Color;
 
         use crate::utils::color_from_hex;
 

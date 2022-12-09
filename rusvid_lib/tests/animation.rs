@@ -5,7 +5,7 @@ use rusvid_lib::animation::prelude::*;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 use rusvid_lib::resolution::Resolution;
-use rusvid_lib::usvg::{Fill, NodeKind, Paint, Path};
+use rusvid_lib::resvg::usvg::{Fill, NodeKind, Paint, Path};
 use rusvid_lib::utils::color_from_hex;
 
 mod dummy;

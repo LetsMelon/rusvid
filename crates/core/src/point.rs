@@ -99,7 +99,7 @@ impl UlpsEq for Point {
 }
 
 macro_rules! implement_math_operator {
-    ($operant:ident, $fct:ident, point for point) => {
+    ($operant:ident, $fct:ident, Point for Point) => {
         impl std::ops::$operant<Point> for Point {
             type Output = Point;
             #[inline]
@@ -108,7 +108,7 @@ macro_rules! implement_math_operator {
             }
         }
     };
-    ($operant:ident, $fct:ident, f64 for point) => {
+    ($operant:ident, $fct:ident, f64 for Point) => {
         impl std::ops::$operant<f64> for Point {
             type Output = Point;
             #[inline]
@@ -117,7 +117,7 @@ macro_rules! implement_math_operator {
             }
         }
     };
-    ($operant:ident, $fct:ident, point for f64) => {
+    ($operant:ident, $fct:ident, Point for f64) => {
         impl std::ops::$operant<Point> for f64 {
             type Output = Point;
             #[inline]
@@ -129,41 +129,49 @@ macro_rules! implement_math_operator {
             }
         }
     };
+    ($operant:ident, $fct:ident, Point for assign $other_type:ident) => {
+        concat_idents::concat_idents!(method_name = $fct, _assign {
+            impl std::ops::$operant<$other_type> for Point {
+                #[inline]
+                fn method_name(&mut self, other: $other_type) {
+                    use std::ops::*;
+
+                    *self = self.$fct(other);
+                }
+            }
+        });
+    };
 }
 
-implement_math_operator!(Add, add, f64 for point);
-implement_math_operator!(Add, add, point for f64);
-implement_math_operator!(Add, add, point for point);
+implement_math_operator!(Add, add, f64 for Point);
+implement_math_operator!(Add, add, Point for f64);
+implement_math_operator!(Add, add, Point for Point);
+implement_math_operator!(AddAssign, add, Point for assign f64);
+implement_math_operator!(AddAssign, add, Point for assign Point);
 
-implement_math_operator!(Div, div, f64 for point);
-implement_math_operator!(Div, div, point for f64);
-implement_math_operator!(Div, div, point for point);
+implement_math_operator!(Div, div, f64 for Point);
+implement_math_operator!(Div, div, Point for f64);
+implement_math_operator!(Div, div, Point for Point);
+implement_math_operator!(DivAssign, div, Point for assign f64);
+implement_math_operator!(DivAssign, div, Point for assign Point);
 
-implement_math_operator!(Mul, mul, f64 for point);
-implement_math_operator!(Mul, mul, point for f64);
-implement_math_operator!(Mul, mul, point for point);
+implement_math_operator!(Mul, mul, f64 for Point);
+implement_math_operator!(Mul, mul, Point for f64);
+implement_math_operator!(Mul, mul, Point for Point);
+implement_math_operator!(MulAssign, mul, Point for assign f64);
+implement_math_operator!(MulAssign, mul, Point for assign Point);
 
-implement_math_operator!(Rem, rem, f64 for point);
-implement_math_operator!(Rem, rem, point for f64);
-implement_math_operator!(Rem, rem, point for point);
+implement_math_operator!(Rem, rem, f64 for Point);
+implement_math_operator!(Rem, rem, Point for f64);
+implement_math_operator!(Rem, rem, Point for Point);
+implement_math_operator!(RemAssign, rem, Point for assign f64);
+implement_math_operator!(RemAssign, rem, Point for assign Point);
 
-implement_math_operator!(Sub, sub, f64 for point);
-implement_math_operator!(Sub, sub, point for f64);
-implement_math_operator!(Sub, sub, point for point);
-
-/*
-! missing from `glam::DVec2`
-impl DivAssign<DVec2> for DVec2 {...}
-impl DivAssign<f64> for DVec2 {...}
-impl MulAssign<DVec2> for DVec2 {...}
-impl MulAssign<f64> for DVec2 {...}
-impl AddAssign<DVec2> for DVec2 {...}
-impl AddAssign<f64> for DVec2 {...}
-impl SubAssign<DVec2> for DVec2 {...}
-impl SubAssign<f64> for DVec2 {...}
-impl RemAssign<DVec2> for DVec2 {...}
-impl RemAssign<f64> for DVec2 {...}
- */
+implement_math_operator!(Sub, sub, f64 for Point);
+implement_math_operator!(Sub, sub, Point for f64);
+implement_math_operator!(Sub, sub, Point for Point);
+implement_math_operator!(SubAssign, sub, Point for assign f64);
+implement_math_operator!(SubAssign, sub, Point for assign Point);
 
 /// Trait to transform struct into a [crate::types::Point]
 pub trait AsPoint {

@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use usvg::{Fill, Node, NodeKind, Tree};
+use resvg::usvg::{Fill, Node, NodeKind, Tree};
 
 use crate::animation::Animation;
 use crate::composition::CompositionBuilder;

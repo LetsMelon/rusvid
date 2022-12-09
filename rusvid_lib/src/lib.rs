@@ -14,7 +14,7 @@ pub mod utils;
 
 /// Repackage the usvg library so the end-user don't have to install `rusvid-lib` and `usvg`
 /// and so that the user always uses the same `usvg` like the library
-pub use usvg;
+pub use resvg;
 
 pub mod prelude {
     pub use crate::animation::curves::Function;
