@@ -1,6 +1,7 @@
+use std::fmt::Debug;
 use std::rc::Rc;
 
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use resvg::tiny_skia::Pixmap;
 use resvg::usvg::{AspectRatio, NodeExt, NormalizedF64, PathData, Size, Tree, ViewBox};
 
@@ -8,22 +9,37 @@ use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::likes::types_like::TypesLike;
 use crate::holder::transform::Transform;
+use crate::holder::utils;
 use crate::plane::{Plane, SIZE};
+
+pub trait TransformLogic: Debug {
+    fn transform(&mut self, transformation: Transform) -> Result<()>;
+
+    fn transform_by_id(&mut self, id: impl Into<String>, transformation: Transform) -> Result<()> {
+        bail!("`transform_by_id` is not implement for {:?}", self);
+    }
+}
 
 #[derive(Debug)]
 pub struct Object {
     data: TypesLike,
     id: String,
-    visibility: bool,
 }
 
 impl Object {
-    pub fn new(id: impl Into<String>, data: TypesLike) -> Self {
+    pub fn new_with_id(id: impl Into<String>, data: TypesLike) -> Self {
         Object {
             data,
             id: id.into(),
-            visibility: true,
         }
+    }
+
+    pub fn new(data: TypesLike) -> Self {
+        Self::new_with_id(utils::random_id(), data)
+    }
+
+    pub fn id(&self) -> &str {
+        &self.id
     }
 
     pub fn render(&self, width: SIZE, height: SIZE) -> Result<Plane> {
@@ -32,7 +48,7 @@ impl Object {
                 let size = Size::new(width as f64, height as f64)
                     .context("Width oder height must be greater 0")?;
 
-                let mut tree = Tree {
+                let tree = Tree {
                     size,
                     view_box: ViewBox {
                         rect: size.to_rect(0.0, 0.0),
@@ -43,39 +59,41 @@ impl Object {
                     )),
                 };
 
-                let mut path = PathData::new();
-                PathLike::extend_path_from_slice(&mut path, &svg.path);
+                for (_, item) in &svg.items {
+                    let mut path = PathData::new();
+                    PathLike::extend_path_from_slice(&mut path, &item.path);
 
-                let color = {
-                    let channels = if let ColorLike::Color(c) = &svg.fill_color {
-                        Some(c)
-                    } else {
-                        None
+                    let color = {
+                        let channels = if let ColorLike::Color(c) = &item.fill_color {
+                            Some(c)
+                        } else {
+                            None
+                        };
+
+                        channels.map(|channels| resvg::usvg::Fill {
+                            paint: resvg::usvg::Paint::Color(resvg::usvg::Color {
+                                red: channels[0],
+                                green: channels[1],
+                                blue: channels[2],
+                            }),
+                            opacity: NormalizedF64::new_u8(channels[3]),
+                            ..Default::default()
+                        })
                     };
 
-                    channels.map(|channels| resvg::usvg::Fill {
-                        paint: resvg::usvg::Paint::Color(resvg::usvg::Color {
-                            red: channels[0],
-                            green: channels[1],
-                            blue: channels[2],
-                        }),
-                        opacity: NormalizedF64::new_u8(channels[3]),
-                        ..Default::default()
-                    })
-                };
-
-                tree.root
-                    .append_kind(resvg::usvg::NodeKind::Path(resvg::usvg::Path {
-                        id: self.id.clone(),
-                        fill: color,
-                        visibility: if self.visibility {
-                            resvg::usvg::Visibility::Visible
-                        } else {
-                            resvg::usvg::Visibility::Hidden
-                        },
-                        data: Rc::new(path),
-                        ..Default::default()
-                    }));
+                    tree.root
+                        .append_kind(resvg::usvg::NodeKind::Path(resvg::usvg::Path {
+                            id: self.id.clone(),
+                            fill: color,
+                            visibility: if item.visibility {
+                                resvg::usvg::Visibility::Visible
+                            } else {
+                                resvg::usvg::Visibility::Hidden
+                            },
+                            data: Rc::new(path),
+                            ..Default::default()
+                        }));
+                }
 
                 let mut pixmap = Pixmap::new(width, height).context("sth error")?;
 
@@ -93,7 +111,9 @@ impl Object {
 
                 // TODO add offset (image.x.abs()) to enumerate
                 // image.x < 0
-                if self.visibility {
+                if true
+                /* TODO self.visibility */
+                {
                     let x_iter = (image_holder.coordinates.x() as u32).min(width)
                         ..((image_holder.coordinates + image_holder.size).x() as u32).min(width);
 
@@ -119,55 +139,21 @@ impl Object {
         }
     }
 
-    pub fn transform(&mut self, transformation: Transform) -> Result<()> {
-        match transformation {
-            Transform::Move(point) => match &mut self.data {
-                TypesLike::Svg(svg) => {
-                    svg.path = svg
-                        .path
-                        .iter()
-                        .map(|p| match *p {
-                            PathLike::Move(og_p) => PathLike::Move(og_p + point),
-                            PathLike::Line(og_p) => PathLike::Line(og_p + point),
-                            PathLike::Close => PathLike::Close,
-                        })
-                        .collect::<Vec<PathLike>>()
-                }
-                TypesLike::Image(image_holder) => {
-                    image_holder.coordinates += point;
-                }
-            },
-            Transform::Visibility(visibility) => self.visibility = visibility,
-            Transform::Color(color) => match &mut self.data {
-                TypesLike::Svg(svg) => {
-                    svg.fill_color = color;
-                }
-                TypesLike::Image(_) => {
-                    println!("Transformation `Color` has no effect over TypesLike::Image")
-                }
-            },
-            Transform::Position(position) => match &mut self.data {
-                TypesLike::Svg(svg) => match svg.path[0] {
-                    PathLike::Move(point) => {
-                        let offset = position - point;
-                        self.transform(Transform::Move(offset))?
-                    }
-                    _ => panic!("First element needs to be a `PathLike::Move`"),
-                },
-                TypesLike::Image(image_holder) => {
-                    image_holder.coordinates = position;
-                }
-            },
-        };
-
-        Ok(())
-    }
-
     pub fn transforms(&mut self, transformations: Vec<Transform>) -> Result<()> {
         for transformation in transformations.iter() {
             self.transform(*transformation)?;
         }
 
         Ok(())
+    }
+}
+
+impl TransformLogic for Object {
+    fn transform(&mut self, transformation: Transform) -> Result<()> {
+        self.data.transform(transformation)
+    }
+
+    fn transform_by_id(&mut self, id: impl Into<String>, transformation: Transform) -> Result<()> {
+        self.data.transform_by_id(id, transformation)
     }
 }

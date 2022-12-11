@@ -76,12 +76,12 @@ impl PathLike {
             PathSegment::MoveTo { x, y } => PathLike::Move(Point::new(x, y)),
             PathSegment::LineTo { x, y } => PathLike::Line(Point::new(x, y)),
             PathSegment::CurveTo {
-                x1,
-                y1,
-                x2,
-                y2,
-                x,
-                y,
+                x1: _,
+                y1: _,
+                x2: _,
+                y2: _,
+                x: _,
+                y: _,
             } => todo!("Conversion for PathSegment::CurveTo is not implemented"),
             PathSegment::ClosePath => PathLike::Close,
         }

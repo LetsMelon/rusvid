@@ -1,5 +1,7 @@
+use std::path::Path;
+
 use anyhow::{anyhow, bail, Result};
-use image::{DynamicImage, RgbaImage};
+use image::{DynamicImage, ImageFormat, RgbaImage};
 use resvg::tiny_skia::Pixmap;
 
 pub type Pixel = [u8; 4];
@@ -208,6 +210,30 @@ impl Plane {
             x: 0,
             y: 0,
         }
+    }
+
+    // TODO implement first citizen Plane to Bmp
+    pub fn save_as_bmp<P: AsRef<Path>>(self, path: P) -> Result<()> {
+        let as_image = self.as_rgba_image()?;
+        as_image.save_with_format(path, ImageFormat::Bmp)?;
+
+        Ok(())
+    }
+
+    // TODO implement first citizen Plane to Png
+    pub fn save_as_png<P: AsRef<Path>>(self, path: P) -> Result<()> {
+        let as_image = self.as_rgba_image()?;
+        as_image.save_with_format(path, ImageFormat::Png)?;
+
+        Ok(())
+    }
+
+    // TODO implement first citizen Plane to JPG
+    pub fn save_as_jpg<P: AsRef<Path>>(self, path: P) -> Result<()> {
+        let as_image = self.as_rgba_image()?;
+        as_image.save_with_format(path, ImageFormat::Jpeg)?;
+
+        Ok(())
     }
 }
 
