@@ -257,11 +257,7 @@ pub struct PlaneIntoIterator {
 impl Iterator for PlaneIntoIterator {
     type Item = Pixel;
     fn next(&mut self) -> Option<Self::Item> {
-        let result = self
-            .plane
-            .data
-            .get(self.index)
-            .and_then(|pixel| Some(*pixel));
+        let result = self.plane.data.get(self.index).map(|pixel| *pixel);
 
         if result.is_some() {
             self.index += 1;
@@ -291,12 +287,10 @@ impl Iterator for CoordinateIterator {
             .plane
             .data
             .get(position_to_index(self.x, self.y, self.plane.width))
-            .and_then(|p| {
-                Some(CoordinateIteratorItem {
-                    pixel: *p,
-                    x: self.x,
-                    y: self.y,
-                })
+            .map(|p| CoordinateIteratorItem {
+                pixel: *p,
+                x: self.x,
+                y: self.y,
             });
 
         if result.is_some() {
