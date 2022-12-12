@@ -74,7 +74,7 @@ impl Plane {
     }
 
     pub fn as_rgba_image(self) -> Result<RgbaImage> {
-        let buf = self.data.iter().flatten().map(|x| *x).collect::<Vec<u8>>();
+        let buf = self.data.iter().flatten().copied().collect::<Vec<u8>>();
 
         assert_eq!(self.width() * self.height() * 4, buf.len() as SIZE);
 
@@ -124,7 +124,7 @@ impl Plane {
 
         let data = pixmap.data_mut();
 
-        let buf = self.data.iter().flatten().map(|x| *x).collect::<Vec<u8>>();
+        let buf = self.data.iter().flatten().copied().collect::<Vec<u8>>();
         for i in 0..buf.len() {
             data[i] = buf[i];
         }
@@ -257,7 +257,7 @@ pub struct PlaneIntoIterator {
 impl Iterator for PlaneIntoIterator {
     type Item = Pixel;
     fn next(&mut self) -> Option<Self::Item> {
-        let result = self.plane.data.get(self.index).map(|pixel| *pixel);
+        let result = self.plane.data.get(self.index).copied();
 
         if result.is_some() {
             self.index += 1;
