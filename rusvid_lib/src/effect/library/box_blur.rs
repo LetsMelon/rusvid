@@ -76,8 +76,8 @@ impl EffectLogic for BoxBlur {
                 let y = y as i32;
 
                 let count = self.kernel_x * self.kernel_y;
-                let sum = ((self.abs_d_y * -1)..=self.abs_d_y)
-                    .cartesian_product((self.abs_d_x * -1)..=self.abs_d_x)
+                let sum = ((-self.abs_d_y)..=self.abs_d_y)
+                    .cartesian_product((-self.abs_d_x)..=self.abs_d_x)
                     .map(|(i_x, i_y)| *original.pixel_unchecked((x + i_x) as u32, (y + i_y) as u32))
                     .fold([0_u32; 4], |mut acc, val| {
                         acc[0] += val[0] as u32;

@@ -46,8 +46,8 @@ impl GaussianBlur {
             stdev, kernel, abs_d
         );
 
-        let weights = ((abs_d * -1)..=abs_d)
-            .cartesian_product((abs_d * -1)..=abs_d)
+        let weights = ((-abs_d)..=abs_d)
+            .cartesian_product((-abs_d)..=abs_d)
             .map(|(x, y)| gaussian_function(stdev.abs(), x, y))
             .collect::<Vec<f64>>();
 
@@ -80,8 +80,8 @@ impl EffectLogic for GaussianBlur {
 
         for x in (self.kernel)..(result.width() as i32 - self.kernel) {
             for y in (self.kernel)..(result.height() as i32 - self.kernel) {
-                let sum = ((self.abs_d * -1)..=self.abs_d)
-                    .cartesian_product((self.abs_d * -1)..=self.abs_d)
+                let sum = ((-self.abs_d)..=self.abs_d)
+                    .cartesian_product((-self.abs_d)..=self.abs_d)
                     .map(|(i_x, i_y)| {
                         let cord_x = (x + i_x) as u32;
                         let cord_y = (y + i_y) as u32;
