@@ -51,8 +51,8 @@ pub trait Renderer {
             frames.push(frame);
         }
 
-        let width = composition.resolution.width() as u32;
-        let height = composition.resolution.height() as u32;
+        let width = composition.resolution.width();
+        let height = composition.resolution.height();
         let mut plane = combine_renders(width, height, frames)?;
 
         plane = apply_effects(plane, &composition.effects)?;
