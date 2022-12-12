@@ -45,6 +45,9 @@ impl TransformLogic for SvgItem {
                     .map(|p| match *p {
                         PathLike::Move(og_p) => PathLike::Move(og_p + point),
                         PathLike::Line(og_p) => PathLike::Line(og_p + point),
+                        PathLike::CurveTo(end, c1, c2) => {
+                            PathLike::CurveTo(end + point, c1 + point, c2 + point)
+                        }
                         PathLike::Close => PathLike::Close,
                     })
                     .collect();
