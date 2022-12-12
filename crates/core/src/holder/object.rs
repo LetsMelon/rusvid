@@ -15,6 +15,7 @@ use crate::plane::{Plane, SIZE};
 pub trait TransformLogic: Debug {
     fn transform(&mut self, transformation: Transform) -> Result<()>;
 
+    #[allow(unused_variables)]
     fn transform_by_id(&mut self, id: impl Into<String>, transformation: Transform) -> Result<()> {
         bail!("`transform_by_id` is not implement for {:?}", self);
     }
