@@ -34,7 +34,7 @@ impl Element for ColorPaletteEffect {
 
 impl EffectLogic for ColorPaletteEffect {
     fn apply(&self, original: Plane) -> Result<Plane> {
-        if self.color_palette.len() == 0 {
+        if self.color_palette.is_empty() {
             bail!("Must have at least one color in the color palette");
         }
 

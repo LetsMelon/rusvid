@@ -74,7 +74,7 @@ impl Plane {
     }
 
     pub fn as_rgba_image(self) -> Result<RgbaImage> {
-        let buf = self.data.iter().flatten().map(|x| *x).collect::<Vec<u8>>();
+        let buf = self.data.iter().flatten().copied().collect::<Vec<u8>>();
 
         assert_eq!(self.width() * self.height() * 4, buf.len() as SIZE);
 
@@ -122,12 +122,8 @@ impl Plane {
         let mut pixmap = Pixmap::new(self.width(), self.height())
             .ok_or(anyhow!("Error while creating an `tiny_skia::Pixmap`"))?;
 
-        let data = pixmap.data_mut();
-
-        let buf = self.data.iter().flatten().map(|x| *x).collect::<Vec<u8>>();
-        for i in 0..buf.len() {
-            data[i] = buf[i];
-        }
+        let buf = self.data.iter().flatten().copied().collect::<Vec<u8>>();
+        pixmap.data_mut()[..buf.len()].copy_from_slice(&buf[..]);
 
         Ok(pixmap)
     }
@@ -257,11 +253,7 @@ pub struct PlaneIntoIterator {
 impl Iterator for PlaneIntoIterator {
     type Item = Pixel;
     fn next(&mut self) -> Option<Self::Item> {
-        let result = self
-            .plane
-            .data
-            .get(self.index)
-            .and_then(|pixel| Some(*pixel));
+        let result = self.plane.data.get(self.index).copied();
 
         if result.is_some() {
             self.index += 1;
@@ -291,12 +283,10 @@ impl Iterator for CoordinateIterator {
             .plane
             .data
             .get(position_to_index(self.x, self.y, self.plane.width))
-            .and_then(|p| {
-                Some(CoordinateIteratorItem {
-                    pixel: *p,
-                    x: self.x,
-                    y: self.y,
-                })
+            .map(|p| CoordinateIteratorItem {
+                pixel: *p,
+                x: self.x,
+                y: self.y,
             });
 
         if result.is_some() {

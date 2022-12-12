@@ -23,7 +23,7 @@ pub trait Renderer {
 
     fn render_single(&self, composition: &Composition) -> Result<Plane> {
         let layers = composition.get_layers();
-        if layers.len() == 0 {
+        if layers.is_empty() {
             bail!("TODO: error")
         }
 
@@ -44,15 +44,15 @@ pub trait Renderer {
             .expect("Error while rendering");
             let mut frame = Plane::from_pixmap(pixmap);
 
-            if layer.effects.len() != 0 {
+            if !layer.effects.is_empty() {
                 frame = apply_effects(frame, &layer.effects)?;
             }
 
             frames.push(frame);
         }
 
-        let width = composition.resolution.width() as u32;
-        let height = composition.resolution.height() as u32;
+        let width = composition.resolution.width();
+        let height = composition.resolution.height();
         let mut plane = combine_renders(width, height, frames)?;
 
         plane = apply_effects(plane, &composition.effects)?;

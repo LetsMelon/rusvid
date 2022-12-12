@@ -41,9 +41,9 @@ impl SvgItem {
             PathLike::Move(p) => p,
             _ => todo!(),
         };
-        let mut bigger_corner = smaller_corner.clone();
+        let mut bigger_corner = smaller_corner;
 
-        let mut last_point = smaller_corner.clone();
+        let mut last_point = smaller_corner;
         self.path.iter().for_each(|path| {
             fn compare_and_set(value: &Point, smaller: &mut Point, bigger: &mut Point) {
                 if smaller.x() > value.x() {
@@ -89,8 +89,8 @@ impl SvgItem {
 
                     let curve = Curve::from_points(
                         point_to_coord2(&last_point),
-                        (point_to_coord2(&c1), point_to_coord2(&c2)),
-                        point_to_coord2(&p),
+                        (point_to_coord2(c1), point_to_coord2(c2)),
+                        point_to_coord2(p),
                     );
 
                     for i in 0..BOUNDING_BOX_STEPS {
@@ -175,7 +175,7 @@ impl TransformLogic for SvgItem {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct SvgHolder {
     pub(crate) items: HashMap<String, SvgItem>,
 }
@@ -183,9 +183,7 @@ pub struct SvgHolder {
 impl SvgHolder {
     #[inline]
     pub fn new() -> Self {
-        Self {
-            items: HashMap::new(),
-        }
+        Self::default()
     }
 
     pub fn add_item(&mut self, item: SvgItem) -> String {

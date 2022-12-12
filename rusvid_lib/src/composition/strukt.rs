@@ -40,7 +40,7 @@ impl Composition {
 
     #[inline]
     fn check_or_create_layer(&mut self) -> Result<()> {
-        if self.layers.len() == 0 {
+        if self.layers.is_empty() {
             self.create_layer().context("Couldn't create a layer")?;
         };
         Ok(())
@@ -59,7 +59,7 @@ impl Composition {
     #[inline]
     pub fn update(&mut self, frame_count: usize) -> Result<()> {
         for layer in &mut self.layers {
-            let _ = layer.update(frame_count)?;
+            layer.update(frame_count)?;
         }
         Ok(())
     }
@@ -101,7 +101,7 @@ impl MetricsSize for Composition {
 impl LayerLogic for Composition {
     #[inline]
     fn rtree(&self) -> Option<&Tree> {
-        if self.layers.len() == 0 {
+        if self.layers.is_empty() {
             None
         } else {
             Some(self.layers[0].rtree()?)
@@ -110,7 +110,7 @@ impl LayerLogic for Composition {
 
     #[inline]
     fn rtree_mut(&mut self) -> Option<&mut Tree> {
-        if self.layers.len() == 0 {
+        if self.layers.is_empty() {
             None
         } else {
             Some(self.layers[0].rtree_mut()?)
@@ -131,7 +131,7 @@ impl LayerLogic for Composition {
 
     #[inline]
     fn fill_with_link(&self, id: &str) -> Option<Fill> {
-        if self.layers.len() == 0 {
+        if self.layers.is_empty() {
             None
         } else {
             self.layers[0].fill_with_link(id)

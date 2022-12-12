@@ -15,6 +15,7 @@ use crate::plane::{Plane, SIZE};
 pub trait TransformLogic: Debug {
     fn transform(&mut self, transformation: Transform) -> Result<()>;
 
+    #[allow(unused_variables)]
     fn transform_by_id(&mut self, id: impl Into<String>, transformation: Transform) -> Result<()> {
         bail!("`transform_by_id` is not implement for {:?}", self);
     }
@@ -59,11 +60,12 @@ impl Object {
                     )),
                 };
 
-                for (_, item) in &svg.items {
+                for item in svg.items.values() {
                     let mut path = PathData::new();
                     PathLike::extend_path_from_slice(&mut path, &item.path);
 
                     let color = {
+                        #[allow(irrefutable_let_patterns)]
                         let channels = if let ColorLike::Color(c) = &item.fill_color {
                             Some(c)
                         } else {

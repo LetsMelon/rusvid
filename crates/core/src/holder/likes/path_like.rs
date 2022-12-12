@@ -57,20 +57,20 @@ impl PathLike {
         }
     }
 
-    pub fn to_usvg_path_segments(path: &Vec<PathLike>) -> Vec<PathSegment> {
+    pub fn to_usvg_path_segments(path: &[PathLike]) -> Vec<PathSegment> {
         path.iter().map(|p| p.to_usvg_path_segment()).collect()
     }
 
     pub fn type_equal(&self, other: &PathLike) -> bool {
         debug_assert_eq!(std::mem::variant_count::<PathLike>(), 4);
 
-        match (self, other) {
+        matches!(
+            (self, other),
             (PathLike::Move(_), PathLike::Move(_))
-            | (PathLike::Line(_), PathLike::Line(_))
-            | (PathLike::Close, PathLike::Close)
-            | (PathLike::CurveTo(_, _, _), PathLike::CurveTo(_, _, _)) => true,
-            _ => false,
-        }
+                | (PathLike::Line(_), PathLike::Line(_))
+                | (PathLike::Close, PathLike::Close)
+                | (PathLike::CurveTo(_, _, _), PathLike::CurveTo(_, _, _))
+        )
     }
 
     pub fn extend_path_from_self(&self, path: &mut PathData) {
@@ -84,7 +84,7 @@ impl PathLike {
         }
     }
 
-    pub fn extend_path_from_slice(path: &mut PathData, slice: &Vec<Self>) {
+    pub fn extend_path_from_slice(path: &mut PathData, slice: &[Self]) {
         slice
             .iter()
             .for_each(|item| item.extend_path_from_self(path))

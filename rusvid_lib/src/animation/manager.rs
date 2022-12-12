@@ -7,7 +7,7 @@ use resvg::usvg::PathData;
 
 use crate::animation::Animation;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AnimationManager {
     reference: HashMap<String, Rc<PathData>>,
     animations: Vec<Box<dyn Animation>>,
@@ -15,10 +15,7 @@ pub struct AnimationManager {
 
 impl AnimationManager {
     pub fn new() -> AnimationManager {
-        AnimationManager {
-            reference: HashMap::new(),
-            animations: Vec::new(),
-        }
+        AnimationManager::default()
     }
 
     #[inline]

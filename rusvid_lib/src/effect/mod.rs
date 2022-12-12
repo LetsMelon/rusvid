@@ -27,7 +27,7 @@ pub trait EffectLogic: std::fmt::Debug + Element {
     /// assert!(!effect.depends_on_other_effects());
     /// ```
     fn depends_on_other_effects(&self) -> bool {
-        self.depends_on_other_effects_ids().len() != 0
+        !self.depends_on_other_effects_ids().is_empty()
     }
 
     #[allow(unused_variables)]
