@@ -41,9 +41,9 @@ impl SvgItem {
             PathLike::Move(p) => p,
             _ => todo!(),
         };
-        let mut bigger_corner = smaller_corner.clone();
+        let mut bigger_corner = smaller_corner;
 
-        let mut last_point = smaller_corner.clone();
+        let mut last_point = smaller_corner;
         self.path.iter().for_each(|path| {
             fn compare_and_set(value: &Point, smaller: &mut Point, bigger: &mut Point) {
                 if smaller.x() > value.x() {
