@@ -7,14 +7,14 @@ const MULTIPLIER_RED: f32 = 0.299;
 const MULTIPLIER_GREEN: f32 = 0.587;
 const MULTIPLIER_BLUE: f32 = 0.114;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct GrayscaleEffect {
     id: Option<String>,
 }
 
 impl GrayscaleEffect {
     pub fn new() -> Self {
-        GrayscaleEffect { id: None }
+        GrayscaleEffect::default()
     }
 
     pub fn new_with_id(id: impl Into<String>) -> Self {
