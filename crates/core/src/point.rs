@@ -35,6 +35,16 @@ impl Point {
         self.0.y
     }
 
+    #[inline]
+    pub fn x_mut(&mut self) -> &mut f64 {
+        &mut self.0.x
+    }
+
+    #[inline]
+    pub fn y_mut(&mut self) -> &mut f64 {
+        &mut self.0.y
+    }
+
     /// Returns true if the absolute difference of all elements between `self` and `rhs` is
     /// less than or equal to `max_abs_diff`.
     ///
