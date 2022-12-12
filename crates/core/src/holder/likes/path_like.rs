@@ -64,13 +64,13 @@ impl PathLike {
     pub fn type_equal(&self, other: &PathLike) -> bool {
         debug_assert_eq!(std::mem::variant_count::<PathLike>(), 4);
 
-        match (self, other) {
+        matches!(
+            (self, other),
             (PathLike::Move(_), PathLike::Move(_))
-            | (PathLike::Line(_), PathLike::Line(_))
-            | (PathLike::Close, PathLike::Close)
-            | (PathLike::CurveTo(_, _, _), PathLike::CurveTo(_, _, _)) => true,
-            _ => false,
-        }
+                | (PathLike::Line(_), PathLike::Line(_))
+                | (PathLike::Close, PathLike::Close)
+                | (PathLike::CurveTo(_, _, _), PathLike::CurveTo(_, _, _))
+        )
     }
 
     pub fn extend_path_from_self(&self, path: &mut PathData) {
