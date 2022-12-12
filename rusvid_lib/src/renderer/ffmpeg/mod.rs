@@ -85,7 +85,7 @@ impl Renderer for FfmpegRenderer {
             let buffer = self.render_single(&composition)?;
 
             // TODO implement `.save_with_format(...)` in `rusvid_core::plane::Plane`
-            let _ = buffer
+            buffer
                 .as_rgba_image()?
                 .save_with_format(file_path.clone(), file_extension_format)?;
             debug!("Saved frame at: {:?}", file_path);

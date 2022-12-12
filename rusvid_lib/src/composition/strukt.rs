@@ -59,7 +59,7 @@ impl Composition {
     #[inline]
     pub fn update(&mut self, frame_count: usize) -> Result<()> {
         for layer in &mut self.layers {
-            let _ = layer.update(frame_count)?;
+            layer.update(frame_count)?;
         }
         Ok(())
     }
