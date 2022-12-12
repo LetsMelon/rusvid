@@ -175,7 +175,7 @@ impl TransformLogic for SvgItem {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct SvgHolder {
     pub(crate) items: HashMap<String, SvgItem>,
 }
@@ -183,9 +183,7 @@ pub struct SvgHolder {
 impl SvgHolder {
     #[inline]
     pub fn new() -> Self {
-        Self {
-            items: HashMap::new(),
-        }
+        Self::default()
     }
 
     pub fn add_item(&mut self, item: SvgItem) -> String {
