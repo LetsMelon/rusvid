@@ -84,7 +84,7 @@ impl PathLike {
         }
     }
 
-    pub fn extend_path_from_slice(path: &mut PathData, slice: &Vec<Self>) {
+    pub fn extend_path_from_slice(path: &mut PathData, slice: &[Self]) {
         slice
             .iter()
             .for_each(|item| item.extend_path_from_self(path))
