@@ -64,7 +64,6 @@ impl Renderer for FfmpegRenderer {
         self.framerate = composition.framerate;
 
         let file_extension = self.frame_output_format.file_extension();
-        let file_extension_format = self.frame_output_format.as_image_format();
         let out_path = self.out_path().to_path_buf();
         let tmp_path = self.tmp_dir_path().to_path_buf();
 
@@ -84,10 +83,13 @@ impl Renderer for FfmpegRenderer {
             let file_path = tmp_path.join(format!("{}.{}", i, file_extension));
             let buffer = self.render_single(&composition)?;
 
-            // TODO implement `.save_with_format(...)` in `rusvid_core::plane::Plane`
-            buffer
-                .as_rgba_image()?
-                .save_with_format(file_path.clone(), file_extension_format)?;
+            // TODO implement method in plane to accept `FrameImageFormat`
+            match self.frame_output_format {
+                FrameImageFormat::Png => buffer.save_as_png(file_path.clone())?,
+                FrameImageFormat::Bmp => buffer.save_as_bmp(file_path.clone())?,
+                FrameImageFormat::Jpg => buffer.save_as_jpg(file_path.clone())?,
+            };
+
             debug!("Saved frame at: {:?}", file_path);
         }
 
