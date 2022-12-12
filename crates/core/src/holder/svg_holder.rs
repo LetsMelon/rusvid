@@ -89,8 +89,8 @@ impl SvgItem {
 
                     let curve = Curve::from_points(
                         point_to_coord2(&last_point),
-                        (point_to_coord2(&c1), point_to_coord2(&c2)),
-                        point_to_coord2(&p),
+                        (point_to_coord2(c1), point_to_coord2(c2)),
+                        point_to_coord2(p),
                     );
 
                     for i in 0..BOUNDING_BOX_STEPS {
