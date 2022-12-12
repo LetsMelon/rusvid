@@ -65,6 +65,7 @@ impl Object {
                     PathLike::extend_path_from_slice(&mut path, &item.path);
 
                     let color = {
+                        #[allow(irrefutable_let_patterns)]
                         let channels = if let ColorLike::Color(c) = &item.fill_color {
                             Some(c)
                         } else {
