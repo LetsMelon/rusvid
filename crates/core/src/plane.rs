@@ -122,12 +122,8 @@ impl Plane {
         let mut pixmap = Pixmap::new(self.width(), self.height())
             .ok_or(anyhow!("Error while creating an `tiny_skia::Pixmap`"))?;
 
-        let data = pixmap.data_mut();
-
         let buf = self.data.iter().flatten().copied().collect::<Vec<u8>>();
-        for i in 0..buf.len() {
-            data[i] = buf[i];
-        }
+        pixmap.data_mut()[..buf.len()].copy_from_slice(&buf[..]);
 
         Ok(pixmap)
     }
