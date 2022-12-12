@@ -47,12 +47,6 @@ pub fn color_from_hex(hex_color: String) -> Option<Color> {
     }
 }
 
-// TODO replace with crate approx
-pub(crate) fn equal_delta(v1: f64, v2: f64, delta: f64) -> bool {
-    let diff = (v1 - v2).abs();
-    diff <= delta.abs()
-}
-
 #[cfg(test)]
 mod tests {
     mod color {
