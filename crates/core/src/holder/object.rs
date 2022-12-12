@@ -59,7 +59,7 @@ impl Object {
                     )),
                 };
 
-                for (_, item) in &svg.items {
+                for item in svg.items.values() {
                     let mut path = PathData::new();
                     PathLike::extend_path_from_slice(&mut path, &item.path);
 
