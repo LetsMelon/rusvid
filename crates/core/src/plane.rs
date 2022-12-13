@@ -4,6 +4,8 @@ use anyhow::{anyhow, bail, Result};
 use image::{DynamicImage, ImageFormat, RgbaImage};
 use resvg::tiny_skia::Pixmap;
 
+use crate::frame_image_format::FrameImageFormat;
+
 pub type Pixel = [u8; 4];
 
 pub type SIZE = u32;
@@ -205,6 +207,15 @@ impl Plane {
             plane: self,
             x: 0,
             y: 0,
+        }
+    }
+
+    #[inline]
+    pub fn save_with_format<P: AsRef<Path>>(self, path: P, format: FrameImageFormat) -> Result<()> {
+        match format {
+            FrameImageFormat::Png => self.save_as_png(path),
+            FrameImageFormat::Bmp => self.save_as_bmp(path),
+            FrameImageFormat::Jpg => self.save_as_jpg(path),
         }
     }
 

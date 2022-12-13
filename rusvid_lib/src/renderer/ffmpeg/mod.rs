@@ -83,12 +83,7 @@ impl Renderer for FfmpegRenderer {
             let file_path = tmp_path.join(format!("{}.{}", i, file_extension));
             let buffer = self.render_single(&composition)?;
 
-            // TODO implement method in plane to accept `FrameImageFormat`
-            match self.frame_output_format {
-                FrameImageFormat::Png => buffer.save_as_png(file_path.clone())?,
-                FrameImageFormat::Bmp => buffer.save_as_bmp(file_path.clone())?,
-                FrameImageFormat::Jpg => buffer.save_as_jpg(file_path.clone())?,
-            };
+            buffer.save_with_format(file_path.clone(), self.frame_output_format)?;
 
             debug!("Saved frame at: {:?}", file_path);
         }
