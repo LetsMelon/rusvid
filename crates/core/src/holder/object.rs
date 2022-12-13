@@ -83,15 +83,17 @@ impl Object {
                         })
                     };
 
+                    let visibility = if item.visibility {
+                        resvg::usvg::Visibility::Visible
+                    } else {
+                        resvg::usvg::Visibility::Hidden
+                    };
+
                     tree.root
                         .append_kind(resvg::usvg::NodeKind::Path(resvg::usvg::Path {
                             id: self.id.clone(),
                             fill: color,
-                            visibility: if item.visibility {
-                                resvg::usvg::Visibility::Visible
-                            } else {
-                                resvg::usvg::Visibility::Hidden
-                            },
+                            visibility,
                             data: Rc::new(path),
                             ..Default::default()
                         }));
