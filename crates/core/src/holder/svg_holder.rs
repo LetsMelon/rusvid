@@ -92,7 +92,6 @@ impl SvgItem {
                         Point::new(c.x(), c.y())
                     }
 
-                    // TODO calculate curve and sample with points on the curve
                     compare_and_set(p, &mut smaller_corner, &mut bigger_corner);
 
                     let curve = Curve::from_points(
