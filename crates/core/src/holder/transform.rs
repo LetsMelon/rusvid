@@ -15,7 +15,7 @@ pub enum Transform {
     Position(Point),
 
     /// Set the color of the object to `ColorLike`
-    Color(ColorLike),
+    Color(Option<ColorLike>),
 
     /// Change the stroke of the object to the `Option<Stroke>`
     Stroke(Option<Stroke>),

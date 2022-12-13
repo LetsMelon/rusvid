@@ -16,8 +16,8 @@ const BOUNDING_BOX_STEPS: i32 = 10;
 pub struct SvgItem {
     pub(crate) id: String,
     pub(crate) path: Vec<PathLike>,
-    pub(crate) fill_color: ColorLike,
 
+    pub(crate) fill_color: Option<ColorLike>,
     pub(crate) stroke: Option<Stroke>,
 
     pub(crate) visibility: bool,
@@ -25,7 +25,11 @@ pub struct SvgItem {
 
 impl SvgItem {
     #[inline]
-    pub fn new_with_id(id: impl Into<String>, path: Vec<PathLike>, fill_color: ColorLike) -> Self {
+    pub fn new_with_id(
+        id: impl Into<String>,
+        path: Vec<PathLike>,
+        fill_color: Option<ColorLike>,
+    ) -> Self {
         Self {
             id: id.into(),
             path,
@@ -36,7 +40,7 @@ impl SvgItem {
     }
 
     #[inline]
-    pub fn new(path: Vec<PathLike>, fill_color: ColorLike) -> Self {
+    pub fn new(path: Vec<PathLike>, fill_color: Option<ColorLike>) -> Self {
         Self::new_with_id(utils::random_id(), path, fill_color)
     }
 
@@ -138,10 +142,14 @@ impl SvgItem {
             .y(),
         ));
 
-        SvgItem::new(
-            vec![a, b, c, d, PathLike::Close],
-            ColorLike::Color([255, 255, 255, 255]),
-        )
+        let mut my_box = SvgItem::new(vec![a, b, c, d, PathLike::Close], None);
+        my_box.stroke = Some(Stroke {
+            paint: ColorLike::Color([0, 0, 0, 255]),
+            width: 3.0,
+            ..Default::default()
+        });
+
+        my_box
     }
 }
 

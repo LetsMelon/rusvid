@@ -67,7 +67,7 @@ impl Object {
 
                     let color = {
                         #[allow(irrefutable_let_patterns)]
-                        let channels = if let ColorLike::Color(c) = &item.fill_color {
+                        let channels = if let Some(ColorLike::Color(c)) = &item.fill_color {
                             Some(c)
                         } else {
                             None

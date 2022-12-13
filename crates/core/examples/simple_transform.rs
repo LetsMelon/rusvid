@@ -24,7 +24,7 @@ fn main() {
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
         ],
-        ColorLike::Color([0, 255, 100, 255]),
+        Some(ColorLike::Color([0, 255, 100, 255])),
     ));
 
     let heart_id = svg.add_item(SvgItem::new(
@@ -43,7 +43,7 @@ fn main() {
             ),
             PathLike::Close,
         ],
-        ColorLike::Color([255, 0, 0, 255]),
+        Some(ColorLike::Color([255, 0, 0, 255])),
     ));
 
     let mut object = Object::new(TypesLike::Svg(svg));
@@ -64,7 +64,7 @@ fn main() {
     object
         .transform_by_id(
             &heart_id,
-            &Transform::Color(ColorLike::Color([230, 57, 70, 255])),
+            &Transform::Color(Some(ColorLike::Color([230, 57, 70, 255]))),
         )
         .unwrap();
     render_and_save(&object, "color").unwrap();
@@ -78,6 +78,11 @@ fn main() {
         .transform_by_id(&heart_id, &Transform::Move(Point::new(50.0, 0.0)))
         .unwrap();
     render_and_save(&object, "move").unwrap();
+
+    object
+        .transform_by_id(&triangle_id, &Transform::Color(None))
+        .unwrap();
+    render_and_save(&object, "color_none").unwrap();
 
     object
         .transform_by_id(&triangle_id, &Transform::Visibility(false))

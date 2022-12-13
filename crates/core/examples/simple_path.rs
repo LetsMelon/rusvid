@@ -7,17 +7,17 @@ use rusvid_core::point::Point;
 
 fn main() {
     let mut svg = SvgHolder::new();
-    let rect = SvgItem::new(
+    let triangle = SvgItem::new(
         vec![
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 100.0)),
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
         ],
-        ColorLike::Color([0, 255, 100, 255]),
+        Some(ColorLike::Color([0, 255, 100, 255])),
     );
     // svg.add_item(rect.bounding_box_rect());
-    svg.add_item(rect);
+    svg.add_item(triangle);
 
     let heart = SvgItem::new(
         vec![
@@ -35,7 +35,7 @@ fn main() {
             ),
             PathLike::Close,
         ],
-        ColorLike::Color([255, 0, 0, 255]),
+        Some(ColorLike::Color([255, 0, 0, 255])),
     );
     // svg.add_item(heart.bounding_box_rect());
     svg.add_item(heart);
