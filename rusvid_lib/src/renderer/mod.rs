@@ -10,7 +10,6 @@ use crate::composition::Composition;
 use crate::layer::LayerLogic;
 
 pub mod ffmpeg;
-pub mod frame_image_format;
 mod util;
 
 use util::{apply_effects, combine_renders};

@@ -6,12 +6,12 @@ use std::process::{Command, Stdio};
 
 use anyhow::Result;
 use log::{debug, info};
+use rusvid_core::frame_image_format::FrameImageFormat;
 
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
 use crate::renderer::ffmpeg::codec::VideoCodec;
 use crate::renderer::ffmpeg::pixel_formats::PixelFormats;
-use crate::renderer::frame_image_format::FrameImageFormat;
 use crate::renderer::{CliArgument, CliCommand, Renderer};
 use crate::types::FPS;
 

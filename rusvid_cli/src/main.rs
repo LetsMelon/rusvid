@@ -6,6 +6,7 @@ use chrono::Local;
 use fern::{log_file, Dispatch};
 use log::{debug, LevelFilter};
 use rusvid_lib::animation::prelude::*;
+use rusvid_lib::core::frame_image_format::FrameImageFormat;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 use rusvid_lib::resvg::usvg::{

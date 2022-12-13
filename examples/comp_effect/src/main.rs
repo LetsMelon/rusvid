@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use rusvid_lib::animation::prelude::*;
+use rusvid_lib::core::frame_image_format::FrameImageFormat;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 use rusvid_lib::resvg::usvg::{Fill, NodeKind, Paint, Path};

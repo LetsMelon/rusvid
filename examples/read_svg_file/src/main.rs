@@ -1,6 +1,7 @@
 use std::env;
 use std::path::PathBuf;
 
+use rusvid_lib::core::frame_image_format::FrameImageFormat;
 use rusvid_lib::prelude::*;
 
 fn main() {
