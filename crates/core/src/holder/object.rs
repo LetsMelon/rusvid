@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Debug;
 use std::rc::Rc;
 
@@ -13,10 +14,10 @@ use crate::holder::utils;
 use crate::plane::{Plane, SIZE};
 
 pub trait TransformLogic: Debug {
-    fn transform(&mut self, transformation: Transform) -> Result<()>;
+    fn transform(&mut self, transformation: &Transform) -> Result<()>;
 
     #[allow(unused_variables)]
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: Transform) -> Result<()> {
+    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
         bail!("`transform_by_id` is not implement for {:?}", self);
     }
 }
@@ -94,6 +95,7 @@ impl Object {
                             id: self.id.clone(),
                             fill: color,
                             visibility,
+                            stroke: item.stroke.clone(),
                             data: Rc::new(path),
                             ..Default::default()
                         }));
@@ -145,7 +147,18 @@ impl Object {
 
     pub fn transforms(&mut self, transformations: Vec<Transform>) -> Result<()> {
         for transformation in transformations.iter() {
-            self.transform(*transformation)?;
+            self.transform(transformation)?;
+        }
+
+        Ok(())
+    }
+
+    pub fn transform_key_value(
+        &mut self,
+        transformations: HashMap<&str, &Transform>,
+    ) -> Result<()> {
+        for (id, transformation) in transformations {
+            self.transform_by_id(id, transformation)?;
         }
 
         Ok(())
@@ -153,11 +166,11 @@ impl Object {
 }
 
 impl TransformLogic for Object {
-    fn transform(&mut self, transformation: Transform) -> Result<()> {
+    fn transform(&mut self, transformation: &Transform) -> Result<()> {
         self.data.transform(transformation)
     }
 
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: Transform) -> Result<()> {
+    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
         self.data.transform_by_id(id, transformation)
     }
 }

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::{Context, Result};
+use resvg::usvg::Stroke;
 
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
@@ -17,6 +18,8 @@ pub struct SvgItem {
     pub(crate) path: Vec<PathLike>,
     pub(crate) fill_color: ColorLike,
 
+    pub(crate) stroke: Option<Stroke>,
+
     pub(crate) visibility: bool,
 }
 
@@ -27,6 +30,7 @@ impl SvgItem {
             id: id.into(),
             path,
             fill_color,
+            stroke: Some(Stroke::default()),
             visibility: true,
         }
     }
@@ -142,18 +146,18 @@ impl SvgItem {
 }
 
 impl TransformLogic for SvgItem {
-    fn transform(&mut self, transformation: Transform) -> Result<()> {
-        match transformation {
-            Transform::Visibility(value) => self.visibility = value,
+    fn transform(&mut self, transformation: &Transform) -> Result<()> {
+        match &transformation {
+            Transform::Visibility(value) => self.visibility = *value,
             Transform::Move(point) => {
                 self.path = self
                     .path
                     .iter()
                     .map(|p| match *p {
-                        PathLike::Move(og_p) => PathLike::Move(og_p + point),
-                        PathLike::Line(og_p) => PathLike::Line(og_p + point),
+                        PathLike::Move(og_p) => PathLike::Move(og_p + *point),
+                        PathLike::Line(og_p) => PathLike::Line(og_p + *point),
                         PathLike::CurveTo(end, c1, c2) => {
-                            PathLike::CurveTo(end + point, c1 + point, c2 + point)
+                            PathLike::CurveTo(end + *point, c1 + *point, c2 + *point)
                         }
                         PathLike::Close => PathLike::Close,
                     })
@@ -161,13 +165,16 @@ impl TransformLogic for SvgItem {
             }
             Transform::Position(position) => match self.path[0] {
                 PathLike::Move(point) => {
-                    let offset = position - point;
-                    self.transform(Transform::Move(offset))?
+                    let offset = *position - point;
+                    self.transform(&Transform::Move(offset))?
                 }
                 _ => panic!("First element needs to be a `PathLike::Move`"),
             },
             Transform::Color(value) => {
-                self.fill_color = value;
+                self.fill_color = *value;
+            }
+            Transform::Stroke(stroke) => {
+                self.stroke = stroke.clone();
             }
         };
 
@@ -198,15 +205,15 @@ impl SvgHolder {
 }
 
 impl TransformLogic for SvgHolder {
-    fn transform(&mut self, transformation: Transform) -> Result<()> {
+    fn transform(&mut self, transformation: &Transform) -> Result<()> {
         for item in &mut self.items.values_mut() {
-            item.transform(transformation)?;
+            item.transform(&transformation)?;
         }
 
         Ok(())
     }
 
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: Transform) -> Result<()> {
+    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
         let id: String = id.into();
         let item = self
             .get_item_mut(id.clone())

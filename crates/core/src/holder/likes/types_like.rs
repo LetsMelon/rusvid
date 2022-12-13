@@ -12,14 +12,14 @@ pub enum TypesLike {
 }
 
 impl TransformLogic for TypesLike {
-    fn transform(&mut self, transformation: Transform) -> Result<()> {
+    fn transform(&mut self, transformation: &Transform) -> Result<()> {
         match self {
             TypesLike::Svg(svg) => svg.transform(transformation),
             TypesLike::Image(_) => todo!(),
         }
     }
 
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: Transform) -> Result<()> {
+    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
         match self {
             TypesLike::Svg(svg) => svg.transform_by_id(id, transformation),
             TypesLike::Image(_) => todo!(),
