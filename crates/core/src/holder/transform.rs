@@ -1,6 +1,5 @@
-use resvg::usvg::Stroke;
-
 use crate::holder::likes::color_like::ColorLike;
+use crate::holder::stroke::Stroke;
 use crate::point::Point;
 
 #[derive(Debug, Clone)]

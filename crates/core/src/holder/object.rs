@@ -95,7 +95,7 @@ impl Object {
                             id: self.id.clone(),
                             fill: color,
                             visibility,
-                            stroke: item.stroke.clone(),
+                            stroke: item.stroke.clone().and_then(|s| s.as_resvg_stroke()),
                             data: Rc::new(path),
                             ..Default::default()
                         }));

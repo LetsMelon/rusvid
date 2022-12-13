@@ -1,9 +1,9 @@
 use anyhow::Result;
-use resvg::usvg::{Color, NonZeroPositiveF64, Stroke};
 use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
 use rusvid_core::holder::object::{Object, TransformLogic};
+use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
 use rusvid_core::holder::transform::Transform;
 use rusvid_core::point::Point;
@@ -53,12 +53,8 @@ fn main() {
         .transform_by_id(
             &triangle_id,
             &Transform::Stroke(Some(Stroke {
-                paint: resvg::usvg::Paint::Color(Color {
-                    red: 255,
-                    green: 255,
-                    blue: 255,
-                }),
-                width: NonZeroPositiveF64::new(2.5).unwrap(),
+                paint: ColorLike::Color([100, 50, 120, 255]),
+                width: 1.75,
                 ..Stroke::default()
             })),
         )

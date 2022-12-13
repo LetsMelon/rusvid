@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use anyhow::{Context, Result};
-use resvg::usvg::Stroke;
 
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::object::TransformLogic;
+use crate::holder::stroke::Stroke;
 use crate::holder::transform::Transform;
 use crate::holder::utils;
 use crate::point::Point;
