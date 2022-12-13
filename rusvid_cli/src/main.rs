@@ -138,7 +138,7 @@ fn main() {
         },
     });
 
-    let mut path = equilateral_triangle(400.0, 400.0, 350.0);
+    let mut path = equilateral_triangle(Point::new(400.0, 400.0), 350.0);
     path.transform(Transform::new_rotate(2.5));
     layer
         .add_to_root(NodeKind::Path(Path {
