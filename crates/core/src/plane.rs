@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::{anyhow, bail, Result};
-use image::{DynamicImage, ImageFormat, RgbaImage};
+use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
 use resvg::tiny_skia::Pixmap;
 
 use crate::frame_image_format::FrameImageFormat;
@@ -73,6 +73,19 @@ impl Plane {
         }
 
         Ok(plane)
+    }
+
+    pub fn as_rgb_image(self) -> Result<RgbImage> {
+        let buf = self
+            .data
+            .iter()
+            .flat_map(|v| [v[0], v[1], v[2]])
+            .collect::<Vec<u8>>();
+
+        assert_eq!(self.width() * self.height() * 3, buf.len() as SIZE);
+
+        RgbImage::from_vec(self.width(), self.height(), buf)
+            .ok_or(anyhow!("Error while creating an `image::RgbImage`"))
     }
 
     pub fn as_rgba_image(self) -> Result<RgbaImage> {

@@ -19,7 +19,6 @@ pub enum Transform {
 
     /// Change the stroke of the object to the `Option<Stroke>`
     Stroke(Option<Stroke>),
-
     // TODO's
     // Rotate(f32), // Rotate by angle
     // Scale(Point), // Scale x by Point.x and y by Point.y

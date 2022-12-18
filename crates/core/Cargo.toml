@@ -14,3 +14,6 @@ image = { workspace = true, features = ["png", "bmp", "jpeg"] }
 resvg = { workspace = true }
 uuid = { version = "1.2.2", default-features = false, features = [ "v4", "fast-rng" ] }
 flo_curves = "0.6.1"
+
+[dev-dependencies]
+image-compare = "0.2.3"
