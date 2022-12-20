@@ -11,18 +11,19 @@ use crate::composition::Composition;
 use crate::metrics::MetricsVideo;
 use crate::renderer::ffmpeg::codec::VideoCodec;
 use crate::renderer::ffmpeg::pixel_formats::PixelFormats;
+use crate::renderer::ffmpeg::FfmpegRendererBuilder;
 use crate::renderer::{CliArgument, CliCommand, Renderer};
 use crate::types::FPS;
 
 #[derive(Debug)]
 pub struct FfmpegRenderer {
-    pub codec: String, // TODO enum
-    pub codec_video: VideoCodec,
-    pub pixel_format: Option<PixelFormats>,
-    pub framerate: FPS,
-    frame_output_format: FrameImageFormat,
-    out_path: PathBuf,
-    tmp_dir_path: PathBuf,
+    pub(crate) codec: String, // TODO enum
+    pub(crate) codec_video: VideoCodec,
+    pub(crate) pixel_format: Option<PixelFormats>,
+    pub(crate) framerate: FPS,
+    pub(crate) frame_output_format: FrameImageFormat,
+    pub(crate) out_path: PathBuf,
+    pub(crate) tmp_dir_path: PathBuf,
 }
 
 impl Default for FfmpegRenderer {
@@ -51,6 +52,10 @@ impl FfmpegRenderer {
             frame_output_format,
             ..FfmpegRenderer::default()
         }
+    }
+
+    pub fn builder() -> FfmpegRendererBuilder {
+        FfmpegRendererBuilder::default()
     }
 }
 
