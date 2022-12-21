@@ -1,20 +1,16 @@
 use std::collections::VecDeque;
 use std::sync::Mutex;
 
-use lazy_static::{lazy_static, __Deref};
-use rusvid_core::holder::likes::{
-    color_like::ColorLike, path_like::PathLike, types_like::TypesLike,
-};
+use lazy_static::{__Deref, lazy_static};
+use rusvid_core::holder::likes::*;
 use rusvid_core::holder::object::Object;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
-use rusvid_core::plane::Plane;
 use rusvid_core::point::Point;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
 lazy_static! {
     static ref HOLDER: Mutex<SvgHolder> = Mutex::new(SvgHolder::new());
-
     static ref WIDTH: Mutex<u32> = Mutex::new(300);
     static ref HEIGHT: Mutex<u32> = Mutex::new(300);
 }
@@ -35,12 +31,12 @@ pub fn set_height(value: u32) {
 
 #[wasm_bindgen]
 pub fn get_width() -> u32 {
-    *WIDTH.lock().unwrap().deref()
+    *WIDTH.lock().unwrap()
 }
 
 #[wasm_bindgen]
 pub fn get_height() -> u32 {
-    *HEIGHT.lock().unwrap().deref()
+    *HEIGHT.lock().unwrap()
 }
 
 #[wasm_bindgen]
@@ -49,26 +45,24 @@ pub fn render() -> js_sys::Uint8ClampedArray {
     let height = *HEIGHT.lock().unwrap().deref();
 
     let holder = HOLDER.lock().unwrap();
-    let object = Object::new(TypesLike::Svg(
-        holder.deref().clone()
-    ));
+    let object = Object::new(TypesLike::Svg(holder.deref().clone()));
 
     let plane = object.render(width, height).unwrap();
     let data = plane.as_data();
-    
+
     let my_data = data.iter().flatten().map(|x| *x).collect::<Vec<u8>>();
-    
+
     js_sys::Uint8ClampedArray::from(&my_data[..])
 }
 
 #[wasm_bindgen]
 pub fn add_svg(data: js_sys::Uint32Array, color: js_sys::Uint8ClampedArray) {
     // kind, x, y
-    
+
     // 0     -> Move
     // 1     -> Line
     // 255.. -> Close
-    
+
     let mut as_vec = VecDeque::from(data.to_vec());
     let mut paths = Vec::new();
 
@@ -79,22 +73,22 @@ pub fn add_svg(data: js_sys::Uint32Array, color: js_sys::Uint8ClampedArray) {
             0 => {
                 let x = as_vec.pop_front().unwrap();
                 let y = as_vec.pop_front().unwrap();
-    
+
                 paths.push(PathLike::Move(Point::new(x as f64, y as f64)));
-            },
+            }
             1 => {
                 let x = as_vec.pop_front().unwrap();
                 let y = as_vec.pop_front().unwrap();
-    
+
                 paths.push(PathLike::Line(Point::new(x as f64, y as f64)));
-            },
+            }
             255.. => {
                 paths.push(PathLike::Close);
-            },
+            }
             _ => break,
         }
     }
-    
+
     let color_as_vec = color.to_vec();
     let color = match color.to_vec().len() {
         4 => {
@@ -103,9 +97,9 @@ pub fn add_svg(data: js_sys::Uint32Array, color: js_sys::Uint8ClampedArray) {
             let b = color_as_vec[2];
             let a = color_as_vec[3];
 
-            Some(ColorLike::Color([r,g,b,a]))
-        },
-        _ => None
+            Some(ColorLike::Color([r, g, b, a]))
+        }
+        _ => None,
     };
 
     let item = SvgItem::new(paths, color);
