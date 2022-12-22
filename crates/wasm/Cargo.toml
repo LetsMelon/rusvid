@@ -1,12 +1,16 @@
+cargo-features = ["per-package-target"]
+
 [package]
 name = "rusvid_wasm"
 version = "0.1.0"
 edition = "2021"
+forced-target = "wasm32-unknown-unknown"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 crate-type = ["cdylib"]
+
 
 [dependencies]
 js-sys = "0.3.60"
