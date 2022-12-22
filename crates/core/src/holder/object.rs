@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use anyhow::{bail, Context, Result};
+use anyhow::Context;
 use resvg::tiny_skia::Pixmap;
 use resvg::usvg::{AspectRatio, NodeExt, NormalizedF64, PathData, Size, Tree, ViewBox};
 
@@ -13,12 +13,28 @@ use crate::holder::transform::Transform;
 use crate::holder::utils;
 use crate::plane::{Plane, SIZE};
 
+#[derive(thiserror::Error, Debug)]
+pub enum TransformError {
+    #[error("`{0}` is not implemented for {1}")]
+    NotImplemented(&'static str, String),
+
+    #[error("No item with id `{0}`")]
+    NoItem(String),
+}
+
 pub trait TransformLogic: Debug {
-    fn transform(&mut self, transformation: &Transform) -> Result<()>;
+    fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError>;
 
     #[allow(unused_variables)]
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
-        bail!("`transform_by_id` is not implement for {:?}", self);
+    fn transform_by_id(
+        &mut self,
+        id: impl Into<String>,
+        transformation: &Transform,
+    ) -> Result<(), TransformError> {
+        Err(TransformError::NotImplemented(
+            "transform_by_id",
+            format!("{:?}", self),
+        ))
     }
 }
 
@@ -44,7 +60,7 @@ impl Object {
         &self.id
     }
 
-    pub fn render(&self, width: SIZE, height: SIZE) -> Result<Plane> {
+    pub fn render(&self, width: SIZE, height: SIZE) -> anyhow::Result<Plane> {
         match &self.data {
             TypesLike::Svg(svg) => {
                 let size = Size::new(width as f64, height as f64)
@@ -145,7 +161,7 @@ impl Object {
         }
     }
 
-    pub fn transforms(&mut self, transformations: Vec<Transform>) -> Result<()> {
+    pub fn transforms(&mut self, transformations: Vec<Transform>) -> Result<(), TransformError> {
         for transformation in transformations.iter() {
             self.transform(transformation)?;
         }
@@ -156,7 +172,7 @@ impl Object {
     pub fn transform_key_value(
         &mut self,
         transformations: HashMap<&str, &Transform>,
-    ) -> Result<()> {
+    ) -> Result<(), TransformError> {
         for (id, transformation) in transformations {
             self.transform_by_id(id, transformation)?;
         }
@@ -166,11 +182,15 @@ impl Object {
 }
 
 impl TransformLogic for Object {
-    fn transform(&mut self, transformation: &Transform) -> Result<()> {
+    fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError> {
         self.data.transform(transformation)
     }
 
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
+    fn transform_by_id(
+        &mut self,
+        id: impl Into<String>,
+        transformation: &Transform,
+    ) -> Result<(), TransformError> {
         self.data.transform_by_id(id, transformation)
     }
 }
