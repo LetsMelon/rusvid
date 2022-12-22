@@ -163,6 +163,10 @@ impl Object {
 
         Ok(())
     }
+
+    pub fn data_mut(&mut self) -> &mut TypesLike {
+        &mut self.data
+    }
 }
 
 impl TransformLogic for Object {
