@@ -51,7 +51,9 @@ pub enum Transform {
 
     /// Scale x and y by value
     Scale(Point),
+
+    /// Rotate by angle in radiant
+    Rotate(f64),
     // TODO's
-    // Rotate(f32), // Rotate by angle
     // Opacity(f32), // Should change the alpha chanel in the color
 }

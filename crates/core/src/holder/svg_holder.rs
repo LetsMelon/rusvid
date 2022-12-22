@@ -209,6 +209,43 @@ impl TransformLogic for SvgItem {
                     })
                     .collect();
             }
+            Transform::Rotate(angle) => {
+                let bounding_box = self.bounding_box();
+
+                let size = bounding_box.1 - bounding_box.0;
+                let center = bounding_box.0 + size / 2.0;
+
+                self.path = self
+                    .path
+                    .iter()
+                    .map(|p| {
+                        let formatted = match *p {
+                            PathLike::Move(value) => {
+                                let v = value - center;
+
+                                let x = angle.cos() * v.x() - angle.sin() * v.y();
+                                let y = angle.sin() * v.x() + angle.cos() * v.y();
+
+                                let pos = center + Point::new(x, y);
+                                PathLike::Move(pos)
+                            }
+                            PathLike::Line(value) => {
+                                let v = value - center;
+
+                                let x = angle.cos() * v.x() - angle.sin() * v.y();
+                                let y = angle.sin() * v.x() + angle.cos() * v.y();
+
+                                let pos = center + Point::new(x, y);
+                                PathLike::Line(pos)
+                            }
+                            PathLike::CurveTo(_, _, _) => todo!(),
+                            PathLike::Close => PathLike::Close,
+                        };
+
+                        formatted
+                    })
+                    .collect();
+            }
         };
 
         Ok(())

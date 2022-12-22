@@ -85,6 +85,11 @@ fn main() {
     render_and_save(&object, "scale").unwrap();
 
     object
+        .transform_by_id(&triangle_id, &Transform::Rotate(15.0_f64.to_radians()))
+        .unwrap();
+    render_and_save(&object, "rotate").unwrap();
+
+    object
         .transform_by_id(&triangle_id, &Transform::Color(None))
         .unwrap();
     render_and_save(&object, "color_none").unwrap();
