@@ -10,7 +10,7 @@ use crate::point::Point;
 const BOUNDING_BOX_STEPS: i32 = 10;
 
 // TODO move SvgItem into separate file
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SvgItem {
     pub(crate) id: String,
     pub(crate) path: Vec<PathLike>,
@@ -253,7 +253,7 @@ impl TransformLogic for SvgItem {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct SvgHolder {
     pub(crate) items: HashMap<String, SvgItem>,
 }
@@ -262,6 +262,16 @@ impl SvgHolder {
     #[inline]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn new_with_items(items: Vec<SvgItem>) -> Self {
+        let mut svg_holder = Self::new();
+
+        for item in items {
+            svg_holder.add_item(item);
+        }
+
+        svg_holder
     }
 
     pub fn add_item(&mut self, item: SvgItem) -> String {

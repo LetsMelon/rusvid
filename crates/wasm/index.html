@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>rusvid</title>
+    <style>
+      canvas {
+        outline: black 3px solid;
+        image-rendering: pixelated;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="app"></canvas>
+
+    <button type="button" , id="b_render">Render</button>
+    <button type="button" , id="b_animation">Animation</button>
+
+    <div>
+      <p>Color:</p>
+      <input type="range" id="c_r" name="red" min="0" max="255" value="255" />
+      <label for="c_r">Red</label>
+      <input type="range" id="c_g" name="green" min="0" max="255" />
+      <label for="c_g">Green</label>
+      <input type="range" id="c_b" name="blue" min="0" max="255" />
+      <label for="c_b">Blue</label>
+    </div>
+
+    <script type="module" src="index.js"></script>
+  </body>
+</html>
