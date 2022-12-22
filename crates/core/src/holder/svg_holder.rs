@@ -2,10 +2,8 @@ use std::collections::HashMap;
 
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
-// TODO move `TransformLogic` and `TransformError` into `crate::holder::transform`
-use crate::holder::object::{TransformError, TransformLogic};
 use crate::holder::stroke::Stroke;
-use crate::holder::transform::Transform;
+use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
 use crate::point::Point;
 

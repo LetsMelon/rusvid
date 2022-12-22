@@ -1,7 +1,6 @@
 use crate::holder::image_holder::ImageHolder;
-use crate::holder::object::{TransformError, TransformLogic};
 use crate::holder::svg_holder::SvgHolder;
-use crate::holder::transform::Transform;
+use crate::holder::transform::{Transform, TransformError, TransformLogic};
 
 #[derive(Debug)]
 pub enum TypesLike {

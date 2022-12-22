@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::fmt::Debug;
 use std::rc::Rc;
 
 use anyhow::Context;
@@ -9,34 +8,9 @@ use resvg::usvg::{AspectRatio, NodeExt, NormalizedF64, PathData, Size, Tree, Vie
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::likes::types_like::TypesLike;
-use crate::holder::transform::Transform;
+use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
 use crate::plane::{Plane, SIZE};
-
-#[derive(thiserror::Error, Debug)]
-pub enum TransformError {
-    #[error("`{0}` is not implemented for {1}")]
-    NotImplemented(&'static str, String),
-
-    #[error("No item with id `{0}`")]
-    NoItem(String),
-}
-
-pub trait TransformLogic: Debug {
-    fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError>;
-
-    #[allow(unused_variables)]
-    fn transform_by_id(
-        &mut self,
-        id: impl Into<String>,
-        transformation: &Transform,
-    ) -> Result<(), TransformError> {
-        Err(TransformError::NotImplemented(
-            "transform_by_id",
-            format!("{:?}", self),
-        ))
-    }
-}
 
 #[derive(Debug)]
 pub struct Object {
