@@ -80,6 +80,11 @@ fn main() {
     render_and_save(&object, "move").unwrap();
 
     object
+        .transform_by_id(&triangle_id, &Transform::Scale(Point::new_symmetric(1.5)))
+        .unwrap();
+    render_and_save(&object, "scale").unwrap();
+
+    object
         .transform_by_id(&triangle_id, &Transform::Color(None))
         .unwrap();
     render_and_save(&object, "color_none").unwrap();
