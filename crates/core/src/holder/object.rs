@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use anyhow::Context;
 use resvg::tiny_skia::Pixmap;
 use resvg::usvg::{AspectRatio, NodeExt, NormalizedF64, PathData, Size, Tree, ViewBox};
 
@@ -10,7 +9,7 @@ use crate::holder::likes::path_like::PathLike;
 use crate::holder::likes::types_like::TypesLike;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
-use crate::plane::{Plane, SIZE};
+use crate::plane::{Plane, PlaneError, SIZE};
 
 #[derive(Debug)]
 pub struct Object {
@@ -34,11 +33,11 @@ impl Object {
         &self.id
     }
 
-    pub fn render(&self, width: SIZE, height: SIZE) -> anyhow::Result<Plane> {
+    pub fn render(&self, width: SIZE, height: SIZE) -> Result<Plane, PlaneError> {
         match &self.data {
             TypesLike::Svg(svg) => {
                 let size = Size::new(width as f64, height as f64)
-                    .context("Width oder height must be greater 0")?;
+                    .ok_or(PlaneError::ValueGreaterZero("width or height"))?;
 
                 let tree = Tree {
                     size,
@@ -91,7 +90,7 @@ impl Object {
                         }));
                 }
 
-                let mut pixmap = Pixmap::new(width, height).context("sth error")?;
+                let mut pixmap = Pixmap::new(width, height).ok_or(PlaneError::TinySkiaError)?;
 
                 resvg::render(
                     &tree,

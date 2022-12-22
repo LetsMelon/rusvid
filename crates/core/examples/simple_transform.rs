@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
@@ -12,7 +12,7 @@ use rusvid_core::point::Point;
 fn render_and_save(object: &Object, name: &str) -> Result<()> {
     let plane = object.render(300, 300)?;
     let path = format!("example_simple_transform_{}.png", name);
-    plane.save_as_png(path)
+    plane.save_as_png(path).map_err(|err| anyhow!(err))
 }
 
 fn main() {
