@@ -9,6 +9,7 @@ use crate::point::Point;
 
 const BOUNDING_BOX_STEPS: i32 = 10;
 
+// TODO move SvgItem into separate file
 #[derive(Debug)]
 pub struct SvgItem {
     pub(crate) id: String,
