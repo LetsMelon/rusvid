@@ -1,12 +1,9 @@
 use std::collections::HashMap;
 
-use anyhow::{Context, Result};
-
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
-use crate::holder::object::TransformLogic;
 use crate::holder::stroke::Stroke;
-use crate::holder::transform::Transform;
+use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
 use crate::point::Point;
 
@@ -153,7 +150,7 @@ impl SvgItem {
 }
 
 impl TransformLogic for SvgItem {
-    fn transform(&mut self, transformation: &Transform) -> Result<()> {
+    fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError> {
         match &transformation {
             Transform::Visibility(value) => self.visibility = *value,
             Transform::Move(point) => {
@@ -212,7 +209,7 @@ impl SvgHolder {
 }
 
 impl TransformLogic for SvgHolder {
-    fn transform(&mut self, transformation: &Transform) -> Result<()> {
+    fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError> {
         for item in &mut self.items.values_mut() {
             item.transform(&transformation)?;
         }
@@ -220,11 +217,15 @@ impl TransformLogic for SvgHolder {
         Ok(())
     }
 
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
+    fn transform_by_id(
+        &mut self,
+        id: impl Into<String>,
+        transformation: &Transform,
+    ) -> Result<(), TransformError> {
         let id: String = id.into();
         let item = self
             .get_item_mut(id.clone())
-            .context(format!("SvgHolder don't have an item with the id `{}`", id))?;
+            .ok_or(TransformError::NoItem(id))?;
 
         item.transform(transformation)
     }
