@@ -19,3 +19,4 @@ members = [
 anyhow = "1.0.66"
 image = { version = "0.24", default-features = false }
 resvg = { version = "0.28.0", default-features = false }
+thiserror = "1.0.38"

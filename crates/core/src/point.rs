@@ -7,17 +7,22 @@ pub struct Point(DVec2);
 
 impl Point {
     /// All zeroes.
-    pub const ZERO: Self = Self::from_dvec(DVec2::splat(0.0));
+    pub const ZERO: Self = Self::new_symmetric(0.0);
 
     /// All ones.
-    pub const ONE: Self = Self::from_dvec(DVec2::splat(1.0));
+    pub const ONE: Self = Self::new_symmetric(1.0);
 
     /// All negative ones.
-    pub const NEG_ONE: Self = Self::from_dvec(DVec2::splat(-1.0));
+    pub const NEG_ONE: Self = Self::new_symmetric(-1.0);
 
     #[inline]
     pub const fn new(x: f64, y: f64) -> Self {
         Self::from_dvec(DVec2::new(x, y))
+    }
+
+    #[inline]
+    pub const fn new_symmetric(v: f64) -> Self {
+        Self::new(v, v)
     }
 
     #[inline(always)]

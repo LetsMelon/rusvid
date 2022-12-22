@@ -1,17 +1,15 @@
 use std::collections::HashMap;
 
-use anyhow::{Context, Result};
-
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
-use crate::holder::object::TransformLogic;
 use crate::holder::stroke::Stroke;
-use crate::holder::transform::Transform;
+use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
 use crate::point::Point;
 
 const BOUNDING_BOX_STEPS: i32 = 10;
 
+// TODO move SvgItem into separate file
 #[derive(Debug, Clone)]
 pub struct SvgItem {
     pub(crate) id: String,
@@ -153,7 +151,7 @@ impl SvgItem {
 }
 
 impl TransformLogic for SvgItem {
-    fn transform(&mut self, transformation: &Transform) -> Result<()> {
+    fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError> {
         match &transformation {
             Transform::Visibility(value) => self.visibility = *value,
             Transform::Move(point) => {
@@ -182,6 +180,72 @@ impl TransformLogic for SvgItem {
             }
             Transform::Stroke(stroke) => {
                 self.stroke = stroke.clone();
+            }
+            Transform::Scale(factor) => {
+                let bounding_box = self.bounding_box();
+
+                let size = bounding_box.1 - bounding_box.0;
+                let center = bounding_box.0 + size / 2.0;
+
+                self.path = self
+                    .path
+                    .iter()
+                    .map(|p| {
+                        let formatted = match *p {
+                            PathLike::Move(value) => {
+                                let v = (value - center) * *factor;
+                                let pos = center + v;
+                                PathLike::Move(pos)
+                            }
+                            PathLike::Line(value) => {
+                                let v = (value - center) * *factor;
+                                let pos = center + v;
+                                PathLike::Line(pos)
+                            }
+                            PathLike::CurveTo(_, _, _) => todo!(),
+                            PathLike::Close => PathLike::Close,
+                        };
+
+                        formatted
+                    })
+                    .collect();
+            }
+            Transform::Rotate(angle) => {
+                let bounding_box = self.bounding_box();
+
+                let size = bounding_box.1 - bounding_box.0;
+                let center = bounding_box.0 + size / 2.0;
+
+                self.path = self
+                    .path
+                    .iter()
+                    .map(|p| {
+                        let formatted = match *p {
+                            PathLike::Move(value) => {
+                                let v = value - center;
+
+                                let x = angle.cos() * v.x() - angle.sin() * v.y();
+                                let y = angle.sin() * v.x() + angle.cos() * v.y();
+
+                                let pos = center + Point::new(x, y);
+                                PathLike::Move(pos)
+                            }
+                            PathLike::Line(value) => {
+                                let v = value - center;
+
+                                let x = angle.cos() * v.x() - angle.sin() * v.y();
+                                let y = angle.sin() * v.x() + angle.cos() * v.y();
+
+                                let pos = center + Point::new(x, y);
+                                PathLike::Line(pos)
+                            }
+                            PathLike::CurveTo(_, _, _) => todo!(),
+                            PathLike::Close => PathLike::Close,
+                        };
+
+                        formatted
+                    })
+                    .collect();
             }
         };
 
@@ -222,7 +286,7 @@ impl SvgHolder {
 }
 
 impl TransformLogic for SvgHolder {
-    fn transform(&mut self, transformation: &Transform) -> Result<()> {
+    fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError> {
         for item in &mut self.items.values_mut() {
             item.transform(&transformation)?;
         }
@@ -230,11 +294,15 @@ impl TransformLogic for SvgHolder {
         Ok(())
     }
 
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
+    fn transform_by_id(
+        &mut self,
+        id: impl Into<String>,
+        transformation: &Transform,
+    ) -> Result<(), TransformError> {
         let id: String = id.into();
         let item = self
             .get_item_mut(id.clone())
-            .context(format!("SvgHolder don't have an item with the id `{}`", id))?;
+            .ok_or(TransformError::NoItem(id))?;
 
         item.transform(transformation)
     }

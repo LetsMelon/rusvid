@@ -1,13 +1,30 @@
 use std::path::Path;
 
-use anyhow::{anyhow, bail, Result};
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
 use resvg::tiny_skia::Pixmap;
+use thiserror::Error;
 
 use crate::frame_image_format::FrameImageFormat;
 
-pub type Pixel = [u8; 4];
+#[derive(Error, Debug)]
+pub enum PlaneError {
+    #[error("{0} must be greater than 0")]
+    ValueGreaterZero(&'static str),
 
+    #[error("width * height must equal data.len()")]
+    CapacityError,
+
+    #[error("Error in crate 'Image'")]
+    ImageError,
+
+    #[error("Error in crate 'tiny-skia'")]
+    TinySkiaError,
+
+    #[error("Can't get item at coordinates x: {0}, y: {1}")]
+    OutOfBound2d(u32, u32),
+}
+
+pub type Pixel = [u8; 4];
 pub type SIZE = u32;
 
 #[derive(Debug, Clone)]
@@ -24,12 +41,12 @@ fn position_to_index(x: SIZE, y: SIZE, multi: SIZE) -> usize {
 
 /// Coordinate system used: <https://learn.adafruit.com/adafruit-gfx-graphics-library/coordinate-system-and-units>
 impl Plane {
-    pub fn new(width: SIZE, height: SIZE) -> Result<Self> {
-        if width == 0 {
-            bail!("Width must be greater 0");
+    pub fn new(width: SIZE, height: SIZE) -> Result<Self, PlaneError> {
+        if width <= 0 {
+            return Err(PlaneError::ValueGreaterZero("Width"));
         }
-        if height == 0 {
-            bail!("Height must be greater 0");
+        if height <= 0 {
+            return Err(PlaneError::ValueGreaterZero("Height"));
         }
 
         Ok(Plane {
@@ -39,9 +56,9 @@ impl Plane {
         })
     }
 
-    pub fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Result<Self> {
+    pub fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Result<Self, PlaneError> {
         if width * height != data.len() as SIZE {
-            bail!("Data hasn't the right capacity");
+            return Err(PlaneError::CapacityError);
         }
 
         Ok(Self::from_data_unchecked(width, height, data))
@@ -59,8 +76,8 @@ impl Plane {
         &self.data
     }
 
-    /// Crates a `anyhow::Result<Plane>` from a `image::RgbaImage`
-    pub fn from_rgba_image(image: RgbaImage) -> Result<Self> {
+    /// Crates a `Result<Plane, PlaneError>` from a `image::RgbaImage`
+    pub fn from_rgba_image(image: RgbaImage) -> Result<Self, PlaneError> {
         let width = image.width() as SIZE;
         let height = image.height() as SIZE;
 
@@ -75,7 +92,7 @@ impl Plane {
         Ok(plane)
     }
 
-    pub fn as_rgb_image(self) -> Result<RgbImage> {
+    pub fn as_rgb_image(self) -> Result<RgbImage, PlaneError> {
         let buf = self
             .data
             .iter()
@@ -84,20 +101,18 @@ impl Plane {
 
         assert_eq!(self.width() * self.height() * 3, buf.len() as SIZE);
 
-        RgbImage::from_vec(self.width(), self.height(), buf)
-            .ok_or(anyhow!("Error while creating an `image::RgbImage`"))
+        RgbImage::from_vec(self.width(), self.height(), buf).ok_or(PlaneError::ImageError)
     }
 
-    pub fn as_rgba_image(self) -> Result<RgbaImage> {
+    pub fn as_rgba_image(self) -> Result<RgbaImage, PlaneError> {
         let buf = self.data.iter().flatten().copied().collect::<Vec<u8>>();
 
         assert_eq!(self.width() * self.height() * 4, buf.len() as SIZE);
 
-        RgbaImage::from_vec(self.width(), self.height(), buf)
-            .ok_or(anyhow!("Error while creating an `image::RgbaImage`"))
+        RgbaImage::from_vec(self.width(), self.height(), buf).ok_or(PlaneError::ImageError)
     }
 
-    pub fn from_dynamic_image(image: DynamicImage) -> Result<Self> {
+    pub fn from_dynamic_image(image: DynamicImage) -> Result<Self, PlaneError> {
         let width = image.width() as SIZE;
         let height = image.height() as SIZE;
 
@@ -133,9 +148,9 @@ impl Plane {
         }
     }
 
-    pub fn as_pixmap(self) -> Result<Pixmap> {
-        let mut pixmap = Pixmap::new(self.width(), self.height())
-            .ok_or(anyhow!("Error while creating an `tiny_skia::Pixmap`"))?;
+    pub fn as_pixmap(self) -> Result<Pixmap, PlaneError> {
+        let mut pixmap =
+            Pixmap::new(self.width(), self.height()).ok_or(PlaneError::TinySkiaError)?;
 
         let buf = self.data.iter().flatten().copied().collect::<Vec<u8>>();
         pixmap.data_mut()[..buf.len()].copy_from_slice(&buf[..]);
@@ -194,8 +209,8 @@ impl Plane {
     }
 
     #[inline]
-    pub fn put_pixel(&mut self, x: SIZE, y: SIZE, value: Pixel) -> Result<()> {
-        *self.pixel_mut(x, y).ok_or(anyhow!("Out off bound error"))? = value;
+    pub fn put_pixel(&mut self, x: SIZE, y: SIZE, value: Pixel) -> Result<(), PlaneError> {
+        *self.pixel_mut(x, y).ok_or(PlaneError::OutOfBound2d(x, y))? = value;
 
         Ok(())
     }
@@ -224,7 +239,11 @@ impl Plane {
     }
 
     #[inline]
-    pub fn save_with_format<P: AsRef<Path>>(self, path: P, format: FrameImageFormat) -> Result<()> {
+    pub fn save_with_format<P: AsRef<Path>>(
+        self,
+        path: P,
+        format: FrameImageFormat,
+    ) -> Result<(), PlaneError> {
         match format {
             FrameImageFormat::Png => self.save_as_png(path),
             FrameImageFormat::Bmp => self.save_as_bmp(path),
@@ -233,27 +252,27 @@ impl Plane {
     }
 
     // TODO implement first citizen Plane to Bmp
-    pub fn save_as_bmp<P: AsRef<Path>>(self, path: P) -> Result<()> {
+    pub fn save_as_bmp<P: AsRef<Path>>(self, path: P) -> Result<(), PlaneError> {
         let as_image = self.as_rgba_image()?;
-        as_image.save_with_format(path, ImageFormat::Bmp)?;
-
-        Ok(())
+        as_image
+            .save_with_format(path, ImageFormat::Bmp)
+            .map_err(|_| PlaneError::ImageError)
     }
 
     // TODO implement first citizen Plane to Png, use https://crates.io/crates/png
-    pub fn save_as_png<P: AsRef<Path>>(self, path: P) -> Result<()> {
+    pub fn save_as_png<P: AsRef<Path>>(self, path: P) -> Result<(), PlaneError> {
         let as_image = self.as_rgba_image()?;
-        as_image.save_with_format(path, ImageFormat::Png)?;
-
-        Ok(())
+        as_image
+            .save_with_format(path, ImageFormat::Png)
+            .map_err(|_| PlaneError::ImageError)
     }
 
     // TODO implement first citizen Plane to JPG
-    pub fn save_as_jpg<P: AsRef<Path>>(self, path: P) -> Result<()> {
+    pub fn save_as_jpg<P: AsRef<Path>>(self, path: P) -> Result<(), PlaneError> {
         let as_image = self.as_rgba_image()?;
-        as_image.save_with_format(path, ImageFormat::Jpeg)?;
-
-        Ok(())
+        as_image
+            .save_with_format(path, ImageFormat::Jpeg)
+            .map_err(|_| PlaneError::ImageError)
     }
 }
 

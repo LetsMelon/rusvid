@@ -1,26 +1,15 @@
 use std::collections::HashMap;
-use std::fmt::Debug;
 use std::rc::Rc;
 
-use anyhow::{bail, Context, Result};
 use resvg::tiny_skia::Pixmap;
 use resvg::usvg::{AspectRatio, NodeExt, NormalizedF64, PathData, Size, Tree, ViewBox};
 
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::likes::types_like::TypesLike;
-use crate::holder::transform::Transform;
+use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
-use crate::plane::{Plane, SIZE};
-
-pub trait TransformLogic: Debug {
-    fn transform(&mut self, transformation: &Transform) -> Result<()>;
-
-    #[allow(unused_variables)]
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
-        bail!("`transform_by_id` is not implement for {:?}", self);
-    }
-}
+use crate::plane::{Plane, PlaneError, SIZE};
 
 #[derive(Debug)]
 pub struct Object {
@@ -44,11 +33,11 @@ impl Object {
         &self.id
     }
 
-    pub fn render(&self, width: SIZE, height: SIZE) -> Result<Plane> {
+    pub fn render(&self, width: SIZE, height: SIZE) -> Result<Plane, PlaneError> {
         match &self.data {
             TypesLike::Svg(svg) => {
                 let size = Size::new(width as f64, height as f64)
-                    .context("Width oder height must be greater 0")?;
+                    .ok_or(PlaneError::ValueGreaterZero("width or height"))?;
 
                 let tree = Tree {
                     size,
@@ -101,7 +90,7 @@ impl Object {
                         }));
                 }
 
-                let mut pixmap = Pixmap::new(width, height).context("sth error")?;
+                let mut pixmap = Pixmap::new(width, height).ok_or(PlaneError::TinySkiaError)?;
 
                 resvg::render(
                     &tree,
@@ -145,7 +134,7 @@ impl Object {
         }
     }
 
-    pub fn transforms(&mut self, transformations: Vec<Transform>) -> Result<()> {
+    pub fn transforms(&mut self, transformations: Vec<Transform>) -> Result<(), TransformError> {
         for transformation in transformations.iter() {
             self.transform(transformation)?;
         }
@@ -156,7 +145,7 @@ impl Object {
     pub fn transform_key_value(
         &mut self,
         transformations: HashMap<&str, &Transform>,
-    ) -> Result<()> {
+    ) -> Result<(), TransformError> {
         for (id, transformation) in transformations {
             self.transform_by_id(id, transformation)?;
         }
@@ -170,11 +159,15 @@ impl Object {
 }
 
 impl TransformLogic for Object {
-    fn transform(&mut self, transformation: &Transform) -> Result<()> {
+    fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError> {
         self.data.transform(transformation)
     }
 
-    fn transform_by_id(&mut self, id: impl Into<String>, transformation: &Transform) -> Result<()> {
+    fn transform_by_id(
+        &mut self,
+        id: impl Into<String>,
+        transformation: &Transform,
+    ) -> Result<(), TransformError> {
         self.data.transform_by_id(id, transformation)
     }
 }

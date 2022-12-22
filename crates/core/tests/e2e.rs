@@ -13,10 +13,10 @@ use image_compare::rgb_hybrid_compare;
 use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
-use rusvid_core::holder::object::{Object, TransformLogic};
+use rusvid_core::holder::object::Object;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
-use rusvid_core::holder::transform::Transform;
+use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::plane::Plane;
 use rusvid_core::point::Point;
 

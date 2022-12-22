@@ -835,6 +835,7 @@ dependencies = [
  "image",
  "image-compare",
  "resvg",
+ "thiserror",
  "uuid",
 ]
 

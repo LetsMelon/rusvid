@@ -1,18 +1,18 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
-use rusvid_core::holder::object::{Object, TransformLogic};
+use rusvid_core::holder::object::Object;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
-use rusvid_core::holder::transform::Transform;
+use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::point::Point;
 
 #[inline]
 fn render_and_save(object: &Object, name: &str) -> Result<()> {
     let plane = object.render(300, 300)?;
     let path = format!("example_simple_transform_{}.png", name);
-    plane.save_as_png(path)
+    plane.save_as_png(path).map_err(|err| anyhow!(err))
 }
 
 fn main() {
@@ -78,6 +78,16 @@ fn main() {
         .transform_by_id(&heart_id, &Transform::Move(Point::new(50.0, 0.0)))
         .unwrap();
     render_and_save(&object, "move").unwrap();
+
+    object
+        .transform_by_id(&triangle_id, &Transform::Scale(Point::new_symmetric(1.5)))
+        .unwrap();
+    render_and_save(&object, "scale").unwrap();
+
+    object
+        .transform_by_id(&triangle_id, &Transform::Rotate(15.0_f64.to_radians()))
+        .unwrap();
+    render_and_save(&object, "rotate").unwrap();
 
     object
         .transform_by_id(&triangle_id, &Transform::Color(None))

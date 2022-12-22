@@ -6,14 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = { workspace = true }
 approx = "0.5.1"
 concat-idents = "1.1.4"
+flo_curves = "0.6.1"
 glam = { version = "0.22.0", features = ["approx"] }
 image = { workspace = true, features = ["png", "bmp", "jpeg"] }
 resvg = { workspace = true }
-uuid = { version = "1.2.2", default-features = false, features = [ "v4", "fast-rng", "js" ] }
-flo_curves = "0.6.1"
+thiserror = { workspace = true }
+uuid = { version = "1.2.2", default-features = false, features = [ "v4", "fast-rng" ] }
 
 [dev-dependencies]
+anyhow = { workspace = true }
 image-compare = "0.2.3"
