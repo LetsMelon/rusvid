@@ -3,10 +3,10 @@ use std::sync::Mutex;
 
 use lazy_static::{__Deref, lazy_static};
 use rusvid_core::holder::likes::*;
-use rusvid_core::holder::object::{Object, TransformLogic};
+use rusvid_core::holder::object::Object;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
-use rusvid_core::holder::transform::Transform;
+use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::point::Point;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
@@ -118,6 +118,23 @@ pub fn transform_position(x: f64, y: f64) {
 pub fn transform_visibility(value: bool) {
     let mut object = OBJECT.lock().unwrap();
     object.transform(&Transform::Visibility(value)).unwrap();
+}
+
+#[wasm_bindgen]
+pub fn transform_scale(x: f64, y: f64) {
+    let mut object = OBJECT.lock().unwrap();
+    object.transform(&Transform::Scale(Point::new(x, y))).unwrap();
+}
+
+#[wasm_bindgen]
+pub fn transform_rotate(rad: f64) {
+    let mut object = OBJECT.lock().unwrap();
+    object.transform(&Transform::Rotate(rad)).unwrap();
+}
+
+#[wasm_bindgen]
+pub fn transform_rotate_deg(deg: f64) {
+    transform_rotate(deg.to_radians())
 }
 
 #[wasm_bindgen]
