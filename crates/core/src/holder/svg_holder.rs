@@ -21,6 +21,9 @@ pub struct SvgItem {
     pub(crate) stroke: Option<Stroke>,
 
     pub(crate) visibility: bool,
+
+    last_rotation: f64,
+    last_scale: Point,
 }
 
 impl SvgItem {
@@ -36,6 +39,8 @@ impl SvgItem {
             fill_color,
             stroke: Some(Stroke::default()),
             visibility: true,
+            last_rotation: 0.0,
+            last_scale: Point::new_symmetric(1.0),
         }
     }
 
@@ -186,18 +191,20 @@ impl TransformLogic for SvgItem {
             Transform::Scale(factor) => {
                 let center = PathLike::get_center(&self.path);
 
+                let factor_adjusted = *factor / self.last_scale;
+
                 self.path = self
                     .path
                     .iter()
                     .map(|p| {
                         let formatted = match *p {
                             PathLike::Move(value) => {
-                                let v = (value - center) * *factor;
+                                let v = (value - center) * factor_adjusted;
                                 let pos = center + v;
                                 PathLike::Move(pos)
                             }
                             PathLike::Line(value) => {
-                                let v = (value - center) * *factor;
+                                let v = (value - center) * factor_adjusted;
                                 let pos = center + v;
                                 PathLike::Line(pos)
                             }
@@ -208,10 +215,14 @@ impl TransformLogic for SvgItem {
                         formatted
                     })
                     .collect();
+
+                self.last_scale = *factor;
             }
             Transform::Rotate(angle) => {
                 let center = PathLike::get_center(&self.path);
 
+                let angle_diff = self.last_rotation - *angle;
+
                 self.path = self
                     .path
                     .iter()
@@ -220,8 +231,8 @@ impl TransformLogic for SvgItem {
                             PathLike::Move(value) => {
                                 let v = value - center;
 
-                                let x = angle.cos() * v.x() - angle.sin() * v.y();
-                                let y = angle.sin() * v.x() + angle.cos() * v.y();
+                                let x = angle_diff.cos() * v.x() - angle_diff.sin() * v.y();
+                                let y = angle_diff.sin() * v.x() + angle_diff.cos() * v.y();
 
                                 let pos = center + Point::new(x, y);
                                 PathLike::Move(pos)
@@ -229,8 +240,8 @@ impl TransformLogic for SvgItem {
                             PathLike::Line(value) => {
                                 let v = value - center;
 
-                                let x = angle.cos() * v.x() - angle.sin() * v.y();
-                                let y = angle.sin() * v.x() + angle.cos() * v.y();
+                                let x = angle_diff.cos() * v.x() - angle_diff.sin() * v.y();
+                                let y = angle_diff.sin() * v.x() + angle_diff.cos() * v.y();
 
                                 let pos = center + Point::new(x, y);
                                 PathLike::Line(pos)
@@ -242,6 +253,8 @@ impl TransformLogic for SvgItem {
                         formatted
                     })
                     .collect();
+
+                self.last_rotation = *angle;
             }
         };
 
