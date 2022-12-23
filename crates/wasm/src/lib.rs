@@ -121,6 +121,22 @@ pub fn transform_visibility(value: bool) {
 }
 
 #[wasm_bindgen]
+pub fn transform_rotate(value: f64) {
+    let mut object = OBJECT.lock().unwrap();
+    object
+        .transform(&Transform::Rotate(value.to_radians()))
+        .unwrap();
+}
+
+#[wasm_bindgen]
+pub fn transform_scale(x: f64, y: f64) {
+    let mut object = OBJECT.lock().unwrap();
+    object
+        .transform(&Transform::Scale(Point::new(x, y)))
+        .unwrap();
+}
+
+#[wasm_bindgen]
 pub fn add_svg(data: js_sys::Uint32Array, color: js_sys::Uint8ClampedArray) {
     // kind, x, y
 

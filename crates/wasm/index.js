@@ -7,6 +7,8 @@ import init, {
   transform_stroke,
   transform_move,
   transform_position,
+  transform_rotate,
+  transform_scale,
 } from "./pkg/rusvid_wasm.js";
 
 function delay(milliseconds) {
@@ -58,6 +60,9 @@ init().then(() => {
 
     transform_color(new Uint8ClampedArray([c_r, c_g, c_b, 255]));
 
+    document.getElementById("s_rotate").value = 0;
+    document.getElementById("s_scale").value = 1;
+
     re_render();
   }
 
@@ -100,9 +105,26 @@ init().then(() => {
     }
   }
 
+  const rotate = () => {
+    let current_angle = document.getElementById("s_rotate").value;
+
+    transform_rotate(current_angle);
+    re_render();
+  }
+
+  const scale = () => {
+    let current_scale = document.getElementById("s_scale").value;
+
+    transform_scale(current_scale, current_scale);
+    re_render();
+  }
+
   document.getElementById("b_render").addEventListener("click", re_render);
   document.getElementById("b_animation").addEventListener("click", animation);
   document.getElementById("c_r").addEventListener("input", transform);
   document.getElementById("c_g").addEventListener("input", transform);
   document.getElementById("c_b").addEventListener("input", transform);
+
+  document.getElementById("s_rotate").addEventListener("input", rotate);
+  document.getElementById("s_scale").addEventListener("input", scale);
 });
