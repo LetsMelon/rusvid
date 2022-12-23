@@ -1,5 +1,4 @@
-use resvg::usvg::PathData;
-use resvg::usvg::PathSegment;
+use resvg::usvg::{PathData, PathSegment};
 
 #[inline]
 pub fn extend_path_from_slice(path: &mut PathData, slice: Vec<PathSegment>) {

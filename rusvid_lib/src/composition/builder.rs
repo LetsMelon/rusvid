@@ -94,8 +94,7 @@ impl CompositionBuilder {
 
 #[cfg(test)]
 mod tests {
-    use super::Composition;
-    use super::Resolution;
+    use super::{Composition, Resolution};
 
     #[test]
     fn takes_arguments_and_build_composition() {

@@ -1,9 +1,7 @@
 use rusvid_core::point::{AsPoint, Point};
 
-use crate::{
-    metrics::{MetricsSize, MetricsVideo},
-    types::ResolutionType,
-};
+use crate::metrics::{MetricsSize, MetricsVideo};
+use crate::types::ResolutionType;
 
 // TODO implement sth to create a `Resolution` from 'forms'/'sizes' like 'A4' and the combination of DPI
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
