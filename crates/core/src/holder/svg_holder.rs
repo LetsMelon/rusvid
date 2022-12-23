@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use geo::Centroid;
+
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
@@ -182,10 +184,7 @@ impl TransformLogic for SvgItem {
                 self.stroke = stroke.clone();
             }
             Transform::Scale(factor) => {
-                let bounding_box = self.bounding_box();
-
-                let size = bounding_box.1 - bounding_box.0;
-                let center = bounding_box.0 + size / 2.0;
+                let center = PathLike::get_center(&self.path);
 
                 self.path = self
                     .path
@@ -211,10 +210,7 @@ impl TransformLogic for SvgItem {
                     .collect();
             }
             Transform::Rotate(angle) => {
-                let bounding_box = self.bounding_box();
-
-                let size = bounding_box.1 - bounding_box.0;
-                let center = bounding_box.0 + size / 2.0;
+                let center = PathLike::get_center(&self.path);
 
                 self.path = self
                     .path

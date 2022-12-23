@@ -1,8 +1,10 @@
+use geo::{Centroid, LineString, Polygon};
 use resvg::usvg::{PathData, PathSegment};
 
 use crate::point::Point;
 
 const DELTA: f64 = 0.0001;
+const BOUNDING_BOX_STEPS: i32 = 10;
 
 #[derive(Debug, Clone, Copy)]
 pub enum PathLike {
@@ -59,6 +61,113 @@ impl PathLike {
 
     pub fn to_usvg_path_segments(path: &[PathLike]) -> Vec<PathSegment> {
         path.iter().map(|p| p.to_usvg_path_segment()).collect()
+    }
+
+    pub(crate) fn to_geo_polygon(path: &[PathLike]) -> Polygon {
+        let mut last_move = Point::new_symmetric(0.0);
+        let exterior = path
+            .iter()
+            .map(|path_like| match *path_like {
+                PathLike::Move(p) => {
+                    last_move = p.clone();
+                    (p.x(), p.y())
+                }
+                PathLike::Line(p) => (p.x(), p.y()),
+                PathLike::CurveTo(_, _, _) => todo!(),
+                PathLike::Close => (last_move.x(), last_move.y()),
+            })
+            .collect::<Vec<(f64, f64)>>();
+
+        Polygon::new(LineString::from(exterior), vec![])
+    }
+
+    pub(crate) fn get_center(path: &[PathLike]) -> Point {
+        let polygon = PathLike::to_geo_polygon(&path);
+        let center = polygon
+            .centroid()
+            .map(|cord| Point::new(cord.x(), cord.y()))
+            .unwrap_or({
+                let bounding_box = Self::bounding_box(&path);
+
+                let size = bounding_box.1 - bounding_box.0;
+                let center = bounding_box.0 + size / 2.0;
+
+                center
+            });
+
+        center
+    }
+
+    pub fn bounding_box(path: &[PathLike]) -> (Point, Point) {
+        let mut smaller_corner = match path[0] {
+            PathLike::Move(p) => p,
+            _ => todo!(),
+        };
+        let mut bigger_corner = smaller_corner;
+
+        let mut last_point = smaller_corner;
+        path.iter().for_each(|path| {
+            fn compare_and_set(value: &Point, smaller: &mut Point, bigger: &mut Point) {
+                if smaller.x() > value.x() {
+                    *smaller.x_mut() = value.x();
+                }
+                if smaller.y() > value.y() {
+                    *smaller.y_mut() = value.y();
+                }
+
+                if bigger.x() < value.x() {
+                    *bigger.x_mut() = value.x();
+                }
+                if bigger.y() < value.y() {
+                    *bigger.y_mut() = value.y();
+                }
+            }
+
+            last_point = match path {
+                PathLike::Move(p) => {
+                    compare_and_set(p, &mut smaller_corner, &mut bigger_corner);
+                    *p
+                }
+                PathLike::Line(p) => {
+                    compare_and_set(p, &mut smaller_corner, &mut bigger_corner);
+                    *p
+                }
+                PathLike::CurveTo(p, c1, c2) => {
+                    use flo_curves::bezier::Curve;
+                    use flo_curves::*;
+
+                    #[inline]
+                    fn point_to_coord2(p: &Point) -> Coord2 {
+                        Coord2(p.x(), p.y())
+                    }
+
+                    #[inline]
+                    fn coord2_to_point(c: &Coord2) -> Point {
+                        Point::new(c.x(), c.y())
+                    }
+
+                    compare_and_set(p, &mut smaller_corner, &mut bigger_corner);
+
+                    let curve = Curve::from_points(
+                        point_to_coord2(&last_point),
+                        (point_to_coord2(c1), point_to_coord2(c2)),
+                        point_to_coord2(p),
+                    );
+
+                    for i in 0..BOUNDING_BOX_STEPS {
+                        let t = (i as f64) / (BOUNDING_BOX_STEPS as f64);
+                        let pos = curve.point_at_pos(t);
+                        let as_point = coord2_to_point(&pos);
+                        compare_and_set(&as_point, &mut smaller_corner, &mut bigger_corner);
+                    }
+
+                    *p
+                }
+                _ => last_point,
+            };
+        });
+
+        (smaller_corner, bigger_corner)
     }
 
     pub fn type_equal(&self, other: &PathLike) -> bool {
