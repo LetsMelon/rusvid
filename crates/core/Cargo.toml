@@ -9,12 +9,12 @@ edition = "2021"
 approx = "0.5.1"
 concat-idents = "1.1.4"
 flo_curves = "0.6.1"
+geo = "0.23.1"
 glam = { version = "0.22.0", features = ["approx"] }
 image = { workspace = true, features = ["png", "bmp", "jpeg"] }
 resvg = { workspace = true }
 thiserror = { workspace = true }
-uuid = { version = "1.2.2", default-features = false, features = [ "v4", "fast-rng" ] }
-geo = "0.23.1"
+uuid = { version = "1.2.2", default-features = false, features = [ "v4", "fast-rng", "js" ] }
 
 [dev-dependencies]
 anyhow = { workspace = true }

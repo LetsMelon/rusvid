@@ -1209,6 +1209,7 @@ checksum = "422ee0de9031b5b948b97a8fc04e3aa35230001a722ddd27943e0be31564ce4c"
 dependencies = [
  "getrandom",
  "rand",
+ "wasm-bindgen",
 ]
 
 [[package]]
