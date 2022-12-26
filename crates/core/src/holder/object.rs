@@ -153,6 +153,10 @@ impl Object {
         Ok(())
     }
 
+    pub fn data(&self) -> &TypesLike {
+        &self.data
+    }
+
     pub fn data_mut(&mut self) -> &mut TypesLike {
         &mut self.data
     }

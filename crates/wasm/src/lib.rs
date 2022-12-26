@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use std::panic;
 use std::sync::Mutex;
 
 use lazy_static::{__Deref, lazy_static};
@@ -137,12 +138,34 @@ pub fn transform_scale(x: f64, y: f64) {
 }
 
 #[wasm_bindgen]
-pub fn add_svg(data: js_sys::Uint32Array, color: js_sys::Uint8ClampedArray) {
-    // kind, x, y
+pub fn calculate_bounding_box(id: String) -> Option<js_sys::Int32Array> {
+    let object = OBJECT.lock().unwrap();
+    let data = object.data();
 
-    // 0     -> Move
-    // 1     -> Line
-    // 255.. -> Close
+    match data {
+        TypesLike::Svg(svg_holder) => svg_holder.get_item(id).map(|item| {
+            let bounding = item.bounding_box();
+
+            let x1 = bounding.0.x() as i32;
+            let y1 = bounding.0.y() as i32;
+            let x2 = bounding.1.x() as i32;
+            let y2 = bounding.1.y() as i32;
+
+            js_sys::Int32Array::from(&vec![x1, y1, x2, y2][..])
+        }),
+        TypesLike::Image(_) => todo!(),
+    }
+}
+
+#[wasm_bindgen]
+pub fn add_svg(data: js_sys::Int32Array, color: js_sys::Uint8ClampedArray) -> Option<String> {
+    panic::set_hook(Box::new(console_error_panic_hook::hook));
+
+    // kind ....
+    // 0    x y                     -> Move
+    // 1    x y                     -> Line
+    // 2    x y x_cs y_cs x_ce y_ce -> Curve
+    // 255..                        -> Close
 
     let mut as_vec = VecDeque::from(data.to_vec());
     let mut paths = Vec::new();
@@ -162,6 +185,22 @@ pub fn add_svg(data: js_sys::Uint32Array, color: js_sys::Uint8ClampedArray) {
                 let y = as_vec.pop_front().unwrap();
 
                 paths.push(PathLike::Line(Point::new(x as f64, y as f64)));
+            }
+            2 => {
+                let x = as_vec.pop_front().unwrap() as f64;
+                let y = as_vec.pop_front().unwrap() as f64;
+
+                let x_cs = as_vec.pop_front().unwrap() as f64;
+                let y_cs = as_vec.pop_front().unwrap() as f64;
+
+                let x_ce = as_vec.pop_front().unwrap() as f64;
+                let y_ce = as_vec.pop_front().unwrap() as f64;
+
+                paths.push(PathLike::CurveTo(
+                    Point::new(x, y),
+                    Point::new(x_cs, y_cs),
+                    Point::new(x_ce, y_ce),
+                ))
             }
             255.. => {
                 paths.push(PathLike::Close);
@@ -190,6 +229,10 @@ pub fn add_svg(data: js_sys::Uint32Array, color: js_sys::Uint8ClampedArray) {
     let mut binding = OBJECT.lock().unwrap();
     let types_like = binding.data_mut();
     if let TypesLike::Svg(svg_holder) = types_like {
-        svg_holder.add_item(item);
+        let id = svg_holder.add_item(item);
+
+        return Some(id);
     }
+
+    None
 }

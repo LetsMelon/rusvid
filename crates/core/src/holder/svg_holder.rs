@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use geo::Centroid;
-
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
@@ -208,7 +206,13 @@ impl TransformLogic for SvgItem {
                                 let pos = center + v;
                                 PathLike::Line(pos)
                             }
-                            PathLike::CurveTo(_, _, _) => todo!(),
+                            PathLike::CurveTo(end, c_s, c_e) => {
+                                let p_e = center + (end - center) * factor_adjusted;
+                                let p_c_s = center + (c_s - center) * factor_adjusted;
+                                let p_c_e = center + (c_e - center) * factor_adjusted;
+
+                                PathLike::CurveTo(p_e, p_c_s, p_c_e)
+                            }
                             PathLike::Close => PathLike::Close,
                         };
 
@@ -227,6 +231,7 @@ impl TransformLogic for SvgItem {
                     .path
                     .iter()
                     .map(|p| {
+                        // TODO make helper functions to remove duplicate code
                         let formatted = match *p {
                             PathLike::Move(value) => {
                                 let v = value - center;
@@ -246,7 +251,29 @@ impl TransformLogic for SvgItem {
                                 let pos = center + Point::new(x, y);
                                 PathLike::Line(pos)
                             }
-                            PathLike::CurveTo(_, _, _) => todo!(),
+                            PathLike::CurveTo(end, c_s, c_e) => {
+                                let v_e = end - center;
+                                let v_c_s = c_s - center;
+                                let v_c_e = c_e - center;
+
+                                let e = center
+                                    + Point::new(
+                                        angle_diff.cos() * v_e.x() - angle_diff.sin() * v_e.y(),
+                                        angle_diff.sin() * v_e.x() + angle_diff.cos() * v_e.y(),
+                                    );
+                                let cs = center
+                                    + Point::new(
+                                        angle_diff.cos() * v_c_s.x() - angle_diff.sin() * v_c_s.y(),
+                                        angle_diff.sin() * v_c_s.x() + angle_diff.cos() * v_c_s.y(),
+                                    );
+                                let ce = center
+                                    + Point::new(
+                                        angle_diff.cos() * v_c_e.x() - angle_diff.sin() * v_c_e.y(),
+                                        angle_diff.sin() * v_c_e.x() + angle_diff.cos() * v_c_e.y(),
+                                    );
+
+                                PathLike::CurveTo(e, cs, ce)
+                            }
                             PathLike::Close => PathLike::Close,
                         };
 
@@ -287,6 +314,10 @@ impl SvgHolder {
         let id = item.id.clone();
         self.items.insert(id.clone(), item);
         id
+    }
+
+    pub fn get_item(&self, key: impl Into<String>) -> Option<&SvgItem> {
+        self.items.get(&key.into())
     }
 
     pub fn get_item_mut(&mut self, key: impl Into<String>) -> Option<&mut SvgItem> {

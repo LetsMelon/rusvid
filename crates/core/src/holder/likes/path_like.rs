@@ -1,10 +1,12 @@
 use geo::{Centroid, LineString, Polygon};
 use resvg::usvg::{PathData, PathSegment};
 
+use crate::holder::likes::utils::{coord2_to_point, point_to_coord2};
 use crate::point::Point;
 
+// TODO merge delta constants
 const DELTA: f64 = 0.0001;
-const BOUNDING_BOX_STEPS: i32 = 10;
+const BOUNDING_BOX_STEPS: u32 = 10;
 
 #[derive(Debug, Clone, Copy)]
 pub enum PathLike {
@@ -65,17 +67,48 @@ impl PathLike {
 
     pub(crate) fn to_geo_polygon(path: &[PathLike]) -> Polygon {
         let mut last_move = Point::new_symmetric(0.0);
+        let mut last_point = Point::new_symmetric(0.0);
         let exterior = path
             .iter()
             .map(|path_like| match *path_like {
                 PathLike::Move(p) => {
                     last_move = p.clone();
-                    (p.x(), p.y())
+                    last_point = p.clone();
+                    vec![(p.x(), p.y())]
                 }
-                PathLike::Line(p) => (p.x(), p.y()),
-                PathLike::CurveTo(_, _, _) => todo!(),
-                PathLike::Close => (last_move.x(), last_move.y()),
+                PathLike::Line(p) => {
+                    last_point = p.clone();
+                    vec![(p.x(), p.y())]
+                }
+                PathLike::CurveTo(end, c_s, c_e) => {
+                    use flo_curves::bezier::Curve;
+                    use flo_curves::*;
+
+                    let curve = Curve::from_points(
+                        point_to_coord2(&last_point),
+                        (point_to_coord2(&c_s), point_to_coord2(&c_e)),
+                        point_to_coord2(&end),
+                    );
+
+                    let mut lines_on_curve = vec![];
+                    for i in 0..BOUNDING_BOX_STEPS {
+                        let t = (i as f64) / (BOUNDING_BOX_STEPS as f64);
+                        let pos = curve.point_at_pos(t);
+                        let as_point = coord2_to_point(&pos);
+
+                        lines_on_curve.push((as_point.x(), as_point.y()));
+
+                        last_point = as_point.clone();
+                    }
+
+                    lines_on_curve
+                }
+                PathLike::Close => {
+                    last_point = last_move.clone();
+                    vec![(last_move.x(), last_move.y())]
+                }
             })
+            .flatten()
             .collect::<Vec<(f64, f64)>>();
 
         Polygon::new(LineString::from(exterior), vec![])
@@ -135,16 +168,6 @@ impl PathLike {
                 PathLike::CurveTo(p, c1, c2) => {
                     use flo_curves::bezier::Curve;
                     use flo_curves::*;
-
-                    #[inline]
-                    fn point_to_coord2(p: &Point) -> Coord2 {
-                        Coord2(p.x(), p.y())
-                    }
-
-                    #[inline]
-                    fn coord2_to_point(c: &Coord2) -> Point {
-                        Point::new(c.x(), c.y())
-                    }
 
                     compare_and_set(p, &mut smaller_corner, &mut bigger_corner);
 
