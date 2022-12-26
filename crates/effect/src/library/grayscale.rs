@@ -1,7 +1,7 @@
 use anyhow::Result;
 use rusvid_core::plane::Plane;
 
-use crate::effect::{EffectLogic, Element, ID};
+use crate::{EffectLogic, Element, ID};
 
 const MULTIPLIER_RED: f32 = 0.299;
 const MULTIPLIER_GREEN: f32 = 0.587;

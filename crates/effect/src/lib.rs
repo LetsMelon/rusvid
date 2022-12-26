@@ -1,3 +1,5 @@
+#![feature(int_roundings)]
+
 use anyhow::Result;
 use rusvid_core::plane::Plane;
 

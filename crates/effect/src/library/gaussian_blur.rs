@@ -5,7 +5,7 @@ use itertools::Itertools;
 use log::info;
 use rusvid_core::plane::Plane;
 
-use crate::effect::{EffectLogic, Element, ID};
+use crate::{EffectLogic, Element, ID};
 
 #[inline(always)]
 fn gaussian_function(stdev: f64, x: i32, y: i32) -> f64 {

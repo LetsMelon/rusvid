@@ -2,7 +2,7 @@ use anyhow::Result;
 use itertools::Itertools;
 use rusvid_core::plane::Plane;
 
-use crate::effect::{EffectLogic, Element, ID};
+use crate::{EffectLogic, Element, ID};
 
 #[derive(Debug)]
 pub struct PixelateEffect {
