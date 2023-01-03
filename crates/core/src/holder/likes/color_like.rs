@@ -1,9 +1,11 @@
+use crate::holder::gradient::linear::LinearGradient;
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::plane::Pixel;
 
 #[derive(Debug, Clone)]
 pub enum ColorLike {
     Color(Pixel),
+    LinearGradient(LinearGradient),
 }
 
 impl ColorLike {
@@ -25,6 +27,7 @@ impl TranslateIntoResvgGeneric<resvg::usvg::Paint> for ColorLike {
                 green: c[1],
                 blue: c[2],
             }),
+            ColorLike::LinearGradient(l_g) => l_g.translate(),
         }
     }
 }
@@ -33,6 +36,7 @@ impl TranslateIntoResvgGeneric<resvg::usvg::Opacity> for ColorLike {
     fn translate(&self) -> resvg::usvg::Opacity {
         match self {
             ColorLike::Color(c) => resvg::usvg::Opacity::new_u8(c[3]),
+            ColorLike::LinearGradient(_) => resvg::usvg::Opacity::ONE,
         }
     }
 }

@@ -1,3 +1,5 @@
+use rusvid_core::holder::gradient::base::BaseGradient;
+use rusvid_core::holder::gradient::linear::LinearGradient;
 use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
@@ -35,7 +37,9 @@ fn main() {
             ),
             PathLike::Close,
         ],
-        Some(ColorLike::Color([255, 0, 0, 255])),
+        Some(ColorLike::LinearGradient(LinearGradient::new(
+            BaseGradient::new_from_colors(vec![[255, 0, 0, 255], [255, 100, 0, 255]]),
+        ))),
     );
     // svg.add_item(heart.bounding_box_rect());
     svg.add_item(heart);

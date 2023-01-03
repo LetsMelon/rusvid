@@ -293,7 +293,7 @@ mod tests {
         #[test]
         fn direct_move() {
             assert!(equal_path_segment(
-                PathLike::Move(Point::ZERO).to_usvg_path_segment(),
+                PathLike::Move(Point::ZERO).translate(),
                 PathSegment::MoveTo { x: 0.0, y: 0.0 }
             ));
         }
@@ -301,7 +301,7 @@ mod tests {
         #[test]
         fn direct_line() {
             assert!(equal_path_segment(
-                PathLike::Line(Point::ZERO).to_usvg_path_segment(),
+                PathLike::Line(Point::ZERO).translate(),
                 PathSegment::LineTo { x: 0.0, y: 0.0 }
             ));
         }
@@ -309,7 +309,7 @@ mod tests {
         #[test]
         fn direct_close() {
             assert!(equal_path_segment(
-                PathLike::Close.to_usvg_path_segment(),
+                PathLike::Close.translate(),
                 PathSegment::ClosePath
             ));
         }
@@ -317,7 +317,7 @@ mod tests {
         #[test]
         fn direct_curve_to() {
             assert!(equal_path_segment(
-                PathLike::CurveTo(Point::ZERO, Point::ONE, Point::NEG_ONE).to_usvg_path_segment(),
+                PathLike::CurveTo(Point::ZERO, Point::ONE, Point::NEG_ONE).translate(),
                 PathSegment::CurveTo {
                     x1: 1.0,
                     y1: 1.0,

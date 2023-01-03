@@ -1,10 +1,8 @@
 use std::collections::HashMap;
-use std::rc::Rc;
 
 use resvg::tiny_skia::Pixmap;
-use resvg::usvg::{AspectRatio, NodeExt, PathData, Size, Tree, ViewBox};
+use resvg::usvg::{AspectRatio, NodeExt, Size, Tree, ViewBox};
 
-use crate::holder::likes::path_like::PathLike;
 use crate::holder::likes::types_like::TypesLike;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
