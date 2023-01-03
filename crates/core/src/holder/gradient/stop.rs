@@ -8,6 +8,12 @@ pub struct Stop {
     pub(crate) color: Pixel,
 }
 
+impl Stop {
+    pub fn new(color: Pixel, offset: f64) -> Self {
+        Stop { color, offset }
+    }
+}
+
 impl TranslateIntoResvgGeneric<resvg::usvg::Stop> for Stop {
     fn translate(&self) -> resvg::usvg::Stop {
         let color = resvg::usvg::Color {
