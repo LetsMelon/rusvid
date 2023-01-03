@@ -2,6 +2,7 @@ use geo::{Centroid, LineString, Polygon};
 use resvg::usvg::{PathData, PathSegment};
 
 use crate::holder::likes::utils::{coord2_to_point, point_to_coord2};
+use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::point::Point;
 
 // TODO merge delta constants
@@ -39,32 +40,6 @@ impl PartialEq<PathLike> for PathLike {
 }
 
 impl PathLike {
-    pub fn to_usvg_path_segment(&self) -> PathSegment {
-        match self {
-            PathLike::Move(point) => PathSegment::MoveTo {
-                x: point.x(),
-                y: point.y(),
-            },
-            PathLike::Line(point) => PathSegment::LineTo {
-                x: point.x(),
-                y: point.y(),
-            },
-            PathLike::CurveTo(pe, pc1, pc2) => PathSegment::CurveTo {
-                x1: pc1.x(),
-                y1: pc1.y(),
-                x2: pc2.x(),
-                y2: pc2.y(),
-                x: pe.x(),
-                y: pe.y(),
-            },
-            PathLike::Close => PathSegment::ClosePath,
-        }
-    }
-
-    pub fn to_usvg_path_segments(path: &[PathLike]) -> Vec<PathSegment> {
-        path.iter().map(|p| p.to_usvg_path_segment()).collect()
-    }
-
     pub(crate) fn to_geo_polygon(path: &[PathLike]) -> Polygon {
         let mut last_move = Point::new_symmetric(0.0);
         let mut last_point = Point::new_symmetric(0.0);
@@ -235,6 +210,30 @@ impl PathLike {
                 y,
             } => PathLike::CurveTo(Point::new(x, y), Point::new(x1, y1), Point::new(x2, y2)),
             PathSegment::ClosePath => PathLike::Close,
+        }
+    }
+}
+
+impl TranslateIntoResvgGeneric<resvg::usvg::PathSegment> for PathLike {
+    fn translate(&self) -> resvg::usvg::PathSegment {
+        match self {
+            PathLike::Move(point) => PathSegment::MoveTo {
+                x: point.x(),
+                y: point.y(),
+            },
+            PathLike::Line(point) => PathSegment::LineTo {
+                x: point.x(),
+                y: point.y(),
+            },
+            PathLike::CurveTo(pe, pc1, pc2) => PathSegment::CurveTo {
+                x1: pc1.x(),
+                y1: pc1.y(),
+                x2: pc2.x(),
+                y2: pc2.y(),
+                x: pe.x(),
+                y: pe.y(),
+            },
+            PathLike::Close => PathSegment::ClosePath,
         }
     }
 }
