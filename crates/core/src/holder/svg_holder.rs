@@ -1,10 +1,11 @@
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
-use crate::holder::utils;
+use crate::holder::utils::{random_id, TranslateIntoResvgGeneric};
 use crate::point::Point;
 
 const BOUNDING_BOX_STEPS: i32 = 10;
@@ -44,7 +45,7 @@ impl SvgItem {
 
     #[inline]
     pub fn new(path: Vec<PathLike>, fill_color: Option<ColorLike>) -> Self {
-        Self::new_with_id(utils::random_id(), path, fill_color)
+        Self::new_with_id(random_id(), path, fill_color)
     }
 
     pub fn bounding_box(&self) -> (Point, Point) {
@@ -181,7 +182,7 @@ impl TransformLogic for SvgItem {
                 _ => panic!("First element needs to be a `PathLike::Move`"),
             },
             Transform::Color(value) => {
-                self.fill_color = *value;
+                self.fill_color = value.clone();
             }
             Transform::Stroke(stroke) => {
                 self.stroke = stroke.clone();
@@ -286,6 +287,34 @@ impl TransformLogic for SvgItem {
         };
 
         Ok(())
+    }
+}
+
+impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
+    fn translate(&self) -> resvg::usvg::NodeKind {
+        use resvg::usvg::*;
+
+        let mut path = PathData::new();
+        PathLike::extend_path_from_slice(&mut path, &self.path);
+
+        let fill = match &self.fill_color {
+            Some(color_like) => Some(color_like.translate()),
+            None => None,
+        };
+
+        let visibility = match self.visibility {
+            true => Visibility::Visible,
+            false => Visibility::Hidden,
+        };
+
+        resvg::usvg::NodeKind::Path(resvg::usvg::Path {
+            id: self.id.clone(),
+            visibility,
+            fill,
+            stroke: self.stroke.clone().and_then(|s| Some(s.translate())),
+            data: Rc::new(path),
+            ..resvg::usvg::Path::default()
+        })
     }
 }
 

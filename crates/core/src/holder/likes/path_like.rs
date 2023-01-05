@@ -2,6 +2,7 @@ use geo::{Centroid, LineString, Polygon};
 use resvg::usvg::{PathData, PathSegment};
 
 use crate::holder::likes::utils::{coord2_to_point, point_to_coord2};
+use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::point::Point;
 
 // TODO merge delta constants
@@ -39,32 +40,6 @@ impl PartialEq<PathLike> for PathLike {
 }
 
 impl PathLike {
-    pub fn to_usvg_path_segment(&self) -> PathSegment {
-        match self {
-            PathLike::Move(point) => PathSegment::MoveTo {
-                x: point.x(),
-                y: point.y(),
-            },
-            PathLike::Line(point) => PathSegment::LineTo {
-                x: point.x(),
-                y: point.y(),
-            },
-            PathLike::CurveTo(pe, pc1, pc2) => PathSegment::CurveTo {
-                x1: pc1.x(),
-                y1: pc1.y(),
-                x2: pc2.x(),
-                y2: pc2.y(),
-                x: pe.x(),
-                y: pe.y(),
-            },
-            PathLike::Close => PathSegment::ClosePath,
-        }
-    }
-
-    pub fn to_usvg_path_segments(path: &[PathLike]) -> Vec<PathSegment> {
-        path.iter().map(|p| p.to_usvg_path_segment()).collect()
-    }
-
     pub(crate) fn to_geo_polygon(path: &[PathLike]) -> Polygon {
         let mut last_move = Point::new_symmetric(0.0);
         let mut last_point = Point::new_symmetric(0.0);
@@ -239,6 +214,30 @@ impl PathLike {
     }
 }
 
+impl TranslateIntoResvgGeneric<resvg::usvg::PathSegment> for PathLike {
+    fn translate(&self) -> resvg::usvg::PathSegment {
+        match self {
+            PathLike::Move(point) => PathSegment::MoveTo {
+                x: point.x(),
+                y: point.y(),
+            },
+            PathLike::Line(point) => PathSegment::LineTo {
+                x: point.x(),
+                y: point.y(),
+            },
+            PathLike::CurveTo(pe, pc1, pc2) => PathSegment::CurveTo {
+                x1: pc1.x(),
+                y1: pc1.y(),
+                x2: pc2.x(),
+                y2: pc2.y(),
+                x: pe.x(),
+                y: pe.y(),
+            },
+            PathLike::Close => PathSegment::ClosePath,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -294,7 +293,7 @@ mod tests {
         #[test]
         fn direct_move() {
             assert!(equal_path_segment(
-                PathLike::Move(Point::ZERO).to_usvg_path_segment(),
+                PathLike::Move(Point::ZERO).translate(),
                 PathSegment::MoveTo { x: 0.0, y: 0.0 }
             ));
         }
@@ -302,7 +301,7 @@ mod tests {
         #[test]
         fn direct_line() {
             assert!(equal_path_segment(
-                PathLike::Line(Point::ZERO).to_usvg_path_segment(),
+                PathLike::Line(Point::ZERO).translate(),
                 PathSegment::LineTo { x: 0.0, y: 0.0 }
             ));
         }
@@ -310,7 +309,7 @@ mod tests {
         #[test]
         fn direct_close() {
             assert!(equal_path_segment(
-                PathLike::Close.to_usvg_path_segment(),
+                PathLike::Close.translate(),
                 PathSegment::ClosePath
             ));
         }
@@ -318,7 +317,7 @@ mod tests {
         #[test]
         fn direct_curve_to() {
             assert!(equal_path_segment(
-                PathLike::CurveTo(Point::ZERO, Point::ONE, Point::NEG_ONE).to_usvg_path_segment(),
+                PathLike::CurveTo(Point::ZERO, Point::ONE, Point::NEG_ONE).translate(),
                 PathSegment::CurveTo {
                     x1: 1.0,
                     y1: 1.0,
