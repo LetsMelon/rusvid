@@ -12,11 +12,22 @@ flo_curves = "0.6.1"
 geo = "0.23.1"
 glam = { version = "0.22.0", features = ["approx"] }
 image = { workspace = true, features = ["png", "bmp", "jpeg"] }
+packed_simd = { version = "0.3.8", package = "packed_simd_2" }
+paste = "1.0.11"
 resvg = { workspace = true }
 thiserror = { workspace = true }
 uuid = { version = "1.2.2", default-features = false, features = [ "v4", "fast-rng", "js" ] }
-paste = "1.0.11"
 
 [dev-dependencies]
 anyhow = { workspace = true }
 image-compare = "0.2.3"
+criterion = "0.4"
+
+[[bench]]
+name = "add_simd"
+harness = false
+
+[features]
+default = ["neon"]
+
+neon = []
