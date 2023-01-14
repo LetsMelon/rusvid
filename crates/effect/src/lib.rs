@@ -20,14 +20,6 @@ pub trait EffectLogic: std::fmt::Debug + Element {
     }
 
     /// Returns `true` if the effect depends on one (or more) other effects, otherwise the function returns `false`
-    ///
-    /// Example:
-    /// ```rust
-    /// use rusvid_lib::prelude::*;
-    ///
-    /// let effect = ColorPaletteEffect::new(vec![]);
-    /// assert!(!effect.depends_on_other_effects());
-    /// ```
     fn depends_on_other_effects(&self) -> bool {
         !self.depends_on_other_effects_ids().is_empty()
     }

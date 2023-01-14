@@ -1,6 +1,7 @@
 use resvg::usvg::{NonZeroPositiveF64, NormalizedF64};
 
-use super::likes::color_like::ColorLike;
+use crate::holder::likes::color_like::ColorLike;
+use crate::holder::utils::TranslateIntoResvgGeneric;
 
 #[derive(Debug, Clone)]
 pub struct Stroke {
@@ -36,16 +37,17 @@ impl Stroke {
             width: stroke.width.get(),
         }
     }
+}
 
-    pub fn as_resvg_stroke(&self) -> Option<resvg::usvg::Stroke> {
-        let mut default = resvg::usvg::Stroke::default();
-
-        default.paint = self.paint.as_resvg_paint();
-        default.dasharray = self.dasharray.clone();
-        default.dashoffset = self.dashoffset as f32;
-        default.opacity = NormalizedF64::new(self.opacity)?;
-        default.width = NonZeroPositiveF64::new(self.width)?;
-
-        Some(default)
+impl TranslateIntoResvgGeneric<resvg::usvg::Stroke> for Stroke {
+    fn translate(&self) -> resvg::usvg::Stroke {
+        resvg::usvg::Stroke {
+            paint: self.paint.translate(),
+            dasharray: self.dasharray.clone(),
+            dashoffset: self.dashoffset as f32,
+            opacity: NormalizedF64::new(self.opacity.abs()).unwrap(),
+            width: NonZeroPositiveF64::new(self.width.abs()).unwrap(),
+            ..resvg::usvg::Stroke::default()
+        }
     }
 }

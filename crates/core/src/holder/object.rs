@@ -1,14 +1,12 @@
 use std::collections::HashMap;
-use std::rc::Rc;
 
 use resvg::tiny_skia::Pixmap;
-use resvg::usvg::{AspectRatio, NodeExt, NormalizedF64, PathData, Size, Tree, ViewBox};
+use resvg::usvg::{AspectRatio, NodeExt, Size, Tree, ViewBox};
 
-use crate::holder::likes::color_like::ColorLike;
-use crate::holder::likes::path_like::PathLike;
 use crate::holder::likes::types_like::TypesLike;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
+use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::plane::{Plane, PlaneError, SIZE};
 
 #[derive(Debug)]
@@ -51,43 +49,8 @@ impl Object {
                 };
 
                 for item in svg.items.values() {
-                    let mut path = PathData::new();
-                    PathLike::extend_path_from_slice(&mut path, &item.path);
-
-                    let color = {
-                        #[allow(irrefutable_let_patterns)]
-                        let channels = if let Some(ColorLike::Color(c)) = &item.fill_color {
-                            Some(c)
-                        } else {
-                            None
-                        };
-
-                        channels.map(|channels| resvg::usvg::Fill {
-                            paint: resvg::usvg::Paint::Color(resvg::usvg::Color {
-                                red: channels[0],
-                                green: channels[1],
-                                blue: channels[2],
-                            }),
-                            opacity: NormalizedF64::new_u8(channels[3]),
-                            ..Default::default()
-                        })
-                    };
-
-                    let visibility = if item.visibility {
-                        resvg::usvg::Visibility::Visible
-                    } else {
-                        resvg::usvg::Visibility::Hidden
-                    };
-
-                    tree.root
-                        .append_kind(resvg::usvg::NodeKind::Path(resvg::usvg::Path {
-                            id: self.id.clone(),
-                            fill: color,
-                            visibility,
-                            stroke: item.stroke.clone().and_then(|s| s.as_resvg_stroke()),
-                            data: Rc::new(path),
-                            ..Default::default()
-                        }));
+                    let node_kind = item.translate();
+                    tree.root.append_kind(node_kind);
                 }
 
                 let mut pixmap = Pixmap::new(width, height).ok_or(PlaneError::TinySkiaError)?;
