@@ -8,7 +8,6 @@ use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
 use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::point::Point;
 
-#[inline]
 fn render_and_save(object: &Object, name: &str) -> Result<()> {
     let plane = object.render(300, 300)?;
     let path = format!("example_simple_transform_{}.png", name);

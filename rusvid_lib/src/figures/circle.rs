@@ -3,17 +3,14 @@ use rusvid_core::point::Point;
 
 use super::utils::extend_path_from_slice;
 
-#[inline]
 fn sin_radius(angle: f64, radius: f64) -> f64 {
     angle.sin() * radius
 }
 
-#[inline]
 fn cos_radius(angle: f64, radius: f64) -> f64 {
     angle.cos() * radius
 }
 
-#[inline]
 pub fn arc_segment(position: Point, radius: f64, a1: f64, a2: f64) -> (PathSegment, Point) {
     let start_angle = a1 * (std::f64::consts::PI / 180.0);
     let end_angle = a2 * (std::f64::consts::PI / 180.0);
@@ -42,7 +39,6 @@ pub fn arc_segment(position: Point, radius: f64, a1: f64, a2: f64) -> (PathSegme
     )
 }
 
-#[inline]
 pub fn arc(position: Point, radius: f64, start_angle: f64, end_angle: f64) -> Vec<PathSegment> {
     let mut segments = Vec::new();
 
@@ -75,7 +71,6 @@ pub fn arc(position: Point, radius: f64, start_angle: f64, end_angle: f64) -> Ve
     segments
 }
 
-#[inline]
 pub fn circle_raw(position: Point, radius: f64) -> Vec<PathSegment> {
     let mut segments = arc(position, radius, 0.0, 360.0);
 
@@ -84,7 +79,6 @@ pub fn circle_raw(position: Point, radius: f64) -> Vec<PathSegment> {
     segments
 }
 
-#[inline]
 pub fn circle(position: Point, radius: f64) -> PathData {
     let mut path = PathData::new();
 

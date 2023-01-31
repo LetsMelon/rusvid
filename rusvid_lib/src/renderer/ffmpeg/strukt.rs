@@ -105,12 +105,10 @@ impl Renderer for FfmpegRenderer {
         Ok(())
     }
 
-    #[inline]
     fn out_path(&self) -> &Path {
         self.out_path.as_path()
     }
 
-    #[inline]
     fn tmp_dir_path(&self) -> &Path {
         self.tmp_dir_path.as_path()
     }

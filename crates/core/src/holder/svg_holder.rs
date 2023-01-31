@@ -26,7 +26,6 @@ pub struct SvgItem {
 }
 
 impl SvgItem {
-    #[inline]
     pub fn new_with_id(
         id: impl Into<String>,
         path: Vec<PathLike>,
@@ -43,7 +42,6 @@ impl SvgItem {
         }
     }
 
-    #[inline]
     pub fn new(path: Vec<PathLike>, fill_color: Option<ColorLike>) -> Self {
         Self::new_with_id(random_id(), path, fill_color)
     }
@@ -86,12 +84,10 @@ impl SvgItem {
                     use flo_curves::bezier::Curve;
                     use flo_curves::*;
 
-                    #[inline]
                     fn point_to_coord2(p: &Point) -> Coord2 {
                         Coord2(p.x(), p.y())
                     }
 
-                    #[inline]
                     fn coord2_to_point(c: &Coord2) -> Point {
                         Point::new(c.x(), c.y())
                     }
@@ -324,7 +320,6 @@ pub struct SvgHolder {
 }
 
 impl SvgHolder {
-    #[inline]
     pub fn new() -> Self {
         Self::default()
     }

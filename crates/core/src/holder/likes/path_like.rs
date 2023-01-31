@@ -22,7 +22,6 @@ impl PartialEq<PathLike> for PathLike {
     fn eq(&self, other: &PathLike) -> bool {
         use PathLike::*;
 
-        #[inline(always)]
         fn compare_points(p1: &Point, p2: &Point) -> bool {
             p1.abs_diff_eq(*p2, DELTA)
         }

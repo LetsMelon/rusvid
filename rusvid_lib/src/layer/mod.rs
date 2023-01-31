@@ -50,7 +50,6 @@ impl Debug for Layer {
 }
 
 impl Layer {
-    #[inline(always)]
     pub fn new(resolution: Resolution) -> Self {
         Layer {
             name: "layer_0".to_string(),
@@ -104,7 +103,6 @@ impl Layer {
         Ok(layer_item)
     }
 
-    #[inline(always)]
     pub fn update(&mut self, frame_count: usize) -> Result<()> {
         self.animations.update(frame_count)
     }
@@ -121,17 +119,14 @@ impl Layer {
 }
 
 impl LayerLogic for Layer {
-    #[inline(always)]
     fn rtree(&self) -> Option<&Tree> {
         Some(&self.rtree)
     }
 
-    #[inline(always)]
     fn rtree_mut(&mut self) -> Option<&mut Tree> {
         Some(&mut self.rtree)
     }
 
-    #[inline(always)]
     fn add_to_defs(&mut self, kind: NodeKind) -> Result<Node> {
         let tree = self
             .rtree_mut()
@@ -139,7 +134,6 @@ impl LayerLogic for Layer {
         Ok(tree.root.append_kind(kind))
     }
 
-    #[inline(always)]
     fn add_to_root(&mut self, kind: NodeKind) -> Result<Node> {
         if let NodeKind::Path(path) = &kind {
             self.animations
@@ -152,7 +146,6 @@ impl LayerLogic for Layer {
             .append_kind(kind))
     }
 
-    #[inline(always)]
     // TODO only linear gradient
     fn fill_with_link(&self, id: &str) -> Option<Fill> {
         Some(Fill {
@@ -161,12 +154,10 @@ impl LayerLogic for Layer {
         })
     }
 
-    #[inline(always)]
     fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
         self.animations.add_animation(animation);
     }
 
-    #[inline(always)]
     fn add_effect<T: EffectLogic + 'static>(&mut self, effect: T) {
         self.effects.push(Box::new(effect))
     }

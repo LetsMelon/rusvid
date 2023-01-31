@@ -16,12 +16,10 @@ pub struct BoxBlur {
 }
 
 impl BoxBlur {
-    #[inline(always)]
     pub fn new(kernel_size: u32) -> Result<Self> {
         Self::new_asymmetric(kernel_size, kernel_size)
     }
 
-    #[inline(always)]
     pub fn new_with_id(kernel_size: u32, id: impl Into<ID>) -> Result<Self> {
         let mut obj = Self::new(kernel_size)?;
         obj.id = Some(id.into());
@@ -29,7 +27,6 @@ impl BoxBlur {
         Ok(obj)
     }
 
-    #[inline(always)]
     pub fn new_asymmetric(kernel_x: u32, kernel_y: u32) -> Result<Self> {
         if kernel_x < 2 {
             bail!("kernel_x must be bigger 1 ({})", kernel_x);
@@ -51,7 +48,6 @@ impl BoxBlur {
         })
     }
 
-    #[inline(always)]
     pub fn new_asymmetric_with_id(kernel_x: u32, kernel_y: u32, id: impl Into<ID>) -> Result<Self> {
         let mut obj = Self::new_asymmetric(kernel_x, kernel_y)?;
         obj.id = Some(id.into());

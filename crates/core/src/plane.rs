@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::io::BufWriter;
 use std::path::Path;
 
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
@@ -74,6 +76,11 @@ impl Plane {
 
     pub fn as_data(&self) -> &Vec<Pixel> {
         &self.data
+    }
+
+    pub fn as_data_flatten(&self) -> Vec<u8> {
+        // TODO use `.flat_map(...)`
+        self.data.iter().flatten().map(|v| *v).collect()
     }
 
     /// Crates a `Result<Plane, PlaneError>` from a `image::RgbaImage`
@@ -158,19 +165,16 @@ impl Plane {
         Ok(pixmap)
     }
 
-    #[inline(always)]
     /// Returns the plane's height in `SIZE`
     pub fn width(&self) -> SIZE {
         self.width
     }
 
     /// Returns the plane's width in `SIZE`
-    #[inline(always)]
     pub fn height(&self) -> SIZE {
         self.height
     }
 
-    #[inline]
     pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
         if x > self.width {
             return None;
@@ -183,12 +187,10 @@ impl Plane {
         self.data.get(index)
     }
 
-    #[inline]
     pub fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
         unsafe { self.data.get_unchecked(position_to_index(x, y, self.width)) }
     }
 
-    #[inline]
     pub fn pixel_mut(&mut self, x: SIZE, y: SIZE) -> Option<&mut Pixel> {
         if x > self.width {
             return None;
@@ -200,7 +202,6 @@ impl Plane {
         self.data.get_mut(position_to_index(x, y, self.width))
     }
 
-    #[inline]
     pub fn pixel_mut_unchecked(&mut self, x: SIZE, y: SIZE) -> &mut Pixel {
         unsafe {
             self.data
@@ -208,24 +209,20 @@ impl Plane {
         }
     }
 
-    #[inline]
     pub fn put_pixel(&mut self, x: SIZE, y: SIZE, value: Pixel) -> Result<(), PlaneError> {
         *self.pixel_mut(x, y).ok_or(PlaneError::OutOfBound2d(x, y))? = value;
 
         Ok(())
     }
 
-    #[inline]
     pub fn put_pixel_unchecked(&mut self, x: SIZE, y: SIZE, value: Pixel) {
         *self.pixel_mut_unchecked(x, y) = value;
     }
 
-    #[inline]
     pub fn pixels(&self) -> &[Pixel] {
         self.data.as_slice()
     }
 
-    #[inline]
     pub fn pixels_mut(&mut self) -> &mut [Pixel] {
         self.data.as_mut_slice()
     }
@@ -238,7 +235,6 @@ impl Plane {
         }
     }
 
-    #[inline]
     pub fn save_with_format<P: AsRef<Path>>(
         self,
         path: P,
@@ -259,12 +255,23 @@ impl Plane {
             .map_err(|_| PlaneError::ImageError)
     }
 
-    // TODO implement first citizen Plane to Png, use https://crates.io/crates/png
     pub fn save_as_png<P: AsRef<Path>>(self, path: P) -> Result<(), PlaneError> {
-        let as_image = self.as_rgba_image()?;
-        as_image
-            .save_with_format(path, ImageFormat::Png)
-            .map_err(|_| PlaneError::ImageError)
+        use png::{BitDepth, ColorType, Compression, Encoder};
+
+        let file = File::create(path).unwrap();
+        let mut w = BufWriter::new(file);
+
+        let mut encoder = Encoder::new(&mut w, self.width(), self.height());
+        encoder.set_color(ColorType::Rgba);
+        encoder.set_depth(BitDepth::Eight);
+        encoder.set_compression(Compression::Best);
+
+        let mut writer = encoder.write_header().unwrap();
+
+        let data = self.as_data_flatten();
+        writer.write_image_data(&data).unwrap();
+
+        Ok(())
     }
 
     // TODO implement first citizen Plane to JPG
@@ -493,4 +500,45 @@ mod tests {
             Ok(())
         }
     }
+    /*
+    mod save_as {
+        use itertools::*;
+
+        use crate::plane::Plane;
+
+        #[test]
+        fn save_as_png() {
+            let size = 2_u32.pow(8);
+
+            let plane =
+                Plane::from_data(size, size, vec![[255, 100, 0, 255]; (size * size) as usize])
+                    .unwrap();
+
+            let saved = plane.clone().save_as_png("test_out.png");
+            assert!(saved.is_ok());
+
+            let read_plane = Plane::from_dynamic_image(
+                image::io::Reader::open("test_out.png")
+                    .unwrap()
+                    .decode()
+                    .unwrap(),
+            )
+            .unwrap();
+
+            let same_pixels = (0..size)
+                .cartesian_product(0..size)
+                .map(|(x, y)| {
+                    let p1 = plane.pixel_unchecked(x, y);
+                    let p2 = read_plane.pixel_unchecked(x, y);
+
+                    p1[0] == p2[0] && p1[1] == p2[1] && p1[2] == p2[2] && p1[3] == p2[3]
+                })
+                .fold(true, |mut acc, value| {
+                    acc &= value;
+                    acc
+                });
+            assert!(same_pixels)
+        }
+    }
+     */
 }

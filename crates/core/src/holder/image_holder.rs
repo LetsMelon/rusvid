@@ -25,7 +25,6 @@ pub struct ImageHolder {
 }
 
 impl ImageHolder {
-    #[inline]
     pub fn new_unchecked(coordinates: Point, size: Point, data: Plane, mode: ImageMode) -> Self {
         ImageHolder {
             coordinates,
@@ -35,7 +34,6 @@ impl ImageHolder {
         }
     }
 
-    #[inline]
     pub fn new_fit(coordinates: Point, data: Plane) -> Self {
         let size = Point::new(data.width() as f64, data.height() as f64);
         let mode = ImageMode::Fit;

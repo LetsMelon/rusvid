@@ -15,37 +15,30 @@ impl Point {
     /// All negative ones.
     pub const NEG_ONE: Self = Self::new_symmetric(-1.0);
 
-    #[inline]
     pub const fn new(x: f64, y: f64) -> Self {
         Self::from_dvec(DVec2::new(x, y))
     }
 
-    #[inline]
     pub const fn new_symmetric(v: f64) -> Self {
         Self::new(v, v)
     }
 
-    #[inline(always)]
     const fn from_dvec(dvec: DVec2) -> Self {
         Point(dvec)
     }
 
-    #[inline]
     pub fn x(&self) -> f64 {
         self.0.x
     }
 
-    #[inline]
     pub fn y(&self) -> f64 {
         self.0.y
     }
 
-    #[inline]
     pub fn x_mut(&mut self) -> &mut f64 {
         &mut self.0.x
     }
 
-    #[inline]
     pub fn y_mut(&mut self) -> &mut f64 {
         &mut self.0.y
     }
@@ -59,21 +52,18 @@ impl Point {
     ///
     /// For more see
     /// [comparing floating point numbers](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/).
-    #[inline]
     pub fn abs_diff_eq(self, rhs: Self, max_abs_diff: f64) -> bool {
         self.0.abs_diff_eq(rhs.0, max_abs_diff)
     }
 }
 
 impl From<(f64, f64)> for Point {
-    #[inline]
     fn from(raw: (f64, f64)) -> Self {
         Point::new(raw.0, raw.1)
     }
 }
 
 impl AsRef<[f64; 2]> for Point {
-    #[inline]
     fn as_ref(&self) -> &[f64; 2] {
         self.0.as_ref()
     }
@@ -117,7 +107,6 @@ macro_rules! implement_math_operator {
     ($operant:ident, $fct:ident, Point for Point) => {
         impl std::ops::$operant<Point> for Point {
             type Output = Point;
-            #[inline]
             fn $fct(self, rhs: Self) -> Self::Output {
                 Point(self.0.$fct(rhs.0))
             }
@@ -126,7 +115,6 @@ macro_rules! implement_math_operator {
     ($operant:ident, $fct:ident, f64 for Point) => {
         impl std::ops::$operant<f64> for Point {
             type Output = Point;
-            #[inline]
             fn $fct(self, rhs: f64) -> Self::Output {
                 Point(self.0.$fct(rhs))
             }
@@ -135,7 +123,6 @@ macro_rules! implement_math_operator {
     ($operant:ident, $fct:ident, Point for f64) => {
         impl std::ops::$operant<Point> for f64 {
             type Output = Point;
-            #[inline]
             fn $fct(self, rhs: Self::Output) -> Self::Output {
                 Point(DVec2 {
                     x: self.$fct(rhs.x()),
@@ -147,7 +134,6 @@ macro_rules! implement_math_operator {
     ($operant:ident, $fct:ident, Point for assign $other_type:ident) => {
         concat_idents::concat_idents!(method_name = $fct, _assign {
             impl std::ops::$operant<$other_type> for Point {
-                #[inline]
                 fn method_name(&mut self, other: $other_type) {
                     use std::ops::*;
 

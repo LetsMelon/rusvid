@@ -7,14 +7,12 @@ use rusvid_core::plane::Plane;
 
 use crate::{EffectLogic, Element, ID};
 
-#[inline(always)]
 fn gaussian_function(stdev: f64, x: i32, y: i32) -> f64 {
     let pow_x = (x as f64).powf(2.0);
     let pow_y = (y as f64).powf(2.0);
     (1.0 / (2.0 * PI * stdev.powf(2.0))) * E.powf(-((pow_x + pow_y) / (2.0 * stdev.powf(2.0))))
 }
 
-#[inline(always)]
 fn kernel_size(stdev: f64) -> i32 {
     let mut kernel = (6.0 * stdev).ceil() as i32;
 
@@ -36,7 +34,6 @@ pub struct GaussianBlur {
 }
 
 impl GaussianBlur {
-    #[inline(always)]
     pub fn new(stdev: f64) -> Self {
         let kernel = kernel_size(stdev);
         let abs_d = kernel.div_floor(2);
@@ -59,7 +56,6 @@ impl GaussianBlur {
         }
     }
 
-    #[inline(always)]
     pub fn new_with_id(stdev: f64, id: impl Into<ID>) -> Self {
         let mut obj = Self::new(stdev);
         obj.id = Some(id.into());

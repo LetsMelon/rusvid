@@ -3,7 +3,6 @@ use rusvid_core::plane::{Pixel, Plane};
 
 use crate::effect::EffectLogic;
 
-#[inline]
 pub fn combine_renders(width: u32, height: u32, images: Vec<Plane>) -> Result<Plane> {
     let images_as_data = images
         .iter()
@@ -57,7 +56,6 @@ pub fn combine_renders(width: u32, height: u32, images: Vec<Plane>) -> Result<Pl
     Ok(Plane::from_data_unchecked(width, height, data))
 }
 
-#[inline]
 pub fn apply_effects(original: Plane, effects: &Vec<Box<dyn EffectLogic>>) -> Result<Plane> {
     let mut back = original;
 
