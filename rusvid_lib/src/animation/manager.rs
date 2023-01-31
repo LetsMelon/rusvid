@@ -3,11 +3,11 @@ use std::fmt::Debug;
 use std::rc::Rc;
 
 use anyhow::Result;
-use usvg::PathData;
+use resvg::usvg::PathData;
 
 use crate::animation::Animation;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AnimationManager {
     reference: HashMap<String, Rc<PathData>>,
     animations: Vec<Box<dyn Animation>>,
@@ -15,23 +15,17 @@ pub struct AnimationManager {
 
 impl AnimationManager {
     pub fn new() -> AnimationManager {
-        AnimationManager {
-            reference: HashMap::new(),
-            animations: Vec::new(),
-        }
+        AnimationManager::default()
     }
 
-    #[inline]
     pub fn add_reference(&mut self, id: String, path: Rc<PathData>) {
         self.reference.insert(id, path);
     }
 
-    #[inline]
     pub fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
         self.animations.push(Box::new(animation))
     }
 
-    #[inline]
     pub fn update(&mut self, frame_count: usize) -> Result<()> {
         for animation in &mut self.animations {
             let id = animation.object_id();

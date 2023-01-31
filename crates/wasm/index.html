@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>rusvid</title>
+    <style>
+      canvas {
+        outline: black 3px solid;
+        image-rendering: pixelated;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="app"></canvas>
+
+    <button type="button" , id="b_render">Render</button>
+    <button type="button" , id="b_animation">Animation</button>
+    <button type="button" , id="b_stop">Stop</button>
+    <div id="fps_p_show"></div>
+
+    <div id="color_div">
+      <div>
+        <p>Color:</p>
+        <input type="range" id="c_r" name="red" min="0" max="255" value="255" />
+        <label for="c_r">Red</label>
+        <input type="range" id="c_g" name="green" min="0" max="255" />
+        <label for="c_g">Green</label>
+        <input type="range" id="c_b" name="blue" min="0" max="255" />
+        <label for="c_b">Blue</label>
+      </div>
+
+      <div id="world_div">
+        <p>Position:</p>
+        <input type="range" id="s_rotate" name="angle" min="0" max="360" />
+        <label for="s_rotate">Angle</label>
+        <input
+          type="range"
+          id="s_scale"
+          name="angle"
+          min="1"
+          max="10"
+          step="0.5"
+        />
+        <label for="s_scale">Scale</label>
+      </div>
+    </div>
+
+    <script type="module" src="index.js"></script>
+  </body>
+</html>

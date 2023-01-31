@@ -8,8 +8,7 @@ pub enum FrameImageFormat {
 }
 
 impl FrameImageFormat {
-    #[inline]
-    pub(crate) fn file_extension(&self) -> String {
+    pub fn file_extension(&self) -> String {
         match self {
             FrameImageFormat::Png => "png".to_string(),
             FrameImageFormat::Bmp => "bmp".to_string(),
@@ -17,8 +16,7 @@ impl FrameImageFormat {
         }
     }
 
-    #[inline]
-    pub(crate) fn as_image_format(&self) -> ImageFormat {
+    pub fn as_image_format(&self) -> ImageFormat {
         match self {
             FrameImageFormat::Png => ImageFormat::Png,
             FrameImageFormat::Bmp => ImageFormat::Bmp,

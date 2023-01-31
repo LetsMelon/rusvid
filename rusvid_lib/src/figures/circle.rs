@@ -1,41 +1,26 @@
-use usvg::{PathData, PathSegment};
+use resvg::usvg::{PathData, PathSegment};
+use rusvid_core::point::Point;
 
-use crate::utils::equal_delta;
+use super::utils::extend_path_from_slice;
 
-#[inline]
 fn sin_radius(angle: f64, radius: f64) -> f64 {
     angle.sin() * radius
 }
 
-#[inline]
 fn cos_radius(angle: f64, radius: f64) -> f64 {
     angle.cos() * radius
 }
 
-#[derive(Debug, Copy, Clone, Default)]
-pub struct Point2d {
-    x: f64,
-    y: f64,
-}
-
-impl PartialEq for Point2d {
-    fn eq(&self, other: &Self) -> bool {
-        equal_delta(self.x, other.x, 0.1) && equal_delta(self.y, other.y, 0.1)
-    }
-}
-impl Eq for Point2d {}
-
-#[inline]
-pub fn arc_segment(c_x: f64, c_y: f64, radius: f64, a1: f64, a2: f64) -> (PathSegment, Point2d) {
+pub fn arc_segment(position: Point, radius: f64, a1: f64, a2: f64) -> (PathSegment, Point) {
     let start_angle = a1 * (std::f64::consts::PI / 180.0);
     let end_angle = a2 * (std::f64::consts::PI / 180.0);
     let half_angle = (end_angle - start_angle) / 2.0;
     let k = (4.0 / 3.0) * ((1.0 - half_angle.cos()) / half_angle.sin());
 
-    let p1x = c_x + cos_radius(start_angle, radius);
-    let p1y = c_y + sin_radius(start_angle, radius);
-    let p4x = c_x + cos_radius(end_angle, radius);
-    let p4y = c_y + sin_radius(end_angle, radius);
+    let p1x = position.x() + cos_radius(start_angle, radius);
+    let p1y = position.y() + sin_radius(start_angle, radius);
+    let p4x = position.x() + cos_radius(end_angle, radius);
+    let p4y = position.y() + sin_radius(end_angle, radius);
     let p2x = p1x - (k * sin_radius(start_angle, radius));
     let p2y = p1y + (k * cos_radius(start_angle, radius));
     let p3x = p4x + (k * sin_radius(end_angle, radius));
@@ -50,12 +35,11 @@ pub fn arc_segment(c_x: f64, c_y: f64, radius: f64, a1: f64, a2: f64) -> (PathSe
             x: p4x,
             y: p4y,
         },
-        Point2d { x: p1x, y: p1y },
+        Point::new(p1x, p1y),
     )
 }
 
-#[inline]
-pub fn arc(c_x: f64, c_y: f64, radius: f64, start_angle: f64, end_angle: f64) -> Vec<PathSegment> {
+pub fn arc(position: Point, radius: f64, start_angle: f64, end_angle: f64) -> Vec<PathSegment> {
     let mut segments = Vec::new();
 
     let mut a2;
@@ -65,16 +49,16 @@ pub fn arc(c_x: f64, c_y: f64, radius: f64, start_angle: f64, end_angle: f64) ->
     while total_angle > 0.0 {
         a2 = a1 + total_angle.min(90.0);
 
-        let (segment, point_2d) = arc_segment(c_x, c_y, radius, a1, a2);
+        let (segment, point_2d) = arc_segment(position, radius, a1, a2);
         let point = if a1 == start_angle {
             PathSegment::MoveTo {
-                x: point_2d.x,
-                y: point_2d.y,
+                x: point_2d.x(),
+                y: point_2d.y(),
             }
         } else {
             PathSegment::LineTo {
-                x: point_2d.x,
-                y: point_2d.y,
+                x: point_2d.x(),
+                y: point_2d.y(),
             }
         };
         segments.push(point);
@@ -87,19 +71,20 @@ pub fn arc(c_x: f64, c_y: f64, radius: f64, start_angle: f64, end_angle: f64) ->
     segments
 }
 
-#[inline]
-pub fn circle_raw(c_x: f64, c_y: f64, radius: f64) -> Vec<PathSegment> {
-    let mut segments = arc(c_x, c_y, radius, 0.0, 360.0);
+pub fn circle_raw(position: Point, radius: f64) -> Vec<PathSegment> {
+    let mut segments = arc(position, radius, 0.0, 360.0);
 
     segments.push(PathSegment::ClosePath);
 
     segments
 }
 
-#[inline]
-pub fn circle(c_x: f64, c_y: f64, radius: f64) -> PathData {
-    let mut path = PathData::with_capacity(9);
-    path.extend_from_slice(&circle_raw(c_x, c_y, radius));
+pub fn circle(position: Point, radius: f64) -> PathData {
+    let mut path = PathData::new();
+
+    let circle_path = circle_raw(position, radius);
+    extend_path_from_slice(&mut path, circle_path);
+
     path
 }
 
@@ -148,7 +133,7 @@ mod tests {
 
     #[test]
     fn calculate_circle() {
-        let circle = circle_raw(0.0, 0.0, 100.0);
+        let circle = circle_raw(Point::ZERO, 100.0);
 
         assert_eq!(circle.len(), 9);
 

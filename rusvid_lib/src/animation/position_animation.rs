@@ -1,7 +1,8 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use usvg::PathData;
+use log::debug;
+use resvg::usvg::PathData;
 
 use crate::animation::curves::Function;
 use crate::animation::Animation;
@@ -27,8 +28,8 @@ impl Animation for PositionAnimation {
             let pd = Rc::get_mut_unchecked(&mut path);
 
             let delta = self.curve.delta(*frame_count);
-            println!("{} -> {:?}", frame_count, delta);
-            pd.transform(usvg::Transform::new_translate(delta.x, delta.y));
+            debug!("Update {}: {:?}", self.object_id(), delta);
+            pd.transform(resvg::usvg::Transform::new_translate(delta.x(), delta.y()));
             // let pos = self.meta.calc(frame_count);
             // println!("{} -> {:?}", frame_count, pos);
             // set_path(&mut pd, pos);

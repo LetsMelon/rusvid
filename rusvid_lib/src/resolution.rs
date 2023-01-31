@@ -1,27 +1,28 @@
-use crate::{
-    metrics::{MetricsSize, MetricsVideo},
-    prelude::AsPoint,
-    types::Point,
-};
+use rusvid_core::point::{AsPoint, Point};
 
-// TODO move into types.rs
-pub type ResolutionType = (usize, usize);
+use crate::metrics::{MetricsSize, MetricsVideo};
+use crate::types::ResolutionType;
 
+// TODO implement sth to create a `Resolution` from 'forms'/'sizes' like 'A4' and the combination of DPI
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 /// Enum for common resolutions and custom ones
 ///
-/// Currently only has presets for resolutions with 16:9 format. For other format use `Resolution::Custom(width, height)`.
+/// Currently only has presets for resolutions with 16:9 format. For other formats use `Resolution::Custom(width, height)`.
+///
+/// Maximal resolution is 4_294_967_295 x 4_294_967_295.
 pub enum Resolution {
+    SD,
     HD,
     FHD,
+    QHD,
     UHD,
+    TwoK,
     FourK,
     /// width, height
-    Custom(usize, usize),
+    Custom(u32, u32),
 }
 
 impl Resolution {
-    #[inline]
     /// Get the width and height of the resolution.
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;
@@ -34,15 +35,17 @@ impl Resolution {
     /// ```
     pub fn value(&self) -> ResolutionType {
         match self {
+            Resolution::SD => (640, 480),
             Resolution::HD => (1280, 720),
             Resolution::FHD => (1920, 1080),
+            Resolution::QHD => (2560, 1440),
             Resolution::UHD => (3840, 2160),
+            Resolution::TwoK => (2048, 1080),
             Resolution::FourK => (4096, 2160),
             Resolution::Custom(w, h) => (*w, *h),
         }
     }
 
-    #[inline]
     /// Get the width of the resolution.
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;
@@ -50,11 +53,10 @@ impl Resolution {
     /// let res = Resolution::HD;
     /// assert_eq!(res.width(), 1280);
     /// ```
-    pub fn width(&self) -> usize {
+    pub fn width(&self) -> u32 {
         self.value().0
     }
 
-    #[inline]
     /// Get the height of the resolution.
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;
@@ -62,11 +64,10 @@ impl Resolution {
     /// let res = Resolution::HD;
     /// assert_eq!(res.height(), 720);
     /// ```
-    pub fn height(&self) -> usize {
+    pub fn height(&self) -> u32 {
         self.value().1
     }
 
-    #[inline]
     /// Get the width of the resolution as `f64`. Used for math
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;
@@ -78,7 +79,6 @@ impl Resolution {
         self.width() as f64
     }
 
-    #[inline]
     /// Get the height of the resolution as `f64`. Used for math
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;
@@ -110,7 +110,7 @@ impl MetricsVideo for Resolution {
     fn pixels(&self) -> usize {
         let res = self.value();
 
-        res.0 * res.1
+        (res.0 * res.1) as usize
     }
 }
 

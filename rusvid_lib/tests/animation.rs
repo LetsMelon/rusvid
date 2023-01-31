@@ -1,10 +1,11 @@
 use std::rc::Rc;
 
+use rusvid_core::point::Point;
 use rusvid_lib::animation::prelude::*;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 use rusvid_lib::resolution::Resolution;
-use rusvid_lib::usvg::{Fill, NodeKind, Paint, Path};
+use rusvid_lib::resvg::usvg::{Fill, NodeKind, Paint, Path};
 use rusvid_lib::utils::color_from_hex;
 
 mod dummy;
@@ -26,7 +27,7 @@ fn renders_correctly_static() {
                 paint: Paint::Color(color_from_hex("ff0000".to_string()).unwrap()),
                 ..Fill::default()
             }),
-            data: Rc::new(rect(0.0, 0.0, 50.0, 50.0)),
+            data: Rc::new(rect(Point::ZERO, Point::new(50.0, 50.0))),
             ..Path::default()
         }))
         .unwrap();
@@ -47,15 +48,15 @@ fn renders_correctly_static() {
 
     match (frame_1, frame_2) {
         (Ok(frame_1), Ok(frame_2)) => {
-            assert_eq!(frame_1.get_pixel(0, 0).0, [255, 0, 0, 255]);
-            assert_eq!(frame_1.get_pixel(49, 49).0, [255, 0, 0, 255]);
-            assert_eq!(frame_1.get_pixel(50, 50).0, [0, 0, 0, 0]);
-            assert_eq!(frame_1.get_pixel(99, 99).0, [0, 0, 0, 0]);
+            assert_eq!(frame_1.pixel_unchecked(0, 0), &[255, 0, 0, 255]);
+            assert_eq!(frame_1.pixel_unchecked(49, 49), &[255, 0, 0, 255]);
+            assert_eq!(frame_1.pixel_unchecked(50, 50), &[0, 0, 0, 0]);
+            assert_eq!(frame_1.pixel_unchecked(99, 99), &[0, 0, 0, 0]);
 
-            assert_eq!(frame_2.get_pixel(0, 0).0, [0, 0, 0, 0]);
-            assert_eq!(frame_2.get_pixel(49, 49).0, [0, 0, 0, 0]);
-            assert_eq!(frame_2.get_pixel(50, 50).0, [255, 0, 0, 255]);
-            assert_eq!(frame_2.get_pixel(99, 99).0, [255, 0, 0, 255]);
+            assert_eq!(frame_2.pixel_unchecked(0, 0), &[0, 0, 0, 0]);
+            assert_eq!(frame_2.pixel_unchecked(49, 49), &[0, 0, 0, 0]);
+            assert_eq!(frame_2.pixel_unchecked(50, 50), &[255, 0, 0, 255]);
+            assert_eq!(frame_2.pixel_unchecked(99, 99), &[255, 0, 0, 255]);
         }
         (_, _) => assert!(false),
     };

@@ -24,7 +24,6 @@ impl Default for VideoCodec {
 }
 
 impl CliArgument for VideoCodec {
-    #[inline(always)]
     fn build_cli_argument(&self) -> Vec<OsString> {
         let mut arguments = Vec::new();
         match self {

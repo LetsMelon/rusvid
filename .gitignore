@@ -1,7 +1,9 @@
 /target
-.idea/
-**.DS_Store
-**.svg
-**.mp4
-out.png
+/.idea
 out/
+**.DS_Store
+**.jpg
+**.log
+**.mp4
+**.png
+**.svg

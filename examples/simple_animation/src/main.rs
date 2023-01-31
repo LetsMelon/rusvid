@@ -2,9 +2,10 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use rusvid_lib::animation::prelude::*;
+use rusvid_lib::core::frame_image_format::FrameImageFormat;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
-use rusvid_lib::usvg::{Fill, NodeKind, Paint, Path};
+use rusvid_lib::resvg::usvg::{Fill, NodeKind, Paint, Path};
 use rusvid_lib::utils::color_from_hex;
 
 fn main() {
@@ -28,7 +29,7 @@ fn main() {
                 paint: Paint::Color(color_from_hex("#1212FF".to_string()).unwrap()),
                 ..Fill::default()
             }),
-            data: Rc::new(rect(rect_pos.x, rect_pos.y, rect_size.x, rect_size.y)),
+            data: Rc::new(rect(rect_pos, rect_size)),
             ..Path::default()
         }))
         .unwrap();
@@ -39,7 +40,7 @@ fn main() {
             0,
             frames,
             rect_pos,
-            Point::new(resolution.x() - rect_size.x, resolution.y() - rect_size.y),
+            resolution.as_point() - rect_size,
             EaseType::InOut,
         )
         .unwrap(),

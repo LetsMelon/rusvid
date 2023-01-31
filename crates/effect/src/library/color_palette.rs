@@ -1,8 +1,7 @@
 use anyhow::{bail, Result};
-use image::{Rgba, RgbaImage};
-use rusvid_plane::Pixel;
+use rusvid_core::plane::{Pixel, Plane};
 
-use crate::effect::{EffectLogic, Element, ID};
+use crate::{EffectLogic, Element, ID};
 
 #[derive(Debug)]
 pub struct ColorPaletteEffect {
@@ -34,16 +33,16 @@ impl Element for ColorPaletteEffect {
 }
 
 impl EffectLogic for ColorPaletteEffect {
-    fn apply(&self, original: RgbaImage) -> Result<RgbaImage> {
-        if self.color_palette.len() == 0 {
+    fn apply(&self, original: Plane) -> Result<Plane> {
+        if self.color_palette.is_empty() {
             bail!("Must have at least one color in the color palette");
         }
 
-        let mut result = RgbaImage::new(original.width(), original.height());
+        let mut result = Plane::new(original.width(), original.height())?;
 
         for x in 0..result.width() {
             for y in 0..result.height() {
-                let old_color = original.get_pixel(x, y);
+                let old_color = original.pixel_unchecked(x, y);
 
                 let mut best_palette_color = self.color_palette[0];
                 let mut distance = u32::MAX;
@@ -60,14 +59,16 @@ impl EffectLogic for ColorPaletteEffect {
                     }
                 }
 
-                let new_color = Rgba([
-                    best_palette_color[0],
-                    best_palette_color[1],
-                    best_palette_color[2],
-                    best_palette_color[3],
-                ]);
-
-                *result.get_pixel_mut(x, y) = new_color;
+                result.put_pixel_unchecked(
+                    x,
+                    y,
+                    [
+                        best_palette_color[0],
+                        best_palette_color[1],
+                        best_palette_color[2],
+                        best_palette_color[3],
+                    ],
+                );
             }
         }
 

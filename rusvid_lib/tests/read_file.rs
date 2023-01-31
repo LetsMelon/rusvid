@@ -1,6 +1,5 @@
 use std::env;
 
-use rayon::prelude::*;
 use rusvid_lib::metrics::MetricsVideo;
 use rusvid_lib::prelude::*;
 
@@ -35,26 +34,23 @@ fn renders_svg_file() {
     let buffer = image_render.render_frame(&composition).unwrap();
 
     // corners
-    assert_eq!(buffer.get_pixel(0, 0).0, PIXEL_TRANSPARENT);
-    assert_eq!(buffer.get_pixel(0, 999).0, PIXEL_TRANSPARENT);
-    assert_eq!(buffer.get_pixel(999, 0).0, PIXEL_TRANSPARENT);
-    assert_eq!(buffer.get_pixel(999, 999).0, PIXEL_TRANSPARENT);
+    assert_eq!(buffer.pixel_unchecked(0, 0), &PIXEL_TRANSPARENT);
+    assert_eq!(buffer.pixel_unchecked(0, 999), &PIXEL_TRANSPARENT);
+    assert_eq!(buffer.pixel_unchecked(999, 0), &PIXEL_TRANSPARENT);
+    assert_eq!(buffer.pixel_unchecked(999, 999), &PIXEL_TRANSPARENT);
 
     // eye's
-    assert_eq!(buffer.get_pixel(500, 450).0, PIXEL_WHITE);
-    assert_eq!(buffer.get_pixel(500, 500).0, PIXEL_BLACK);
-    assert_eq!(buffer.get_pixel(700, 450).0, PIXEL_WHITE);
-    assert_eq!(buffer.get_pixel(700, 500).0, PIXEL_BLACK);
+    assert_eq!(buffer.pixel_unchecked(500, 450), &PIXEL_WHITE);
+    assert_eq!(buffer.pixel_unchecked(500, 500), &PIXEL_BLACK);
+    assert_eq!(buffer.pixel_unchecked(700, 450), &PIXEL_WHITE);
+    assert_eq!(buffer.pixel_unchecked(700, 500), &PIXEL_BLACK);
 
     // body
-    assert_eq!(buffer.get_pixel(200, 300).0, [245, 117, 0, 255]);
-    assert_eq!(buffer.get_pixel(999, 300).0, [246, 107, 0, 255]);
+    assert_eq!(buffer.pixel_unchecked(200, 300), &[245, 117, 0, 255]);
+    assert_eq!(buffer.pixel_unchecked(999, 300), &[246, 107, 0, 255]);
 
     // count pixels with alpha
-    let pixels_with_alpha = buffer
-        .par_chunks_exact(4)
-        .filter(|&item| item[3] > 0)
-        .count();
+    let pixels_with_alpha = buffer.into_iter().filter(|&item| item[3] > 0).count();
     assert_eq!(pixels_with_alpha, 473_746);
     assert!(pixels_with_alpha < composition.pixels());
 }

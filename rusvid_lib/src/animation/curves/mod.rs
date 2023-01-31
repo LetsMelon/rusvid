@@ -1,8 +1,7 @@
 use std::fmt::Debug;
 
 use anyhow::Result;
-
-use crate::types::Point;
+use rusvid_core::point::Point;
 
 // #[rustfmt::skip]
 mod third_party;

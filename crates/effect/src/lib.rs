@@ -1,5 +1,7 @@
+#![feature(int_roundings)]
+
 use anyhow::Result;
-use image::RgbaImage;
+use rusvid_core::plane::Plane;
 
 pub mod library;
 
@@ -11,24 +13,15 @@ pub trait Element {
 }
 
 pub trait EffectLogic: std::fmt::Debug + Element {
-    // TODO switch to `Plane`
-    fn apply(&self, original: RgbaImage) -> Result<RgbaImage>;
+    fn apply(&self, original: Plane) -> Result<Plane>;
 
     fn depends_on_other_effects_ids(&self) -> Vec<ID> {
         Vec::new()
     }
 
     /// Returns `true` if the effect depends on one (or more) other effects, otherwise the function returns `false`
-    ///
-    /// Example:
-    /// ```rust
-    /// use rusvid_lib::prelude::*;
-    ///
-    /// let effect = ColorPaletteEffect::new(vec![]);
-    /// assert!(!effect.depends_on_other_effects());
-    /// ```
     fn depends_on_other_effects(&self) -> bool {
-        self.depends_on_other_effects_ids().len() != 0
+        !self.depends_on_other_effects_ids().is_empty()
     }
 
     #[allow(unused_variables)]

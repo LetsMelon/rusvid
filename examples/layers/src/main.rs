@@ -1,10 +1,10 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use rusvid_lib::animation::prelude::*;
+use rusvid_lib::core::frame_image_format::FrameImageFormat;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
-use rusvid_lib::usvg::{Fill, NodeKind, Paint, Path};
+use rusvid_lib::resvg::usvg::{Fill, NodeKind, Paint, Path};
 use rusvid_lib::utils::color_from_hex;
 
 fn main() {
@@ -19,10 +19,7 @@ fn main() {
     let layer = composition.create_layer().unwrap();
 
     let rect_size = Point::new(250.0, 250.0);
-    let pixel_position = Point::new(
-        (resolution.x() / 2.0) - (rect_size.x / 2.0),
-        (resolution.y() / 2.0) - (rect_size.y / 2.0),
-    );
+    let pixel_position = (resolution.as_point() / 2.0) - (rect_size / 2.0);
     layer
         .add_to_root(NodeKind::Path(Path {
             id: "rect".to_string(),
@@ -30,12 +27,7 @@ fn main() {
                 paint: Paint::Color(color_from_hex("#1212FF".to_string()).unwrap()),
                 ..Fill::default()
             }),
-            data: Rc::new(rect(
-                pixel_position.x,
-                pixel_position.y,
-                rect_size.x,
-                rect_size.y,
-            )),
+            data: Rc::new(rect(pixel_position, rect_size)),
             ..Path::default()
         }))
         .unwrap();
@@ -49,7 +41,7 @@ fn main() {
                 paint: Paint::Color(color_from_hex("#FF1212".to_string()).unwrap()),
                 ..Fill::default()
             }),
-            data: Rc::new(circle(size, size, size)),
+            data: Rc::new(circle(Point::new(size, size), size)),
             ..Path::default()
         }))
         .unwrap();

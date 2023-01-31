@@ -7,6 +7,7 @@ List (ordered by complexity):
 - `simple_animation`: composition with simple animation on rectangle
 - `read_svg_file`: composition with layer from `.svg`-file
 - `grid`: calculate a grid made out of squares with an animated background
+- `comp_effect`: demo for an effect on the compostion
 
 ### black_video
 
@@ -43,3 +44,9 @@ Command: `cargo run -r -p read_svg_file`
 Command: `cargo run -r -p grid`
 
 <img src="/examples/videos/grid.gif" width="500" />
+
+### comp_effect
+
+Command: `cargo run -r -p comp_effect`
+
+<img src="/examples/videos/comp_effect.gif" width="500" />

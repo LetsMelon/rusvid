@@ -36,10 +36,10 @@ jobs:
           key: ${{ runner.os }}-target
 
       - name: Build
-        run: cargo build --verbose --all-targets
+        run: cargo build --verbose --all-targets --all
 
       - name: Test
-        run: cd rusvid_lib && cargo test
+        run: cargo test --workspace
 
 #      - name: Bench
 #        run: cargo bench
