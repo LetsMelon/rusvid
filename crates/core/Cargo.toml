@@ -15,7 +15,7 @@ image = { workspace = true, features = ["png", "bmp", "jpeg"] }
 png = "0.17.7"
 resvg = { workspace = true }
 thiserror = { workspace = true }
-uuid = { version = "1.2.2", default-features = false, features = [ "v4", "fast-rng", "js" ] }
+uuid = { version = "1.3.0", default-features = false, features = [ "v4", "fast-rng", "js" ] }
 
 [dev-dependencies]
 anyhow = { workspace = true }
