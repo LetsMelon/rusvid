@@ -78,6 +78,10 @@ impl Plane {
         &self.data
     }
 
+    pub fn as_data_mut(&mut self) -> &mut Vec<Pixel> {
+        &mut self.data
+    }
+
     pub fn as_data_flatten(&self) -> Vec<u8> {
         // TODO use `.flat_map(...)`
         self.data.iter().flatten().map(|v| *v).collect()
