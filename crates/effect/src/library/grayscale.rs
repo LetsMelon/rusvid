@@ -1,4 +1,6 @@
 use anyhow::Result;
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+use rayon::*;
 use rusvid_core::plane::Plane;
 
 use crate::{EffectLogic, Element, ID};
@@ -35,8 +37,11 @@ impl EffectLogic for GrayscaleEffect {
     fn apply(&self, original: Plane) -> Result<Plane> {
         let width = original.width();
         let height = original.height();
+
         let data = original
-            .into_iter()
+            .as_data()
+            .clone()
+            .par_iter()
             .map(|original_color| {
                 let grayscale_value = (original_color[0] as f32 * MULTIPLIER_RED
                     + original_color[1] as f32 * MULTIPLIER_GREEN

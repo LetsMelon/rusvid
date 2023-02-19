@@ -1,7 +1,16 @@
 use anyhow::{bail, Result};
+use rayon::prelude::*;
 use rusvid_core::plane::{Pixel, Plane};
 
 use crate::{EffectLogic, Element, ID};
+
+#[inline(always)]
+fn calculate_color_diff(c1: &Pixel, c2: &Pixel) -> u32 {
+    c1[0].abs_diff(c2[0]) as u32
+        + c1[1].abs_diff(c2[1]) as u32
+        + c1[2].abs_diff(c2[2]) as u32
+        + c1[3].abs_diff(c2[3]) as u32
+}
 
 #[derive(Debug)]
 pub struct ColorPaletteEffect {
@@ -24,6 +33,10 @@ impl ColorPaletteEffect {
 
         cpe
     }
+
+    pub fn palette_length(&self) -> usize {
+        self.color_palette.len()
+    }
 }
 
 impl Element for ColorPaletteEffect {
@@ -40,37 +53,21 @@ impl EffectLogic for ColorPaletteEffect {
 
         let mut result = Plane::new(original.width(), original.height())?;
 
-        for x in 0..result.width() {
-            for y in 0..result.height() {
-                let old_color = original.pixel_unchecked(x, y);
+        result.as_data_mut().par_iter_mut().for_each(|old_color| {
+            let mut best_palette_color = self.color_palette[0];
+            let mut distance = u32::MAX;
+            for i in 0..self.color_palette.len() {
+                let color_to_test = self.color_palette[i];
+                let test_distance = calculate_color_diff(old_color, &color_to_test);
 
-                let mut best_palette_color = self.color_palette[0];
-                let mut distance = u32::MAX;
-                for i in 0..self.color_palette.len() {
-                    let color_to_test = self.color_palette[i];
-                    let test_distance = old_color[0].abs_diff(color_to_test[0]) as u32
-                        + old_color[1].abs_diff(color_to_test[1]) as u32
-                        + old_color[2].abs_diff(color_to_test[2]) as u32
-                        + old_color[3].abs_diff(color_to_test[3]) as u32;
-
-                    if test_distance < distance {
-                        best_palette_color = color_to_test;
-                        distance = test_distance;
-                    }
+                if test_distance < distance {
+                    best_palette_color = color_to_test;
+                    distance = test_distance;
                 }
-
-                result.put_pixel_unchecked(
-                    x,
-                    y,
-                    [
-                        best_palette_color[0],
-                        best_palette_color[1],
-                        best_palette_color[2],
-                        best_palette_color[3],
-                    ],
-                );
             }
-        }
+
+            *old_color = best_palette_color.clone();
+        });
 
         Ok(result)
     }

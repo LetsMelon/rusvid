@@ -10,3 +10,12 @@ rusvid_core = { path = "../core" }
 anyhow = { workspace = true }
 itertools = "0.10.5"
 log = "0.4.17"
+rayon = "1.6.1"
+
+[dev-dependencies]
+criterion = "0.4"
+rand = "0.8.5"
+
+[[bench]]
+name = "effect"
+harness = false
