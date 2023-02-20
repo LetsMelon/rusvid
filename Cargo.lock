@@ -1227,6 +1227,7 @@ dependencies = [
  "itertools",
  "png",
  "resvg",
+ "rhai",
  "thiserror",
  "uuid",
 ]

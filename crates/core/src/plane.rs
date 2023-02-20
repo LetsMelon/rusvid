@@ -500,7 +500,8 @@ mod tests {
 
             let width = 20;
             let height = 5;
-            let rgba_image = RgbaImage::from_fn(width, height, |x, y| Rgba(generate_pixel(x, y)));
+            let rgba_image =
+                RgbaImage::from_fn(width, height, |x, y| Rgba(generate_pixel(x, y).to_raw()));
             let plane = Plane::from_rgba_image(rgba_image)?;
 
             for x in 0..width {
