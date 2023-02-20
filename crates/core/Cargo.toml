@@ -10,7 +10,7 @@ approx = "0.5.1"
 concat-idents = "1.1.4"
 flo_curves = "0.6.1"
 geo = "0.23.1"
-glam = { version = "0.22.0", features = ["approx"] }
+glam = { version = "0.23.0", features = ["approx"] }
 image = { workspace = true, features = ["png", "bmp", "jpeg"] }
 png = "0.17.7"
 resvg = { workspace = true }
