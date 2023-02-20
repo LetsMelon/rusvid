@@ -14,7 +14,7 @@ fn main() {
         .resolution(resolution)
         .framerate(30)
         .duration(2)
-        .add_effect(PixelateEffect::new(15, 15))
+        .add_effect(PixelateEffect::new(15))
         .build();
     let frames = composition.frames();
 

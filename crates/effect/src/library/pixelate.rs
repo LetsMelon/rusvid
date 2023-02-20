@@ -1,6 +1,6 @@
 use anyhow::Result;
 use itertools::Itertools;
-use rusvid_core::plane::Plane;
+use rusvid_core::plane::{Pixel, Plane};
 
 use crate::{EffectLogic, Element, ID};
 
@@ -99,7 +99,7 @@ impl EffectLogic for PixelateEffect {
 
                 for i_x in from_pixels_width..to_pixels_width {
                     for i_y in from_pixels_height..to_pixels_height {
-                        result.put_pixel_unchecked(i_x, i_y, new_color);
+                        result.put_pixel_unchecked(i_x, i_y, Pixel::new_raw(new_color));
                     }
                 }
             }

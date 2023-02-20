@@ -11,7 +11,7 @@ pub fn combine_renders(width: u32, height: u32, images: Vec<Plane>) -> Result<Pl
 
     let data = (0..((width * height) as usize))
         .map(|i| {
-            images_as_data.iter().fold([0_u8; 4], |acc, value| {
+            images_as_data.iter().fold(Pixel::ZERO, |acc, value| {
                 let value = value[i];
 
                 match (acc[3], value[3]) {
@@ -41,12 +41,12 @@ pub fn combine_renders(width: u32, height: u32, images: Vec<Plane>) -> Result<Pl
                         let mix_g = fg_g * fg_a / mix_a + bg_g * bg_a * (1.0 - fg_a) / mix_a;
                         let mix_b = fg_b * fg_a / mix_a + bg_b * bg_a * (1.0 - fg_a) / mix_a;
 
-                        [
+                        Pixel::new(
                             (mix_r * 255.0) as u8,
                             (mix_g * 255.0) as u8,
                             (mix_b * 255.0) as u8,
                             (mix_a * 255.0) as u8,
-                        ]
+                        )
                     }
                 }
             })
@@ -71,12 +71,12 @@ mod tests {
     fn generate_plane(width: u32, height: u32) -> Plane {
         let data = (0..(width * height))
             .map(|i| {
-                [
+                Pixel::new(
                     i as u8,
                     (i * 2) as u8,
                     (i * 3) as u8,
                     (100 - (i as isize)).abs() as u8,
-                ]
+                )
             })
             .collect();
 

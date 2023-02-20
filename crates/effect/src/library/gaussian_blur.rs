@@ -3,7 +3,7 @@ use std::f64::consts::{E, PI};
 use anyhow::Result;
 use itertools::Itertools;
 use log::info;
-use rusvid_core::plane::Plane;
+use rusvid_core::plane::{Pixel, Plane};
 
 use crate::{EffectLogic, Element, ID};
 
@@ -112,7 +112,7 @@ impl EffectLogic for GaussianBlur {
                 result.put_pixel_unchecked(
                     x as u32,
                     y as u32,
-                    [sum[0] as u8, sum[1] as u8, sum[2] as u8, sum[3] as u8],
+                    Pixel::new(sum[0] as u8, sum[1] as u8, sum[2] as u8, sum[3] as u8),
                 );
             }
         }

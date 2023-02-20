@@ -1,7 +1,6 @@
 use anyhow::Result;
-use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
-use rayon::*;
-use rusvid_core::plane::Plane;
+use rayon::prelude::*;
+use rusvid_core::plane::{Pixel, Plane};
 
 use crate::{EffectLogic, Element, ID};
 
@@ -52,12 +51,12 @@ impl EffectLogic for GrayscaleEffect {
                     + original_color[2] as f32 * MULTIPLIER_BLUE)
                     as u8;
 
-                [
+                Pixel::new(
                     grayscale_value,
                     grayscale_value,
                     grayscale_value,
                     original_color[3],
-                ]
+                )
             })
             .collect();
 

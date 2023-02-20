@@ -15,7 +15,7 @@ impl ColorLike {
         use resvg::usvg::Paint;
 
         match paint {
-            Paint::Color(c) => ColorLike::Color([c.red, c.green, c.blue, 255]),
+            Paint::Color(c) => ColorLike::Color(Pixel::new(c.red, c.green, c.blue, 255)),
             _ => todo!(),
         }
     }

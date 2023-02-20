@@ -7,6 +7,8 @@ use resvg::tiny_skia::Pixmap;
 use thiserror::Error;
 
 use crate::frame_image_format::FrameImageFormat;
+pub use crate::pixel::Pixel;
+use crate::pixel::BITDEPTH;
 
 #[derive(Error, Debug)]
 pub enum PlaneError {
@@ -26,7 +28,6 @@ pub enum PlaneError {
     OutOfBound2d(u32, u32),
 }
 
-pub type Pixel = [u8; 4];
 pub type SIZE = u32;
 
 #[derive(Debug, Clone)]
@@ -54,7 +55,7 @@ impl Plane {
         Ok(Plane {
             width,
             height,
-            data: vec![[0; 4]; (width * height) as usize],
+            data: vec![Pixel::ZERO; (width * height) as usize],
         })
     }
 
@@ -82,9 +83,8 @@ impl Plane {
         &mut self.data
     }
 
-    pub fn as_data_flatten(&self) -> Vec<u8> {
-        // TODO use `.flat_map(...)`
-        self.data.iter().flatten().map(|v| *v).collect()
+    pub fn as_data_flatten(&self) -> Vec<BITDEPTH> {
+        self.data.iter().flat_map(|p| p.to_raw()).collect()
     }
 
     /// Crates a `Result<Plane, PlaneError>` from a `image::RgbaImage`
@@ -96,7 +96,7 @@ impl Plane {
 
         for x in 0..plane.width() {
             for y in 0..plane.height() {
-                *plane.pixel_mut_unchecked(x, y) = image.get_pixel(x, y).0;
+                *plane.pixel_mut_unchecked(x, y) = Pixel::new_raw(image.get_pixel(x, y).0);
             }
         }
 
@@ -116,7 +116,11 @@ impl Plane {
     }
 
     pub fn as_rgba_image(self) -> Result<RgbaImage, PlaneError> {
-        let buf = self.data.iter().flatten().copied().collect::<Vec<u8>>();
+        let buf = self
+            .data
+            .iter()
+            .flat_map(|p| p.to_raw())
+            .collect::<Vec<u8>>();
 
         assert_eq!(self.width() * self.height() * 4, buf.len() as SIZE);
 
@@ -131,7 +135,7 @@ impl Plane {
             .as_bytes()
             .iter()
             .array_chunks()
-            .map(|[r, g, b]| [*r, *g, *b, 255])
+            .map(|[r, g, b]| Pixel::new(*r, *g, *b, 255))
             .collect::<Vec<_>>();
 
         Plane::from_data(width, height, data)
@@ -148,7 +152,7 @@ impl Plane {
                 let b = x.blue();
                 let a = x.alpha();
 
-                [r, g, b, a]
+                Pixel::new_raw([r, g, b, a])
             })
             .collect::<Vec<Pixel>>();
 
@@ -163,7 +167,11 @@ impl Plane {
         let mut pixmap =
             Pixmap::new(self.width(), self.height()).ok_or(PlaneError::TinySkiaError)?;
 
-        let buf = self.data.iter().flatten().copied().collect::<Vec<u8>>();
+        let buf = self
+            .data
+            .iter()
+            .flat_map(|p| p.to_raw())
+            .collect::<Vec<u8>>();
         pixmap.data_mut()[..buf.len()].copy_from_slice(&buf[..]);
 
         Ok(pixmap)
