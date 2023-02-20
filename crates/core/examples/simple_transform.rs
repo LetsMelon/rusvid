@@ -6,6 +6,7 @@ use rusvid_core::holder::object::Object;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
 use rusvid_core::holder::transform::{Transform, TransformLogic};
+use rusvid_core::plane::Pixel;
 use rusvid_core::point::Point;
 
 fn render_and_save(object: &Object, name: &str) -> Result<()> {
@@ -23,7 +24,7 @@ fn main() {
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
         ],
-        Some(ColorLike::Color([0, 255, 100, 255])),
+        Some(ColorLike::Color(Pixel::new(0, 255, 100, 255))),
     ));
 
     let heart_id = svg.add_item(SvgItem::new(
@@ -42,7 +43,7 @@ fn main() {
             ),
             PathLike::Close,
         ],
-        Some(ColorLike::Color([255, 0, 0, 255])),
+        Some(ColorLike::Color(Pixel::new(255, 0, 0, 255))),
     ));
 
     let mut object = Object::new(TypesLike::Svg(svg));
@@ -52,7 +53,7 @@ fn main() {
         .transform_by_id(
             &triangle_id,
             &Transform::Stroke(Some(Stroke {
-                paint: ColorLike::Color([100, 50, 120, 255]),
+                paint: ColorLike::Color(Pixel::new(100, 50, 120, 255)),
                 width: 1.75,
                 ..Stroke::default()
             })),
@@ -63,7 +64,7 @@ fn main() {
     object
         .transform_by_id(
             &heart_id,
-            &Transform::Color(Some(ColorLike::Color([230, 57, 70, 255]))),
+            &Transform::Color(Some(ColorLike::Color(Pixel::new(230, 57, 70, 255)))),
         )
         .unwrap();
     render_and_save(&object, "color").unwrap();

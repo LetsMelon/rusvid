@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use rusvid_core::plane::Pixel;
 use rusvid_core::point::Point;
 use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;
@@ -72,16 +73,19 @@ fn renders_correctly_static() {
     let buffer = image_render.render_frame(&composition);
     if let Ok(buffer) = buffer {
         // Corners
-        assert_eq!(buffer.pixel_unchecked(0, 0), &[255, 0, 0, 255]);
-        assert_eq!(buffer.pixel_unchecked(99, 0), &[0, 255, 0, 255]);
-        assert_eq!(buffer.pixel_unchecked(0, 99), &[0, 0, 255, 255]);
-        assert_eq!(buffer.pixel_unchecked(99, 99), &[0, 0, 0, 0]);
+        assert_eq!(buffer.pixel_unchecked(0, 0), &Pixel::new(255, 0, 0, 255));
+        assert_eq!(buffer.pixel_unchecked(99, 0), &Pixel::new(0, 255, 0, 255));
+        assert_eq!(buffer.pixel_unchecked(0, 99), &Pixel::new(0, 0, 255, 255));
+        assert_eq!(buffer.pixel_unchecked(99, 99), &Pixel::new(0, 0, 0, 0));
 
         // Middle
-        assert_eq!(buffer.pixel_unchecked(24, 24), &[255, 0, 0, 255]);
-        assert_eq!(buffer.pixel_unchecked(74, 24), &[0, 255, 0, 255]);
-        assert_eq!(buffer.pixel_unchecked(24, 74), &[0, 0, 255, 255]);
-        assert_eq!(buffer.pixel_unchecked(74, 74), &[255, 240, 15, 255]);
+        assert_eq!(buffer.pixel_unchecked(24, 24), &Pixel::new(255, 0, 0, 255));
+        assert_eq!(buffer.pixel_unchecked(74, 24), &Pixel::new(0, 255, 0, 255));
+        assert_eq!(buffer.pixel_unchecked(24, 74), &Pixel::new(0, 0, 255, 255));
+        assert_eq!(
+            buffer.pixel_unchecked(74, 74),
+            &Pixel::new(255, 240, 15, 255)
+        );
     } else {
         assert!(false);
     }

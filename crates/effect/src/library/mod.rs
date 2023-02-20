@@ -4,8 +4,13 @@ mod gaussian_blur;
 mod grayscale;
 mod pixelate;
 
+#[cfg(feature = "scripting")]
+mod scripting;
+
 pub use box_blur::BoxBlur;
 pub use color_palette::ColorPaletteEffect;
 pub use gaussian_blur::GaussianBlur;
 pub use grayscale::GrayscaleEffect;
 pub use pixelate::PixelateEffect;
+#[cfg(feature = "scripting")]
+pub use scripting::ScriptingEffect;

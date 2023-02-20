@@ -6,6 +6,7 @@ use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils::{random_id, TranslateIntoResvgGeneric};
+use crate::pixel::Pixel;
 use crate::point::Point;
 
 const BOUNDING_BOX_STEPS: i32 = 10;
@@ -143,7 +144,7 @@ impl SvgItem {
 
         let mut my_box = SvgItem::new(vec![a, b, c, d, PathLike::Close], None);
         my_box.stroke = Some(Stroke {
-            paint: ColorLike::Color([0, 0, 0, 255]),
+            paint: ColorLike::Color(Pixel::new(0, 0, 0, 255)),
             width: 3.0,
             ..Default::default()
         });

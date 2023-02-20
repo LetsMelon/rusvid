@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 use itertools::Itertools;
-use rusvid_core::plane::Plane;
+use rusvid_core::plane::{Pixel, Plane};
 
 use crate::{EffectLogic, Element, ID};
 
@@ -95,12 +95,12 @@ impl EffectLogic for BoxBlur {
                 result.put_pixel_unchecked(
                     x as u32,
                     y as u32,
-                    [
+                    Pixel::new(
                         (sum[0] / count) as u8,
                         (sum[1] / count) as u8,
                         (sum[2] / count) as u8,
                         (sum[3] / count) as u8,
-                    ],
+                    ),
                 );
             }
         }

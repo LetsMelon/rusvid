@@ -17,7 +17,7 @@ use rusvid_core::holder::object::Object;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
 use rusvid_core::holder::transform::{Transform, TransformLogic};
-use rusvid_core::plane::Plane;
+use rusvid_core::plane::{Pixel, Plane};
 use rusvid_core::point::Point;
 
 const DELTA: f64 = 0.00005;
@@ -98,7 +98,7 @@ fn simple_path() {
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
         ],
-        Some(ColorLike::Color([0, 255, 100, 255])),
+        Some(ColorLike::Color([0, 255, 100, 255].into())),
     );
     svg.add_item(triangle);
 
@@ -118,7 +118,7 @@ fn simple_path() {
             ),
             PathLike::Close,
         ],
-        Some(ColorLike::Color([255, 0, 0, 255])),
+        Some(ColorLike::Color([255, 0, 0, 255].into())),
     );
     svg.add_item(heart);
 
@@ -138,7 +138,7 @@ fn simple_transform() {
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
         ],
-        Some(ColorLike::Color([0, 255, 120, 255])),
+        Some(ColorLike::Color([0, 255, 120, 255].into())),
     ));
 
     let heart_id = svg.add_item(SvgItem::new(
@@ -157,7 +157,7 @@ fn simple_transform() {
             ),
             PathLike::Close,
         ],
-        Some(ColorLike::Color([200, 100, 20, 255])),
+        Some(ColorLike::Color([200, 100, 20, 255].into())),
     ));
 
     let mut object = Object::new(TypesLike::Svg(svg));
@@ -168,7 +168,7 @@ fn simple_transform() {
         .transform_by_id(
             &triangle_id,
             &Transform::Stroke(Some(Stroke {
-                paint: ColorLike::Color([100, 50, 120, 255]),
+                paint: ColorLike::Color([100, 50, 120, 255].into()),
                 width: 1.75,
                 ..Stroke::default()
             })),
@@ -180,7 +180,7 @@ fn simple_transform() {
     object
         .transform_by_id(
             &heart_id,
-            &Transform::Color(Some(ColorLike::Color([230, 57, 70, 255]))),
+            &Transform::Color(Some(ColorLike::Color(Pixel::new(230, 57, 70, 255)))),
         )
         .unwrap();
     let plane = object.render(300, 300).unwrap();
