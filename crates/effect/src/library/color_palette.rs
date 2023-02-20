@@ -43,6 +43,10 @@ impl Element for ColorPaletteEffect {
     fn id(&self) -> Option<&ID> {
         self.id.as_ref()
     }
+
+    fn name(&self) -> &str {
+        "color palette"
+    }
 }
 
 impl EffectLogic for ColorPaletteEffect {

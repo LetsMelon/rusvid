@@ -54,11 +54,19 @@ impl BoxBlur {
 
         Ok(obj)
     }
+
+    pub fn kernel(&self) -> (u32, u32) {
+        (self.kernel_x, self.kernel_y)
+    }
 }
 
 impl Element for BoxBlur {
     fn id(&self) -> Option<&ID> {
         self.id.as_ref()
+    }
+
+    fn name(&self) -> &str {
+        "box blur"
     }
 }
 

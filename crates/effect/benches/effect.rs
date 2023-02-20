@@ -2,7 +2,9 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use itertools::Itertools;
 use rand::{Rng, SeedableRng};
 use rusvid_core::plane::Plane;
-use rusvid_effect::library::{BoxBlur, ColorPaletteEffect, GrayscaleEffect};
+use rusvid_effect::library::{
+    BoxBlur, ColorPaletteEffect, GaussianBlur, GrayscaleEffect, PixelateEffect,
+};
 use rusvid_effect::*;
 
 const WIDTH: u32 = 2_u32.pow(9);
@@ -26,16 +28,25 @@ fn criterion_benchmark(c: &mut Criterion) {
     .unwrap();
 
     let effect = GrayscaleEffect::new();
-    c.bench_function("grayscale", |b| {
+    c.bench_function(effect.name(), |b| {
         b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok()))
     });
 
     let effect = BoxBlur::new(3).unwrap();
-    c.bench_function("box blur - 3", |b| {
+    c.bench_function(&format!("{} - {:?}", effect.name(), effect.kernel()), |b| {
         b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok()))
     });
     let effect = BoxBlur::new(5).unwrap();
-    c.bench_function("box blur - 5", |b| {
+    c.bench_function(&format!("{} - {:?}", effect.name(), effect.kernel()), |b| {
+        b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok()))
+    });
+
+    let effect = GaussianBlur::new(1.75);
+    c.bench_function(&format!("{} - {:.2}", effect.name(), effect.stdev()), |b| {
+        b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok()))
+    });
+    let effect = GaussianBlur::new(5.0);
+    c.bench_function(&format!("{} - {:.2}", effect.name(), effect.stdev()), |b| {
         b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok()))
     });
 
@@ -46,7 +57,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         [rng.gen(), rng.gen(), rng.gen(), 255],
     ]);
     c.bench_function(
-        &format!("color palette - {}", effect.palette_length()),
+        &format!("{} - {}", effect.name(), effect.palette_length()),
         |b| b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok())),
     );
     let effect = ColorPaletteEffect::new(vec![
@@ -60,9 +71,18 @@ fn criterion_benchmark(c: &mut Criterion) {
         [rng.gen(), rng.gen(), rng.gen(), 255],
     ]);
     c.bench_function(
-        &format!("color palette - {}", effect.palette_length()),
+        &format!("{} - {}", effect.name(), effect.palette_length()),
         |b| b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok())),
     );
+
+    let effect = PixelateEffect::new(4, 4);
+    c.bench_function(&format!("{} - {:?}", effect.name(), effect.kernel()), |b| {
+        b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok()))
+    });
+    let effect = PixelateEffect::new(16, 16);
+    c.bench_function(&format!("{} - {:?}", effect.name(), effect.kernel()), |b| {
+        b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok()))
+    });
 }
 
 criterion_group!(benches, criterion_benchmark);

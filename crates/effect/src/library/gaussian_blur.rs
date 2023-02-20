@@ -25,6 +25,7 @@ fn kernel_size(stdev: f64) -> i32 {
 
 #[derive(Debug)]
 pub struct GaussianBlur {
+    stdev: f64,
     kernel: i32,
 
     abs_d: i32,
@@ -49,6 +50,7 @@ impl GaussianBlur {
             .collect::<Vec<f64>>();
 
         GaussianBlur {
+            stdev,
             kernel,
             abs_d,
             weights,
@@ -62,11 +64,23 @@ impl GaussianBlur {
 
         obj
     }
+
+    pub fn kernel(&self) -> i32 {
+        self.kernel
+    }
+
+    pub fn stdev(&self) -> f64 {
+        self.stdev
+    }
 }
 
 impl Element for GaussianBlur {
     fn id(&self) -> Option<&ID> {
         self.id.as_ref()
+    }
+
+    fn name(&self) -> &str {
+        "gaussian blur"
     }
 }
 

@@ -31,6 +31,10 @@ impl Element for GrayscaleEffect {
     fn id(&self) -> Option<&ID> {
         self.id.as_ref()
     }
+
+    fn name(&self) -> &str {
+        "grayscale"
+    }
 }
 
 impl EffectLogic for GrayscaleEffect {

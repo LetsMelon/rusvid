@@ -27,11 +27,19 @@ impl PixelateEffect {
 
         effect
     }
+
+    pub fn kernel(&self) -> (u32, u32) {
+        (self.pixel_width, self.pixel_height)
+    }
 }
 
 impl Element for PixelateEffect {
     fn id(&self) -> Option<&ID> {
         self.id.as_ref()
+    }
+
+    fn name(&self) -> &str {
+        "pixelate"
     }
 }
 

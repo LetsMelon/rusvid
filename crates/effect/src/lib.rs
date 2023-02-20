@@ -10,6 +10,8 @@ pub type ID = String;
 // TODO move into separate file and use in the whole project for objects which can hold an id
 pub trait Element {
     fn id(&self) -> Option<&ID>;
+
+    fn name(&self) -> &str;
 }
 
 pub trait EffectLogic: std::fmt::Debug + Element {
