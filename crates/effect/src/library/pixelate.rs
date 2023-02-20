@@ -13,7 +13,7 @@ pub struct PixelateEffect {
 }
 
 impl PixelateEffect {
-    pub fn new(pixel_width: u32, pixel_height: u32) -> Self {
+    pub fn new_asymmetric(pixel_width: u32, pixel_height: u32) -> Self {
         PixelateEffect {
             pixel_width,
             pixel_height,
@@ -21,11 +21,23 @@ impl PixelateEffect {
         }
     }
 
-    pub fn new_with_id(pixel_width: u32, pixel_height: u32, id: impl Into<String>) -> Self {
-        let mut effect = Self::new(pixel_width, pixel_height);
+    pub fn new(pixel_size: u32) -> Self {
+        Self::new_asymmetric(pixel_size, pixel_size)
+    }
+
+    pub fn new_asymmetric_with_id(
+        pixel_width: u32,
+        pixel_height: u32,
+        id: impl Into<String>,
+    ) -> Self {
+        let mut effect = Self::new_asymmetric(pixel_width, pixel_height);
         effect.id = Some(id.into());
 
         effect
+    }
+
+    pub fn new_with_id(pixel_size: u32, id: impl Into<String>) -> Self {
+        Self::new_asymmetric_with_id(pixel_size, pixel_size, id)
     }
 
     pub fn kernel(&self) -> (u32, u32) {

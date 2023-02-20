@@ -75,11 +75,11 @@ fn criterion_benchmark(c: &mut Criterion) {
         |b| b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok())),
     );
 
-    let effect = PixelateEffect::new(4, 4);
+    let effect = PixelateEffect::new(4);
     c.bench_function(&format!("{} - {:?}", effect.name(), effect.kernel()), |b| {
         b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok()))
     });
-    let effect = PixelateEffect::new(16, 16);
+    let effect = PixelateEffect::new(16);
     c.bench_function(&format!("{} - {:?}", effect.name(), effect.kernel()), |b| {
         b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok()))
     });

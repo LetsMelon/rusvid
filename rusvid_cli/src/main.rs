@@ -110,7 +110,7 @@ fn main() {
         .unwrap(),
     ));
     let pixel_size = 20;
-    layer.add_effect(PixelateEffect::new(pixel_size, pixel_size));
+    layer.add_effect(PixelateEffect::new_asymmetric(pixel_size, pixel_size));
 
     let layer = composition.create_layer().unwrap();
     layer.add_linear_gradient(LinearGradient {
