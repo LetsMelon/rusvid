@@ -8,7 +8,6 @@ use thiserror::Error;
 
 use crate::frame_image_format::FrameImageFormat;
 pub use crate::pixel::Pixel;
-use crate::pixel::BITDEPTH;
 
 #[derive(Error, Debug)]
 pub enum PlaneError {
@@ -83,7 +82,7 @@ impl Plane {
         &mut self.data
     }
 
-    pub fn as_data_flatten(&self) -> Vec<BITDEPTH> {
+    pub fn as_data_flatten(&self) -> Vec<u8> {
         self.data.iter().flat_map(|p| p.to_raw()).collect()
     }
 
@@ -395,17 +394,18 @@ mod tests {
     }
 
     mod get_pixel {
+        use crate::pixel::Pixel;
         use crate::plane::Plane;
 
         #[test]
         fn not_mutable() {
             let data = vec![
-                [255, 0, 0, 255],
-                [0, 255, 0, 255],
-                [0; 4],
-                [0, 0, 255, 255],
-                [255, 255, 255, 255],
-                [255 / 2; 4],
+                Pixel::new_raw([255, 0, 0, 255]),
+                Pixel::new_raw([0, 255, 0, 255]),
+                Pixel::new_raw([0; 4]),
+                Pixel::new_raw([0, 0, 255, 255]),
+                Pixel::new_raw([255, 255, 255, 255]),
+                Pixel::new_raw([255 / 2; 4]),
             ];
             let plane = Plane::from_data(3, 2, data.clone()).unwrap();
 
@@ -427,12 +427,12 @@ mod tests {
         #[test]
         fn mutable() {
             let data = vec![
-                [255, 0, 0, 255],
-                [0, 255, 0, 255],
-                [0; 4],
-                [0, 0, 255, 255],
-                [255, 255, 255, 255],
-                [255 / 2; 4],
+                Pixel::new_raw([255, 0, 0, 255]),
+                Pixel::new_raw([0, 255, 0, 255]),
+                Pixel::new_raw([0; 4]),
+                Pixel::new_raw([0, 0, 255, 255]),
+                Pixel::new_raw([255, 255, 255, 255]),
+                Pixel::new_raw([255 / 2; 4]),
             ];
             let mut plane = Plane::from_data(3, 2, data.clone()).unwrap();
 
@@ -453,6 +453,7 @@ mod tests {
     }
 
     mod iterator {
+        use crate::pixel::Pixel;
         use crate::plane::Plane;
 
         #[test]
@@ -461,20 +462,20 @@ mod tests {
                 2,
                 2,
                 vec![
-                    [255, 0, 0, 255],
-                    [0, 255, 0, 255],
-                    [0, 0, 255, 255],
-                    [255, 255, 255, 255],
+                    Pixel::new_raw([255, 0, 0, 255]),
+                    Pixel::new_raw([0, 255, 0, 255]),
+                    Pixel::new_raw([0, 0, 255, 255]),
+                    Pixel::new_raw([255, 255, 255, 255]),
                 ],
             )
             .unwrap();
 
             let mut iter = plane.into_iter();
 
-            assert_eq!(Some([255, 0, 0, 255]), iter.next());
-            assert_eq!(Some([0, 255, 0, 255]), iter.next());
-            assert_eq!(Some([0, 0, 255, 255]), iter.next());
-            assert_eq!(Some([255, 255, 255, 255]), iter.next());
+            assert_eq!(Some([255, 0, 0, 255].into()), iter.next());
+            assert_eq!(Some([0, 255, 0, 255].into()), iter.next());
+            assert_eq!(Some([0, 0, 255, 255].into()), iter.next());
+            assert_eq!(Some([255, 255, 255, 255].into()), iter.next());
             assert_eq!(None, iter.next());
         }
     }
@@ -483,17 +484,18 @@ mod tests {
         use anyhow::{anyhow, Result};
         use image::{Rgba, RgbaImage};
 
+        use crate::pixel::Pixel;
         use crate::plane::Plane;
 
         #[test]
         fn from() -> Result<()> {
-            fn generate_pixel(x: u32, y: u32) -> [u8; 4] {
-                [
+            fn generate_pixel(x: u32, y: u32) -> Pixel {
+                Pixel::new(
                     (x % 255) as u8,
                     ((x + y) % 255) as u8,
                     (y % 255) as u8,
                     ((x + y) & 0xFF) as u8,
-                ]
+                )
             }
 
             let width = 20;

@@ -1,9 +1,7 @@
 use std::ops::{Index, IndexMut};
 
-pub type BITDEPTH = u8;
-
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub struct Pixel([BITDEPTH; 4]);
+pub struct Pixel([u8; 4]);
 
 impl std::fmt::Debug for Pixel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -19,21 +17,21 @@ impl std::fmt::Debug for Pixel {
 impl Pixel {
     pub const ZERO: Pixel = Pixel::new_raw([0; 4]);
 
-    pub fn new(r: BITDEPTH, g: BITDEPTH, b: BITDEPTH, a: BITDEPTH) -> Self {
+    pub fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self::new_raw([r, g, b, a])
     }
 
-    pub const fn new_raw(values: [BITDEPTH; 4]) -> Self {
+    pub const fn new_raw(values: [u8; 4]) -> Self {
         Pixel(values)
     }
 
-    pub fn to_raw(&self) -> [BITDEPTH; 4] {
+    pub fn to_raw(&self) -> [u8; 4] {
         self.0
     }
 }
 
 impl Index<usize> for Pixel {
-    type Output = BITDEPTH;
+    type Output = u8;
 
     fn index(&self, index: usize) -> &Self::Output {
         match index {
@@ -55,7 +53,7 @@ impl IndexMut<usize> for Pixel {
 }
 
 impl Index<&'_ str> for Pixel {
-    type Output = BITDEPTH;
+    type Output = u8;
 
     fn index(&self, index: &'_ str) -> &Self::Output {
         match index {
@@ -70,7 +68,7 @@ impl Index<&'_ str> for Pixel {
 }
 
 impl IntoIterator for Pixel {
-    type Item = BITDEPTH;
+    type Item = u8;
     type IntoIter = std::array::IntoIter<Self::Item, 4>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -78,14 +76,14 @@ impl IntoIterator for Pixel {
     }
 }
 
-impl From<[BITDEPTH; 4]> for Pixel {
-    fn from(value: [BITDEPTH; 4]) -> Self {
+impl From<[u8; 4]> for Pixel {
+    fn from(value: [u8; 4]) -> Self {
         Self::new_raw(value)
     }
 }
 
-impl From<[BITDEPTH; 3]> for Pixel {
-    fn from(value: [BITDEPTH; 3]) -> Self {
+impl From<[u8; 3]> for Pixel {
+    fn from(value: [u8; 3]) -> Self {
         Self::new(value[0], value[1], value[2], 255)
     }
 }
