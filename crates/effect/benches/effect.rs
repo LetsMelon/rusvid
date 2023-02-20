@@ -1,7 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use itertools::Itertools;
 use rand::{Rng, SeedableRng};
-use rusvid_core::plane::Plane;
+use rusvid_core::plane::{Pixel, Plane};
 use rusvid_effect::library::{
     BoxBlur, ColorPaletteEffect, GaussianBlur, GrayscaleEffect, PixelateEffect,
 };
@@ -22,7 +22,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         HEIGHT,
         (0..WIDTH)
             .cartesian_product(0..HEIGHT)
-            .map(|_| [rng.gen(), rng.gen(), rng.gen(), 255])
+            .map(|_| Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255))
             .collect_vec(),
     )
     .unwrap();
@@ -51,24 +51,24 @@ fn criterion_benchmark(c: &mut Criterion) {
     });
 
     let effect = ColorPaletteEffect::new(vec![
-        [255; 4],
-        [0, 0, 0, 255],
-        [255, 0, 0, 255],
-        [rng.gen(), rng.gen(), rng.gen(), 255],
+        Pixel::new_raw([255; 4]),
+        Pixel::new(0, 0, 0, 255),
+        Pixel::new(255, 0, 0, 255),
+        Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255),
     ]);
     c.bench_function(
         &format!("{} - {}", effect.name(), effect.palette_length()),
         |b| b.iter(|| assert!(effect.apply(black_box(plane.clone())).is_ok())),
     );
     let effect = ColorPaletteEffect::new(vec![
-        [rng.gen(), rng.gen(), rng.gen(), 255],
-        [rng.gen(), rng.gen(), rng.gen(), 255],
-        [rng.gen(), rng.gen(), rng.gen(), 255],
-        [rng.gen(), rng.gen(), rng.gen(), 255],
-        [rng.gen(), rng.gen(), rng.gen(), 255],
-        [rng.gen(), rng.gen(), rng.gen(), 255],
-        [rng.gen(), rng.gen(), rng.gen(), 255],
-        [rng.gen(), rng.gen(), rng.gen(), 255],
+        Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255),
+        Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255),
+        Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255),
+        Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255),
+        Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255),
+        Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255),
+        Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255),
+        Pixel::new(rng.gen(), rng.gen(), rng.gen(), 255),
     ]);
     c.bench_function(
         &format!("{} - {}", effect.name(), effect.palette_length()),
