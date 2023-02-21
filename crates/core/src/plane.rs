@@ -9,7 +9,7 @@ use thiserror::Error;
 use crate::frame_image_format::FrameImageFormat;
 pub use crate::pixel::Pixel;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, PartialEq, Eq)]
 pub enum PlaneError {
     #[error("{0} must be greater than 0")]
     ValueGreaterZero(&'static str),
@@ -187,6 +187,8 @@ impl Plane {
     }
 
     pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
+        debug_assert_eq!(SIZE::MIN, 0);
+
         if x > self.width {
             return None;
         }
@@ -194,8 +196,7 @@ impl Plane {
             return None;
         }
 
-        let index = position_to_index(x, y, self.width);
-        self.data.get(index)
+        Some(self.pixel_unchecked(x, y))
     }
 
     pub fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
@@ -210,7 +211,7 @@ impl Plane {
             return None;
         }
 
-        self.data.get_mut(position_to_index(x, y, self.width))
+        Some(self.pixel_mut_unchecked(x, y))
     }
 
     pub fn pixel_mut_unchecked(&mut self, x: SIZE, y: SIZE) -> &mut Pixel {
@@ -228,14 +229,6 @@ impl Plane {
 
     pub fn put_pixel_unchecked(&mut self, x: SIZE, y: SIZE, value: Pixel) {
         *self.pixel_mut_unchecked(x, y) = value;
-    }
-
-    pub fn pixels(&self) -> &[Pixel] {
-        self.data.as_slice()
-    }
-
-    pub fn pixels_mut(&mut self) -> &mut [Pixel] {
-        self.data.as_mut_slice()
     }
 
     pub fn into_coordinate_iter(self) -> CoordinateIterator {
@@ -330,6 +323,7 @@ pub struct CoordinateIterator {
     y: SIZE,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CoordinateIteratorItem {
     pub pixel: Pixel,
     pub x: SIZE,
@@ -350,9 +344,10 @@ impl Iterator for CoordinateIterator {
                 y: self.y,
             });
 
-        if result.is_some() {
-            self.x = (self.x + 1) % self.plane.width;
-            self.y = (self.y + 1) % self.plane.height;
+        self.x += 1;
+        if self.x >= self.plane.width {
+            self.x = 0;
+            self.y += 1;
         }
 
         result
@@ -361,6 +356,9 @@ impl Iterator for CoordinateIterator {
 
 #[cfg(test)]
 mod tests {
+    use crate::pixel::Pixel;
+    use crate::plane::{Plane, PlaneError};
+
     #[test]
     fn position_to_index_test() {
         use crate::plane::position_to_index;
@@ -384,13 +382,52 @@ mod tests {
     }
 
     mod new {
-        use crate::plane::Plane;
+        use crate::plane::{Plane, PlaneError};
 
         #[test]
         fn just_works() {
             let _ = Plane::new(100, 100).unwrap();
             assert!(true);
         }
+
+        #[test]
+        fn errors() {
+            let e1 = Plane::new(0, 100);
+            assert_eq!(e1.unwrap_err(), PlaneError::ValueGreaterZero("Width"));
+
+            let e1 = Plane::new(100, 0);
+            assert_eq!(e1.unwrap_err(), PlaneError::ValueGreaterZero("Height"));
+        }
+    }
+
+    #[test]
+    fn from_data() {
+        let p = Plane::from_data(2, 2, vec![Pixel::new(255, 0, 0, 0); 4]).unwrap();
+        assert_eq!(p.pixel(0, 0).unwrap(), &Pixel::new(255, 0, 0, 0));
+
+        let e = Plane::from_data(2, 2, vec![Pixel::new(255, 0, 0, 0); 3]);
+        assert_eq!(e.unwrap_err(), PlaneError::CapacityError);
+    }
+
+    #[test]
+    fn as_data() {
+        let p = Plane::new(2, 2).unwrap();
+
+        let data = p.as_data();
+        assert_eq!(data.len(), 4);
+        assert_eq!(data[0], *p.pixel(0, 0).unwrap());
+    }
+
+    #[test]
+    fn as_data_flatten() {
+        let p = Plane::new(2, 2).unwrap();
+
+        let data = p.as_data_flatten();
+        assert_eq!(data.len(), 4 * 4);
+        assert_eq!(data[0], p.pixel(0, 0).unwrap().get_r());
+        assert_eq!(data[1], p.pixel(0, 0).unwrap().get_g());
+        assert_eq!(data[2], p.pixel(0, 0).unwrap().get_b());
+        assert_eq!(data[3], p.pixel(0, 0).unwrap().get_a());
     }
 
     mod get_pixel {
@@ -408,6 +445,9 @@ mod tests {
                 Pixel::new_raw([255 / 2; 4]),
             ];
             let plane = Plane::from_data(3, 2, data.clone()).unwrap();
+
+            assert!(plane.pixel(5, 0).is_none());
+            assert!(plane.pixel(0, 5).is_none());
 
             assert_eq!(plane.pixel(0, 0).unwrap(), &data[0]);
             assert_eq!(plane.pixel(1, 0).unwrap(), &data[1]);
@@ -436,6 +476,9 @@ mod tests {
             ];
             let mut plane = Plane::from_data(3, 2, data.clone()).unwrap();
 
+            assert!(plane.pixel_mut(5, 0).is_none());
+            assert!(plane.pixel_mut(0, 5).is_none());
+
             assert_eq!(plane.pixel_mut(0, 0).unwrap(), &data[0]);
             assert_eq!(plane.pixel_mut(1, 0).unwrap(), &data[1]);
             assert_eq!(plane.pixel_mut(2, 0).unwrap(), &data[2]);
@@ -449,6 +492,32 @@ mod tests {
             assert_eq!(plane.pixel_mut_unchecked(0, 1), &data[3]);
             assert_eq!(plane.pixel_mut_unchecked(1, 1), &data[4]);
             assert_eq!(plane.pixel_mut_unchecked(2, 1), &data[5]);
+        }
+    }
+
+    mod put_pixel {
+        use crate::pixel::Pixel;
+        use crate::plane::{Plane, PlaneError};
+
+        #[test]
+        fn safe() {
+            let mut p = Plane::new(2, 2).unwrap();
+
+            assert!(p.put_pixel(0, 0, Pixel::new(255, 0, 0, 255)).is_ok());
+            assert_eq!(*p.pixel(0, 0).unwrap(), Pixel::new(255, 0, 0, 255));
+
+            assert_eq!(
+                p.put_pixel(3, 0, Pixel::new(255, 0, 0, 255)).unwrap_err(),
+                PlaneError::OutOfBound2d(3, 0)
+            );
+        }
+
+        #[test]
+        fn unchecked() {
+            let mut p = Plane::new(2, 2).unwrap();
+
+            p.put_pixel_unchecked(0, 0, Pixel::new(255, 0, 0, 255));
+            assert_eq!(*p.pixel(0, 0).unwrap(), Pixel::new(255, 0, 0, 255));
         }
     }
 
@@ -477,6 +546,39 @@ mod tests {
             assert_eq!(Some([0, 0, 255, 255].into()), iter.next());
             assert_eq!(Some([255, 255, 255, 255].into()), iter.next());
             assert_eq!(None, iter.next());
+        }
+    }
+
+    mod coordinate_iterator {
+        use crate::pixel::Pixel;
+        use crate::plane::{Plane};
+
+        #[test]
+        fn just_works() {
+            let plane = Plane::from_data(
+                2,
+                2,
+                vec![
+                    Pixel::new_raw([255, 0, 0, 255]),
+                    Pixel::new_raw([0, 255, 0, 255]),
+                    Pixel::new_raw([0, 0, 255, 255]),
+                    Pixel::new_raw([255, 255, 255, 255]),
+                ],
+            )
+            .unwrap();
+
+            let mut iter = plane.into_coordinate_iter();
+
+            let item = iter.next();
+            assert!(item.is_some() && item.is_some_and(|item| item.x == 0 && item.y == 0));
+            let item = iter.next();
+            assert!(item.is_some() && item.is_some_and(|item| item.x == 1 && item.y == 0));
+            let item = iter.next();
+            assert!(item.is_some() && item.is_some_and(|item| item.x == 0 && item.y == 1));
+            let item = iter.next();
+            assert!(item.is_some() && item.is_some_and(|item| item.x == 1 && item.y == 1));
+            let item = iter.next();
+            assert!(item.is_none());
         }
     }
 
