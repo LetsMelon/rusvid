@@ -97,7 +97,8 @@ impl EffectLogic for ScriptingEffect {
 
 #[cfg(test)]
 mod tests {
-    use rusvid_core::plane::{Pixel, Plane};
+    use rusvid_core::pixel::Pixel;
+    use rusvid_core::plane::Plane;
 
     use super::ScriptingEffect;
     use crate::EffectLogic;

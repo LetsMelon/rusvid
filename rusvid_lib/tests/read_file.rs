@@ -1,6 +1,6 @@
 use std::env;
 
-use rusvid_core::plane::Pixel;
+use rusvid_core::pixel::Pixel;
 use rusvid_lib::metrics::MetricsVideo;
 use rusvid_lib::prelude::*;
 

@@ -7,7 +7,7 @@ use resvg::tiny_skia::Pixmap;
 use thiserror::Error;
 
 use crate::frame_image_format::FrameImageFormat;
-pub use crate::pixel::Pixel;
+use crate::pixel::Pixel;
 
 #[derive(Error, Debug, PartialEq, Eq)]
 pub enum PlaneError {
@@ -551,7 +551,7 @@ mod tests {
 
     mod coordinate_iterator {
         use crate::pixel::Pixel;
-        use crate::plane::{Plane};
+        use crate::plane::Plane;
 
         #[test]
         fn just_works() {

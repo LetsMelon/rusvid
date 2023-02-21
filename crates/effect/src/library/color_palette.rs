@@ -1,6 +1,7 @@
 use anyhow::{bail, Result};
 use rayon::prelude::*;
-use rusvid_core::plane::{Pixel, Plane};
+use rusvid_core::pixel::Pixel;
+use rusvid_core::plane::Plane;
 
 use crate::{EffectLogic, Element, ID};
 

@@ -8,7 +8,7 @@ use rusvid_core::holder::object::Object;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
 use rusvid_core::holder::transform::{Transform, TransformLogic};
-use rusvid_core::plane::Pixel;
+use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 use wasm_bindgen::prelude::*;
 use web_sys::console;

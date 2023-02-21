@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use rusvid_core::plane::Pixel;
+use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 use rusvid_lib::animation::prelude::*;
 use rusvid_lib::figures::prelude::*;

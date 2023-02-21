@@ -3,7 +3,8 @@ use std::f64::consts::{E, PI};
 use anyhow::Result;
 use itertools::Itertools;
 use log::info;
-use rusvid_core::plane::{Pixel, Plane};
+use rusvid_core::pixel::Pixel;
+use rusvid_core::plane::Plane;
 
 use crate::{EffectLogic, Element, ID};
 

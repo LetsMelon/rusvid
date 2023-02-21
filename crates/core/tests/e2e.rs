@@ -17,7 +17,8 @@ use rusvid_core::holder::object::Object;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
 use rusvid_core::holder::transform::{Transform, TransformLogic};
-use rusvid_core::plane::{Pixel, Plane};
+use rusvid_core::pixel::Pixel;
+use rusvid_core::plane::Plane;
 use rusvid_core::point::Point;
 
 const DELTA: f64 = 0.00005;

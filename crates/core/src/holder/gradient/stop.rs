@@ -1,6 +1,6 @@
 use crate::holder::likes::ColorLike;
 use crate::holder::utils::TranslateIntoResvgGeneric;
-use crate::plane::Pixel;
+use crate::pixel::Pixel;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Stop {
