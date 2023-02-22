@@ -1,7 +1,7 @@
 use crate::holder::gradient::linear::LinearGradient;
 use crate::holder::gradient::radial::RadialGradient;
 use crate::holder::utils::TranslateIntoResvgGeneric;
-use crate::plane::Pixel;
+use crate::pixel::Pixel;
 
 #[derive(Debug, Clone)]
 pub enum ColorLike {

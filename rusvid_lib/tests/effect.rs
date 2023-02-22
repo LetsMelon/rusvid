@@ -6,6 +6,7 @@ use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;
 use rusvid_lib::figures::rect::rect;
 use rusvid_lib::layer::LayerLogic;
+use rusvid_lib::prelude::GrayscaleEffect;
 use rusvid_lib::resolution::Resolution;
 use rusvid_lib::resvg::usvg::{Fill, NodeKind, Paint, Path, ShapeRendering};
 use rusvid_lib::utils::color_from_hex;
@@ -15,11 +16,12 @@ mod dummy;
 use dummy::DummyRender;
 
 #[test]
-fn renders_correctly_static() {
+fn effect() {
     let mut composition = Composition::builder()
         .resolution(Resolution::Custom(100, 100))
         .framerate(1)
         .duration(1)
+        .add_effect(GrayscaleEffect::new())
         .build();
 
     composition
@@ -73,18 +75,24 @@ fn renders_correctly_static() {
     let buffer = image_render.render_frame(&composition);
     if let Ok(buffer) = buffer {
         // Corners
-        assert_eq!(buffer.pixel_unchecked(0, 0), &Pixel::new(255, 0, 0, 255));
-        assert_eq!(buffer.pixel_unchecked(99, 0), &Pixel::new(0, 255, 0, 255));
-        assert_eq!(buffer.pixel_unchecked(0, 99), &Pixel::new(0, 0, 255, 255));
+        assert_eq!(buffer.pixel_unchecked(0, 0), &Pixel::new(76, 76, 76, 255));
+        assert_eq!(
+            buffer.pixel_unchecked(99, 0),
+            &Pixel::new(149, 149, 149, 255)
+        );
+        assert_eq!(buffer.pixel_unchecked(0, 99), &Pixel::new(29, 29, 29, 255));
         assert_eq!(buffer.pixel_unchecked(99, 99), &Pixel::new(0, 0, 0, 0));
 
         // Middle
-        assert_eq!(buffer.pixel_unchecked(24, 24), &Pixel::new(255, 0, 0, 255));
-        assert_eq!(buffer.pixel_unchecked(74, 24), &Pixel::new(0, 255, 0, 255));
-        assert_eq!(buffer.pixel_unchecked(24, 74), &Pixel::new(0, 0, 255, 255));
+        assert_eq!(buffer.pixel_unchecked(24, 24), &Pixel::new(76, 76, 76, 255));
+        assert_eq!(
+            buffer.pixel_unchecked(74, 24),
+            &Pixel::new(149, 149, 149, 255)
+        );
+        assert_eq!(buffer.pixel_unchecked(24, 74), &Pixel::new(29, 29, 29, 255));
         assert_eq!(
             buffer.pixel_unchecked(74, 74),
-            &Pixel::new(255, 240, 15, 255)
+            &Pixel::new(218, 218, 218, 255)
         );
     } else {
         assert!(false);

@@ -1,5 +1,6 @@
 use anyhow::Result;
-use rusvid_core::plane::{Pixel, Plane};
+use rusvid_core::pixel::Pixel;
+use rusvid_core::plane::Plane;
 
 use crate::effect::EffectLogic;
 
