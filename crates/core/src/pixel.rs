@@ -29,6 +29,9 @@ impl std::fmt::Display for Pixel {
 
 impl Pixel {
     pub const ZERO: Pixel = Pixel::new_raw([0; 4]);
+    pub const FULL: Pixel = Pixel::new_raw([255; 4]);
+    pub const WHITE: Pixel = Self::FULL;
+    pub const BLACK: Pixel = Pixel::new_raw([0, 0, 0, 255]);
 
     pub fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self::new_raw([r, g, b, a])

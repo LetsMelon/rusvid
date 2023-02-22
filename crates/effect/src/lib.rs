@@ -1,8 +1,10 @@
 #![feature(int_roundings)]
+#![cfg_attr(coverage_nightly, feature(no_coverage))]
 
 use anyhow::Result;
 use rusvid_core::plane::Plane;
 
+mod functions;
 pub mod library;
 
 pub type ID = String;

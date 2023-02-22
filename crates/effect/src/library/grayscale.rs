@@ -3,6 +3,7 @@ use rayon::prelude::*;
 use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
+use crate::functions::grayscale;
 use crate::{EffectLogic, Element, ID};
 
 const MULTIPLIER_RED: f32 = 0.299;
@@ -46,19 +47,7 @@ impl EffectLogic for GrayscaleEffect {
             .as_data()
             .clone()
             .par_iter()
-            .map(|original_color| {
-                let grayscale_value = (original_color[0] as f32 * MULTIPLIER_RED
-                    + original_color[1] as f32 * MULTIPLIER_GREEN
-                    + original_color[2] as f32 * MULTIPLIER_BLUE)
-                    as u8;
-
-                Pixel::new(
-                    grayscale_value,
-                    grayscale_value,
-                    grayscale_value,
-                    original_color[3],
-                )
-            })
+            .map(grayscale::transform)
             .collect();
 
         Ok(Plane::from_data_unchecked(width, height, data))

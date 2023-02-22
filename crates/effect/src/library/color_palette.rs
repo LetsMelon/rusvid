@@ -3,15 +3,8 @@ use rayon::prelude::*;
 use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
+use crate::functions::color_palette::transform;
 use crate::{EffectLogic, Element, ID};
-
-#[inline(always)]
-fn calculate_color_diff(c1: &Pixel, c2: &Pixel) -> u32 {
-    c1[0].abs_diff(c2[0]) as u32
-        + c1[1].abs_diff(c2[1]) as u32
-        + c1[2].abs_diff(c2[2]) as u32
-        + c1[3].abs_diff(c2[3]) as u32
-}
 
 #[derive(Debug)]
 pub struct ColorPaletteEffect {
@@ -58,21 +51,10 @@ impl EffectLogic for ColorPaletteEffect {
 
         let mut result = Plane::new(original.width(), original.height())?;
 
-        result.as_data_mut().par_iter_mut().for_each(|old_color| {
-            let mut best_palette_color = self.color_palette[0];
-            let mut distance = u32::MAX;
-            for i in 0..self.color_palette.len() {
-                let color_to_test = self.color_palette[i];
-                let test_distance = calculate_color_diff(old_color, &color_to_test);
-
-                if test_distance < distance {
-                    best_palette_color = color_to_test;
-                    distance = test_distance;
-                }
-            }
-
-            *old_color = best_palette_color.clone();
-        });
+        result
+            .as_data_mut()
+            .par_iter_mut()
+            .for_each(|old| *old = transform(&old, &self.color_palette));
 
         Ok(result)
     }

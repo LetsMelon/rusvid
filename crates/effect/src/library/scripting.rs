@@ -14,6 +14,7 @@ pub struct ScriptingEffect {
 }
 
 impl std::fmt::Debug for ScriptingEffect {
+    #[cfg_attr(coverage_nightly, no_coverage)]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ScriptingEffect")
             .field("id", &self.id)
@@ -74,10 +75,10 @@ impl EffectLogic for ScriptingEffect {
 
             match p {
                 Some(value) => Dynamic::from_array(vec![
-                    Dynamic::from(value[0]),
-                    Dynamic::from(value[1]),
-                    Dynamic::from(value[2]),
-                    Dynamic::from(value[3]),
+                    Dynamic::from(value[0] as INT),
+                    Dynamic::from(value[1] as INT),
+                    Dynamic::from(value[2] as INT),
+                    Dynamic::from(value[3] as INT),
                 ]),
                 None => Dynamic::UNIT,
             }
@@ -103,20 +104,20 @@ mod tests {
     use super::ScriptingEffect;
     use crate::EffectLogic;
 
-    const EXAMPLE_SCRIPT: &'static str = "
-    fn my_function(x, y) {
-        pixel(255, 0, 0, 255)
-    }
-    ";
-
     #[test]
-    fn just_works() {
+    fn simple_script() {
+        const SCRIPT: &'static str = "
+fn my_function(x, y) {
+    pixel(255, 0, 0, 255)
+}
+";
+
         let size = 2;
 
         let plane =
             Plane::from_data(size, size, vec![Pixel::ZERO; (size * size) as usize]).unwrap();
 
-        let effect = ScriptingEffect::new("my_function", EXAMPLE_SCRIPT);
+        let effect = ScriptingEffect::new("my_function", SCRIPT);
 
         let effect_result = effect.apply(plane).unwrap();
 
@@ -124,5 +125,94 @@ mod tests {
             *effect_result.pixel(0, 0).unwrap(),
             Pixel::new(255, 0, 0, 255)
         );
+    }
+
+    mod get_pixel {
+        use rusvid_core::pixel::Pixel;
+        use rusvid_core::plane::Plane;
+
+        use crate::library::ScriptingEffect;
+        use crate::EffectLogic;
+
+        #[test]
+        fn just_works() {
+            const SCRIPT: &'static str = "
+fn my_function(x, y) {
+    let p = pixel_raw(get_pixel(x, y));
+
+    if (p.r == 255) {
+        p.r = 0
+    }
+    if (p.g == 255) {
+        p.g = 0
+    }
+    if (p.b == 255) {
+        p.b = 0
+    }
+
+    p
+}
+";
+
+            let plane = Plane::from_data(
+                2,
+                2,
+                vec![
+                    Pixel::new(255, 100, 100, 255),
+                    Pixel::new(10, 255, 10, 255),
+                    Pixel::new(15, 15, 255, 255),
+                    Pixel::new(40, 40, 40, 255),
+                ],
+            )
+            .unwrap();
+
+            let effect = ScriptingEffect::new("my_function", SCRIPT);
+
+            let effect_result = effect.apply(plane).unwrap();
+
+            assert_eq!(
+                effect_result.pixel(0, 0).unwrap(),
+                &Pixel::new(0, 100, 100, 255)
+            );
+            assert_eq!(
+                effect_result.pixel(1, 0).unwrap(),
+                &Pixel::new(15, 15, 0, 255)
+            );
+            assert_eq!(
+                effect_result.pixel(0, 1).unwrap(),
+                &Pixel::new(10, 0, 10, 255)
+            );
+            assert_eq!(
+                effect_result.pixel(1, 1).unwrap(),
+                &Pixel::new(40, 40, 40, 255)
+            );
+        }
+
+        #[test]
+        fn errors() {
+            const SCRIPT: &'static str = "
+            fn my_function(x, y) {
+                let p = pixel_raw(get_pixel(x, y));
+            
+                if (p.r == 255) {
+                    p.r = 0
+                }
+                if (p.g == 255) {
+                    p.g = 0
+                }
+                if (p.b == 255) {
+                    p.b = 0
+                }
+            
+                p
+            }
+            ";
+
+            let plane = Plane::from_data(2, 2, vec![Pixel::ZERO; 4]).unwrap();
+
+            let effect = ScriptingEffect::new("my_function", SCRIPT);
+
+            let effect_result = effect.apply(plane).unwrap();
+        }
     }
 }
