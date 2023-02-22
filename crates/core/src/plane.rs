@@ -44,6 +44,10 @@ fn position_to_index(x: SIZE, y: SIZE, multi: SIZE) -> usize {
 /// Coordinate system used: <https://learn.adafruit.com/adafruit-gfx-graphics-library/coordinate-system-and-units>
 impl Plane {
     pub fn new(width: SIZE, height: SIZE) -> Result<Self, PlaneError> {
+        Self::new_with_fill(width, height, Pixel::ZERO)
+    }
+
+    pub fn new_with_fill(width: SIZE, height: SIZE, color: Pixel) -> Result<Self, PlaneError> {
         if width <= 0 {
             return Err(PlaneError::ValueGreaterZero("Width"));
         }
@@ -54,7 +58,7 @@ impl Plane {
         Ok(Plane {
             width,
             height,
-            data: vec![Pixel::ZERO; (width * height) as usize],
+            data: vec![color; (width * height) as usize],
         })
     }
 
@@ -184,6 +188,11 @@ impl Plane {
     /// Returns the plane's width in `SIZE`
     pub fn height(&self) -> SIZE {
         self.height
+    }
+
+    /// Fill all pixel from the plane with the given color
+    pub fn fill(&mut self, color: Pixel) {
+        self.data = vec![color; (self.width * self.height) as usize]
     }
 
     pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
