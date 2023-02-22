@@ -3,6 +3,7 @@
 use anyhow::Result;
 use rusvid_core::plane::Plane;
 
+mod functions;
 pub mod library;
 
 pub type ID = String;
