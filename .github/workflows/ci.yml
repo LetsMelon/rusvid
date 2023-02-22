@@ -44,3 +44,5 @@ jobs:
 
       - name: Test
         run: cargo test --all --all-features
+        env:
+          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: "sparse"
