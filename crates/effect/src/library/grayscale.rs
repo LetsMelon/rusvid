@@ -1,14 +1,9 @@
 use anyhow::Result;
 use rayon::prelude::*;
-use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
 use crate::functions::grayscale;
 use crate::{EffectLogic, Element, ID};
-
-const MULTIPLIER_RED: f32 = 0.299;
-const MULTIPLIER_GREEN: f32 = 0.587;
-const MULTIPLIER_BLUE: f32 = 0.114;
 
 #[derive(Debug, Default)]
 pub struct GrayscaleEffect {

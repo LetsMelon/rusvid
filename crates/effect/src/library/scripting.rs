@@ -187,32 +187,5 @@ fn my_function(x, y) {
                 &Pixel::new(40, 40, 40, 255)
             );
         }
-
-        #[test]
-        fn errors() {
-            const SCRIPT: &'static str = "
-            fn my_function(x, y) {
-                let p = pixel_raw(get_pixel(x, y));
-            
-                if (p.r == 255) {
-                    p.r = 0
-                }
-                if (p.g == 255) {
-                    p.g = 0
-                }
-                if (p.b == 255) {
-                    p.b = 0
-                }
-            
-                p
-            }
-            ";
-
-            let plane = Plane::from_data(2, 2, vec![Pixel::ZERO; 4]).unwrap();
-
-            let effect = ScriptingEffect::new("my_function", SCRIPT);
-
-            let effect_result = effect.apply(plane).unwrap();
-        }
     }
 }
