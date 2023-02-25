@@ -3,6 +3,8 @@ use std::io::BufWriter;
 use std::path::Path;
 
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rayon::slice::ParallelSlice;
 use resvg::tiny_skia::Pixmap;
 use thiserror::Error;
 
@@ -15,6 +17,9 @@ pub enum PlaneError {
     ValueGreaterZero(&'static str),
 
     #[error("width * height must equal data.len()")]
+    ArrayCapacityError,
+
+    #[error("width * height must smaller than {}", SIZE::MAX)]
     CapacityError,
 
     #[error("Error in crate 'Image'")]
@@ -48,23 +53,30 @@ impl Plane {
     }
 
     pub fn new_with_fill(width: SIZE, height: SIZE, color: Pixel) -> Result<Self, PlaneError> {
+        Self::from_data(
+            width,
+            height,
+            // wrapping_mul because I don't want to have a panic if the result would exceed u32 and `from_data` has checks to catch the overflow
+            vec![color; (width.wrapping_mul(height)) as usize],
+        )
+    }
+
+    pub fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Result<Self, PlaneError> {
         if width <= 0 {
             return Err(PlaneError::ValueGreaterZero("Width"));
         }
+
         if height <= 0 {
             return Err(PlaneError::ValueGreaterZero("Height"));
         }
 
-        Ok(Plane {
-            width,
-            height,
-            data: vec![color; (width * height) as usize],
-        })
-    }
-
-    pub fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Result<Self, PlaneError> {
-        if width * height != data.len() as SIZE {
+        let (_, overflow) = width.overflowing_mul(height);
+        if overflow {
             return Err(PlaneError::CapacityError);
+        }
+
+        if width * height != data.len() as SIZE {
+            return Err(PlaneError::ArrayCapacityError);
         }
 
         Ok(Self::from_data_unchecked(width, height, data))
@@ -87,7 +99,12 @@ impl Plane {
     }
 
     pub fn as_data_flatten(&self) -> Vec<u8> {
-        self.data.iter().flat_map(|p| p.to_raw()).collect()
+        self.data.par_iter().flat_map(|p| p.to_raw()).collect()
+    }
+
+    /// `0xAARRGGBB`
+    pub fn as_data_packed(&self) -> Vec<u32> {
+        self.data.par_iter().map(|p| p.to_raw_packed()).collect()
     }
 
     /// Crates a `Result<Plane, PlaneError>` from a `image::RgbaImage`
@@ -109,23 +126,21 @@ impl Plane {
     pub fn as_rgb_image(self) -> Result<RgbImage, PlaneError> {
         let buf = self
             .data
-            .iter()
+            .par_iter()
             .flat_map(|v| [v[0], v[1], v[2]])
             .collect::<Vec<u8>>();
 
-        assert_eq!(self.width() * self.height() * 3, buf.len() as SIZE);
+        // TODO crate a custom error for this check
+        debug_assert_eq!(self.width() * self.height() * 3, buf.len() as SIZE);
 
         RgbImage::from_vec(self.width(), self.height(), buf).ok_or(PlaneError::ImageError)
     }
 
     pub fn as_rgba_image(self) -> Result<RgbaImage, PlaneError> {
-        let buf = self
-            .data
-            .iter()
-            .flat_map(|p| p.to_raw())
-            .collect::<Vec<u8>>();
+        let buf = self.as_data_flatten();
 
-        assert_eq!(self.width() * self.height() * 4, buf.len() as SIZE);
+        // TODO crate a custom error for this check
+        debug_assert_eq!(self.width() * self.height() * 4, buf.len() as SIZE);
 
         RgbaImage::from_vec(self.width(), self.height(), buf).ok_or(PlaneError::ImageError)
     }
@@ -136,9 +151,8 @@ impl Plane {
 
         let data = image
             .as_bytes()
-            .iter()
-            .array_chunks()
-            .map(|[r, g, b]| Pixel::new(*r, *g, *b, 255))
+            .par_chunks(3)
+            .map(|channels| Pixel::new(channels[0], channels[1], channels[2], 255))
             .collect::<Vec<_>>();
 
         Plane::from_data(width, height, data)
@@ -148,7 +162,7 @@ impl Plane {
     pub fn from_pixmap(pixmap: Pixmap) -> Self {
         let data = pixmap
             .pixels()
-            .iter()
+            .par_iter()
             .map(|x| {
                 let r = x.red();
                 let g = x.green();
@@ -170,11 +184,7 @@ impl Plane {
         let mut pixmap =
             Pixmap::new(self.width(), self.height()).ok_or(PlaneError::TinySkiaError)?;
 
-        let buf = self
-            .data
-            .iter()
-            .flat_map(|p| p.to_raw())
-            .collect::<Vec<u8>>();
+        let buf = self.as_data_flatten();
         pixmap.data_mut()[..buf.len()].copy_from_slice(&buf[..]);
 
         Ok(pixmap)
@@ -196,7 +206,7 @@ impl Plane {
     }
 
     pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
-        debug_assert_eq!(SIZE::MIN, 0);
+        const_assert_eq!(SIZE::MIN, 0);
 
         if x > self.width {
             return None;
@@ -260,7 +270,7 @@ impl Plane {
         }
     }
 
-    // TODO implement first citizen Plane to Bmp
+    // TODO implement first citizen `Plane-to-Bmp` function
     pub fn save_as_bmp<P: AsRef<Path>>(self, path: P) -> Result<(), PlaneError> {
         let as_image = self.as_rgba_image()?;
         as_image
@@ -287,7 +297,7 @@ impl Plane {
         Ok(())
     }
 
-    // TODO implement first citizen Plane to JPG
+    // TODO implement first citizen `Plane-to-JPG` function
     pub fn save_as_jpg<P: AsRef<Path>>(self, path: P) -> Result<(), PlaneError> {
         let as_image = self.as_rgba_image()?;
         as_image
@@ -415,7 +425,7 @@ mod tests {
         assert_eq!(p.pixel(0, 0).unwrap(), &Pixel::new(255, 0, 0, 0));
 
         let e = Plane::from_data(2, 2, vec![Pixel::new(255, 0, 0, 0); 3]);
-        assert_eq!(e.unwrap_err(), PlaneError::CapacityError);
+        assert_eq!(e.unwrap_err(), PlaneError::ArrayCapacityError);
     }
 
     #[test]

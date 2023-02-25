@@ -1234,8 +1234,10 @@ dependencies = [
  "itertools",
  "paste",
  "png",
+ "rayon",
  "resvg",
  "rhai",
+ "static_assertions",
  "thiserror",
  "uuid",
 ]

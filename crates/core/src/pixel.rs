@@ -45,8 +45,23 @@ impl Pixel {
         self.0
     }
 
+    /// `0xAARRGGBB`
+    pub fn to_raw_packed(&self) -> u32 {
+        let mut result = 0;
+
+        result |= (self.get_a() as u32) << (8 * 3);
+        result |= (self.get_r() as u32) << (8 * 2);
+        result |= (self.get_g() as u32) << (8 * 1);
+        result |= (self.get_b() as u32) << (8 * 0);
+
+        result
+    }
+
     pub fn get_r(&self) -> u8 {
         self[0]
+    }
+    pub fn get_r_mut(&mut self) -> &mut u8 {
+        &mut self[0]
     }
     pub fn set_r(&mut self, value: u8) {
         self[0] = value;
@@ -55,6 +70,9 @@ impl Pixel {
     pub fn get_g(&self) -> u8 {
         self[1]
     }
+    pub fn get_g_mut(&mut self) -> &mut u8 {
+        &mut self[1]
+    }
     pub fn set_g(&mut self, value: u8) {
         self[1] = value;
     }
@@ -62,12 +80,18 @@ impl Pixel {
     pub fn get_b(&self) -> u8 {
         self[2]
     }
+    pub fn get_b_mut(&mut self) -> &mut u8 {
+        &mut self[2]
+    }
     pub fn set_b(&mut self, value: u8) {
         self[2] = value;
     }
 
     pub fn get_a(&self) -> u8 {
         self[3]
+    }
+    pub fn get_a_mut(&mut self) -> &mut u8 {
+        &mut self[3]
     }
     pub fn set_a(&mut self, value: u8) {
         self[3] = value;
@@ -192,6 +216,27 @@ impl rhai::CustomType for Pixel {
 
 #[cfg(test)]
 mod tests {
+    use super::Pixel;
+
+    #[test]
+    fn to_raw_and_packed() {
+        let p = Pixel::new(255, 0, 0, 0);
+        assert_eq!(p.to_raw_packed(), 0x00FF0000);
+        assert_eq!(p.to_raw(), [255, 0, 0, 0]);
+
+        let p = Pixel::new(0, 255, 0, 0);
+        assert_eq!(p.to_raw_packed(), 0x0000FF00);
+        assert_eq!(p.to_raw(), [0, 255, 0, 0]);
+
+        let p = Pixel::new(0, 0, 255, 0);
+        assert_eq!(p.to_raw_packed(), 0x000000FF);
+        assert_eq!(p.to_raw(), [0, 0, 255, 0]);
+
+        let p = Pixel::new(0, 0, 0, 255);
+        assert_eq!(p.to_raw_packed(), 0xFF000000);
+        assert_eq!(p.to_raw(), [0, 0, 0, 255]);
+    }
+
     mod getter_setter {
         macro_rules! generate_test_case {
             ($name:ident) => {
