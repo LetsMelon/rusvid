@@ -9,6 +9,7 @@ use rusvid_core::plane::Plane;
 use crate::composition::Composition;
 use crate::layer::LayerLogic;
 
+pub mod embedded;
 pub mod ffmpeg;
 mod util;
 
