@@ -13,6 +13,7 @@ use super::{Frame, Packet, WrapperType};
 use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
 
+// See https://ffmpeg.org/ffmpeg-codecs.html#Options-34
 pub enum CodecContextOption<'a> {
     Crf(f32),
     Preset(&'a str),
