@@ -10,6 +10,9 @@ pub enum VideoEncoderError {
         error_code: FfmpegSysStatus,
     },
 
+    #[error("Value must be a multiple of two: '{field:?}'='{value:?}'")]
+    ResolutionError { field: &'static str, value: u32 },
+
     #[error("The selected output container does not support video encoding.")]
     ContainerNoVideoEncoding,
 

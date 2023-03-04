@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use anyhow::{bail, Result};
+use error::VideoEncoderError;
 use ffmpeg_sys_next::{AVPixelFormat, SWS_BICUBIC};
 use rusvid_core::plane::Plane;
 
@@ -31,13 +31,26 @@ pub struct Encoder {
 // TODO use custom errors
 impl Encoder {
     // TODO replace fps's type with FPS type from `rusvid_lib`
-    pub fn new(path: impl Into<PathBuf>, resolution: (u32, u32), fps: usize) -> Result<Encoder> {
-        let bit_rate = (resolution.0 * resolution.1 * 4 * (fps as u32)) as usize;
-        let time_base = (1_000, fps * 1_000);
-
-        if resolution.0 % 2 != 0 || resolution.1 % 2 != 0 {
-            bail!("width and/or height must be a multiple of two");
+    pub fn new(
+        path: impl Into<PathBuf>,
+        resolution: (u32, u32),
+        fps: usize,
+    ) -> Result<Encoder, VideoEncoderError> {
+        if resolution.0 % 2 != 0 {
+            return Err(VideoEncoderError::ResolutionError {
+                field: "width",
+                value: resolution.0,
+            });
         }
+        if resolution.1 % 2 != 0 {
+            return Err(VideoEncoderError::ResolutionError {
+                field: "height",
+                value: resolution.1,
+            });
+        }
+
+        let bit_rate = (resolution.0 * resolution.1 * 4 * (fps as u32)) as usize;
+        let time_base = (1, fps);
 
         let mut format_context = FormatContext::new(path.into())?;
 
@@ -92,7 +105,7 @@ impl Encoder {
         })
     }
 
-    pub fn encode_plane(&mut self, plane: Plane) -> Result<()> {
+    pub fn encode_plane(&mut self, plane: Plane) -> Result<(), VideoEncoderError> {
         let width = plane.width();
         let height = plane.height();
         let data = plane.as_data_flatten();
@@ -100,7 +113,7 @@ impl Encoder {
         self.encode(width, height, &data)
     }
 
-    fn encode(&mut self, width: u32, height: u32, data: &[u8]) -> Result<()> {
+    fn encode(&mut self, width: u32, height: u32, data: &[u8]) -> Result<(), VideoEncoderError> {
         let new_buffer_length = (width * height * 4) as usize;
         debug_assert!(data.len() == new_buffer_length);
 
@@ -139,7 +152,7 @@ impl Encoder {
         Ok(())
     }
 
-    pub fn finish_stream(mut self) -> Result<()> {
+    pub fn finish_stream(mut self) -> Result<(), VideoEncoderError> {
         self.context.send_stream_eof(&mut self.format_context)?;
 
         self.format_context.write_trailer()?;
