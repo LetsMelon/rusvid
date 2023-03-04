@@ -19,6 +19,9 @@ pub enum VideoEncoderError {
     #[error("Could not allocate the video frame.")]
     VideoFrameAllocation,
 
+    #[error("Could not allocate the video stream.")]
+    VideoStreamAllocation,
+
     #[error("can't transform '{from:?}' to '{to:?}'")]
     Transform {
         from: &'static str,
