@@ -22,6 +22,12 @@ pub enum VideoEncoderError {
     #[error("Could not allocate the video stream.")]
     VideoStreamAllocation,
 
+    #[error("Error in creating a scale context.")]
+    ScaleContextAllocation,
+
+    #[error("Error in getting cached scale context.")]
+    ScaleContextCached,
+
     #[error("can't transform '{from:?}' to '{to:?}'")]
     Transform {
         from: &'static str,

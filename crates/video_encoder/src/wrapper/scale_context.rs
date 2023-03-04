@@ -1,11 +1,11 @@
 use std::ptr;
 
-use anyhow::{bail, Result};
 use ffmpeg_sys_next::{
     sws_freeContext, sws_getCachedContext, sws_getContext, sws_scale, AVPixelFormat, SwsContext,
 };
 
 use super::{Frame, WrapperType};
+use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
 use crate::{PIX_FMT, SCALE_FLAGS};
 
@@ -16,7 +16,10 @@ pub struct ScaleContext {
 }
 
 impl ScaleContext {
-    pub fn new(src_resolution: (u32, u32), dst_resolution: (u32, u32)) -> Result<Self> {
+    pub fn new(
+        src_resolution: (u32, u32),
+        dst_resolution: (u32, u32),
+    ) -> Result<Self, VideoEncoderError> {
         let scale_context = unsafe {
             sws_getContext(
                 src_resolution.0 as i32,
@@ -33,7 +36,7 @@ impl ScaleContext {
         };
 
         if scale_context.is_null() {
-            bail!("Error in creating a scale context.")
+            return Err(VideoEncoderError::ScaleContextAllocation);
         }
 
         Ok(ScaleContext {
@@ -42,7 +45,10 @@ impl ScaleContext {
         })
     }
 
-    pub fn get_cached_context(&mut self, src_resolution: (u32, u32)) -> Result<()> {
+    pub fn get_cached_context(
+        &mut self,
+        src_resolution: (u32, u32),
+    ) -> Result<(), VideoEncoderError> {
         let scale_context = unsafe {
             sws_getCachedContext(
                 self.get_inner_mut(),
@@ -60,7 +66,7 @@ impl ScaleContext {
         };
 
         if scale_context.is_null() {
-            bail!("Error in getting cached scale context.");
+            return Err(VideoEncoderError::ScaleContextCached);
         }
 
         self.raw = scale_context;
@@ -73,7 +79,7 @@ impl ScaleContext {
         src_frame: &Frame,
         src_height: u32,
         dst_frame: &mut Frame,
-    ) -> Result<()> {
+    ) -> Result<(), VideoEncoderError> {
         let err = unsafe {
             sws_scale(
                 self.get_inner_mut(),
@@ -87,8 +93,11 @@ impl ScaleContext {
         };
         let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
         if status.is_error() {
-            // TODO throw custom error
-            dbg!(&status);
+            let err = VideoEncoderError::FfmpegSysError {
+                message: "Failed to set codec parameters.",
+                error_code: status,
+            };
+            println!("{err:?}");
         }
 
         Ok(())
