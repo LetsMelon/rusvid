@@ -16,6 +16,9 @@ pub enum VideoEncoderError {
     #[error("Codec not found.")]
     CodecNotFound,
 
+    #[error("Could not allocate the video frame.")]
+    VideoFrameAllocation,
+
     #[error("can't transform '{from:?}' to '{to:?}'")]
     Transform {
         from: &'static str,

@@ -1,20 +1,20 @@
-use anyhow::{bail, Result};
 use ffmpeg_sys_next::{
     av_frame_alloc, av_frame_free, av_image_fill_arrays, av_image_get_buffer_size, AVFrame,
     AVPixelFormat,
 };
 
 use super::WrapperType;
+use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
 
 pub struct Frame(*mut AVFrame);
 
 impl Frame {
-    pub fn new(pix_fmt: AVPixelFormat) -> Result<Self> {
+    pub fn new(pix_fmt: AVPixelFormat) -> Result<Self, VideoEncoderError> {
         unsafe {
             let frame = av_frame_alloc();
             if frame.is_null() {
-                bail!("Could not allocate the video frame.");
+                return Err(VideoEncoderError::VideoFrameAllocation);
             }
 
             (*frame).format = pix_fmt as i32;
@@ -42,12 +42,20 @@ impl Frame {
         self.set_pts(self.get_pts() + value);
     }
 
-    pub fn get_raw_buffer(&self, pix_fmt: AVPixelFormat, target: (u32, u32)) -> Result<Vec<u8>> {
+    pub fn get_raw_buffer(
+        &self,
+        pix_fmt: AVPixelFormat,
+        target: (u32, u32),
+    ) -> Result<Vec<u8>, VideoEncoderError> {
         let nframe_bytes =
             unsafe { av_image_get_buffer_size(pix_fmt, target.0 as i32, target.1 as i32, 16) };
 
-        if nframe_bytes < 0 {
-            bail!("Error in `av_image_get_buffer_size`");
+        let status = FfmpegSysStatus::from_ffmpeg_sys_error(nframe_bytes);
+        if status.is_error() {
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Error in `av_image_get_buffer_size`",
+                error_code: status,
+            });
         }
 
         Ok(vec![0; nframe_bytes as usize])
@@ -58,7 +66,7 @@ impl Frame {
         frame_buf: &Vec<u8>,
         pix_fmt: AVPixelFormat,
         resolution: (u32, u32),
-    ) -> Result<()> {
+    ) -> Result<(), VideoEncoderError> {
         let err = unsafe {
             av_image_fill_arrays(
                 (*self.0).data.as_mut_ptr(),
@@ -73,8 +81,11 @@ impl Frame {
 
         let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
         if status.is_error() {
-            // TODO throw custom error
-            dbg!(&status);
+            let err = VideoEncoderError::FfmpegSysError {
+                message: "error in `av_image_fill_arrays`",
+                error_code: status,
+            };
+            println!("{err:?}");
         }
 
         Ok(())
