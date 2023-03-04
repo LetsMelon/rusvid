@@ -1,7 +1,6 @@
 use std::ffi::CString;
 use std::ptr;
 
-use anyhow::{bail, Result};
 use ffmpeg_sys_next::{
     av_interleaved_write_frame, av_opt_set, avcodec_alloc_context3, avcodec_free_context,
     avcodec_receive_packet, avcodec_send_frame, AVCodecContext, AVCodecID, AVPixelFormat,
@@ -11,6 +10,7 @@ use ffmpeg_sys_next::{
 use super::codec::Codec;
 use super::format_context::FormatContext;
 use super::{Frame, Packet, WrapperType};
+use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
 
 pub enum CodecContextOption<'a> {
@@ -19,22 +19,26 @@ pub enum CodecContextOption<'a> {
 }
 
 impl<'a> CodecContextOption<'a> {
-    fn get_name(&self) -> Result<CString> {
-        let value = match self {
-            CodecContextOption::Crf(_) => CString::new("crf")?,
-            CodecContextOption::Preset(_) => CString::new("preset")?,
-        };
-
-        Ok(value)
+    fn get_name(&self) -> Result<CString, VideoEncoderError> {
+        match self {
+            CodecContextOption::Crf(_) => {
+                CString::new("crf").map_err(|_| VideoEncoderError::NulError)
+            }
+            CodecContextOption::Preset(_) => {
+                CString::new("preset").map_err(|_| VideoEncoderError::NulError)
+            }
+        }
     }
 
-    fn get_value(&self) -> Result<CString> {
-        let value = match self {
-            CodecContextOption::Crf(crf) => CString::new(crf.to_string())?,
-            CodecContextOption::Preset(preset) => CString::new(*preset)?,
-        };
-
-        Ok(value)
+    fn get_value(&self) -> Result<CString, VideoEncoderError> {
+        match self {
+            CodecContextOption::Crf(crf) => {
+                CString::new(crf.to_string()).map_err(|_| VideoEncoderError::NulError)
+            }
+            CodecContextOption::Preset(preset) => {
+                CString::new(*preset).map_err(|_| VideoEncoderError::NulError)
+            }
+        }
     }
 }
 
@@ -49,10 +53,10 @@ impl CodecContext {
         time_base: (usize, usize),
         max_b_frames: usize,
         pix_fmt: AVPixelFormat,
-    ) -> Result<Self> {
+    ) -> Result<Self, VideoEncoderError> {
         let context = unsafe { avcodec_alloc_context3(codec.get_inner()) };
         if context.is_null() {
-            bail!("Could not allocate video codec context.");
+            return Err(VideoEncoderError::VideoCodecContextAllocation);
         }
 
         unsafe {
@@ -82,7 +86,7 @@ impl CodecContext {
     pub fn set_object_with_value(
         &mut self,
         codec_context_option: CodecContextOption,
-    ) -> Result<()> {
+    ) -> Result<(), VideoEncoderError> {
         let name = codec_context_option.get_name()?;
         let value = codec_context_option.get_value()?;
 
@@ -94,10 +98,12 @@ impl CodecContext {
                 0,
             )
         };
-
         let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
         if status.is_error() {
-            bail!(format!("Error in setting option: {status:?}"));
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Error in setting option for codec context",
+                error_code: status,
+            });
         }
 
         Ok(())
@@ -108,11 +114,14 @@ impl CodecContext {
         frame: &Frame,
         format_context: &mut FormatContext,
         mut packet: Packet,
-    ) -> Result<()> {
+    ) -> Result<(), VideoEncoderError> {
         let err = unsafe { avcodec_send_frame(self.get_inner_mut(), frame.get_inner()) };
         let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
         if status.is_error() {
-            bail!("Error encoding frame.");
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Error encoding frame.",
+                error_code: status,
+            });
         }
 
         let err = unsafe { avcodec_receive_packet(self.get_inner_mut(), packet.get_inner_mut()) };
@@ -132,11 +141,17 @@ impl CodecContext {
         Ok(())
     }
 
-    pub fn send_stream_eof(&mut self, format_context: &mut FormatContext) -> Result<()> {
+    pub fn send_stream_eof(
+        &mut self,
+        format_context: &mut FormatContext,
+    ) -> Result<(), VideoEncoderError> {
         let err = unsafe { avcodec_send_frame(self.get_inner_mut(), ptr::null()) };
         let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
         if status.is_error() {
-            bail!("Error encoding frame.");
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Error encoding frame.",
+                error_code: status,
+            });
         }
 
         loop {

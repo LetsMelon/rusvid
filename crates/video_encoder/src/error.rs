@@ -25,6 +25,9 @@ pub enum VideoEncoderError {
     #[error("Error in creating a scale context.")]
     ScaleContextAllocation,
 
+    #[error("Could not allocate video codec context.")]
+    VideoCodecContextAllocation,
+
     #[error("Error in getting cached scale context.")]
     ScaleContextCached,
 
