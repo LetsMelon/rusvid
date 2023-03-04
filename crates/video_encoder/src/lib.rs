@@ -4,6 +4,7 @@ use anyhow::{bail, Result};
 use ffmpeg_sys_next::{AVPixelFormat, SWS_BICUBIC};
 use rusvid_core::plane::Plane;
 
+pub mod error;
 pub mod status;
 mod util;
 mod wrapper;
