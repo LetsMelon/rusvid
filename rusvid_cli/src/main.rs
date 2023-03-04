@@ -6,9 +6,9 @@ use chrono::Local;
 use fern::{log_file, Dispatch};
 use log::{debug, LevelFilter};
 use rusvid_lib::animation::prelude::*;
-use rusvid_lib::core::frame_image_format::FrameImageFormat;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
+use rusvid_lib::renderer::embedded::EmbeddedRenderer;
 use rusvid_lib::resvg::usvg::{
     BaseGradient, Color, LinearGradient, NodeKind, NonZeroPositiveF64, NormalizedF64, Opacity,
     Path, SpreadMethod, Stop, StopOffset, Stroke, Transform, Units,
@@ -45,7 +45,7 @@ fn main() {
     let mut composition = Composition::builder()
         .resolution(resolution)
         .framerate(24)
-        .duration(5)
+        .duration(10)
         // .add_effect(PixelateEffect::new(15, 15))
         // .add_effect(ColorPaletteEffect::new(vec![
         //     [10, 56, 120, 255],
@@ -53,7 +53,7 @@ fn main() {
         //     [100, 10, 100, 255],
         //     [90, 12, 30, 255],
         // ]))
-        // .add_effect(GrayscaleEffect::new())
+        .add_effect(GrayscaleEffect::new())
         // .add_effect(BoxBlur::new(5).unwrap())
         // .add_effect(GaussianBlur::new(3.0))
         .build();
@@ -176,9 +176,12 @@ fn main() {
         Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap(),
     ));
 
-    let mut renderer = FfmpegRenderer::builder()
-        .out_path("out.mp4")
-        .frame_output_format(FrameImageFormat::Png)
-        .build();
-    renderer.render(composition).unwrap()
+    // let mut renderer = FfmpegRenderer::builder()
+    //     .out_path("out.mp4")
+    //     .frame_output_format(FrameImageFormat::Png)
+    //     .build();
+    // renderer.render(composition).unwrap();
+
+    let mut renderer = EmbeddedRenderer::new("out.mp4");
+    renderer.render(composition).unwrap();
 }
