@@ -1392,7 +1392,6 @@ dependencies = [
 name = "rusvid_video_encoder"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "ffmpeg-sys-next",
  "rusvid_core",
  "thiserror",
