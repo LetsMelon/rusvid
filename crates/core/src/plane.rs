@@ -60,11 +60,11 @@ impl Plane {
     }
 
     pub fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Result<Self, PlaneError> {
-        if width <= 0 {
+        const_assert_eq!(SIZE::MIN, 0);
+        if width == 0 {
             return Err(PlaneError::ValueGreaterZero("Width"));
         }
-
-        if height <= 0 {
+        if height == 0 {
             return Err(PlaneError::ValueGreaterZero("Height"));
         }
 
