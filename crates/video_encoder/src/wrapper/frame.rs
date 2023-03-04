@@ -14,7 +14,10 @@ impl Frame {
         unsafe {
             let frame = av_frame_alloc();
             if frame.is_null() {
-                return Err(VideoEncoderError::VideoFrameAllocation);
+                return Err(VideoEncoderError::FfmpegSysError {
+                    message: "Could not allocate the video frame.",
+                    error_code: FfmpegSysStatus::Unknown,
+                });
             }
 
             (*frame).format = pix_fmt as i32;

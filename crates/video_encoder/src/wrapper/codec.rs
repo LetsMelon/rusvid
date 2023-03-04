@@ -15,12 +15,18 @@ impl Codec {
         unsafe {
             let fmt = (*format_context.get_inner()).oformat;
             if (*fmt).video_codec == AVCodecID::AV_CODEC_ID_NONE {
-                return Err(VideoEncoderError::ContainerNoVideoEncoding);
+                return Err(VideoEncoderError::FfmpegSysError {
+                    message: "The selected output container does not support video encoding.",
+                    error_code: FfmpegSysStatus::Unknown,
+                });
             }
 
             let codec = avcodec_find_encoder((*fmt).video_codec);
             if codec.is_null() {
-                return Err(VideoEncoderError::CodecNotFound);
+                return Err(VideoEncoderError::FfmpegSysError {
+                    message: "Codec not found.",
+                    error_code: FfmpegSysStatus::Unknown,
+                });
             }
 
             Ok(Codec(codec))

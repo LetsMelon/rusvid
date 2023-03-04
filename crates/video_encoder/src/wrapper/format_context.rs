@@ -64,7 +64,10 @@ impl FormatContext {
         }
 
         if fmt.is_null() {
-            return Err(VideoEncoderError::OutputContextAllocation);
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Unable to create the output context.",
+                error_code: FfmpegSysStatus::Unknown,
+            });
         }
 
         Ok(FormatContext {

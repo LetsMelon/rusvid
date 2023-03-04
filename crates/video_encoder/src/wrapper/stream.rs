@@ -15,7 +15,10 @@ impl Stream {
         let video_st = unsafe { avformat_new_stream(format_context.get_inner_mut(), ptr::null()) };
 
         if video_st.is_null() {
-            return Err(VideoEncoderError::VideoStreamAllocation);
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Could not allocate the video stream.",
+                error_code: FfmpegSysStatus::Unknown,
+            });
         }
 
         unsafe {

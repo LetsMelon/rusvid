@@ -56,7 +56,10 @@ impl CodecContext {
     ) -> Result<Self, VideoEncoderError> {
         let context = unsafe { avcodec_alloc_context3(codec.get_inner()) };
         if context.is_null() {
-            return Err(VideoEncoderError::VideoCodecContextAllocation);
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Could not allocate video codec context.",
+                error_code: FfmpegSysStatus::Unknown,
+            });
         }
 
         unsafe {

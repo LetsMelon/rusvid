@@ -36,7 +36,10 @@ impl ScaleContext {
         };
 
         if scale_context.is_null() {
-            return Err(VideoEncoderError::ScaleContextAllocation);
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Error in creating a scale context.",
+                error_code: FfmpegSysStatus::Unknown,
+            });
         }
 
         Ok(ScaleContext {
@@ -66,7 +69,10 @@ impl ScaleContext {
         };
 
         if scale_context.is_null() {
-            return Err(VideoEncoderError::ScaleContextCached);
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Error in getting cached scale context.",
+                error_code: FfmpegSysStatus::Unknown,
+            });
         }
 
         self.raw = scale_context;
