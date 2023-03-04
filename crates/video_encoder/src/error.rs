@@ -28,6 +28,9 @@ pub enum VideoEncoderError {
     #[error("Error in getting cached scale context.")]
     ScaleContextCached,
 
+    #[error("Unable to create the output context. Maybe the logs can say more about where the error has happened")]
+    OutputContextAllocation,
+
     #[error("can't transform '{from:?}' to '{to:?}'")]
     Transform {
         from: &'static str,

@@ -2,13 +2,13 @@ use core::ptr;
 use std::ffi::CString;
 use std::path::PathBuf;
 
-use anyhow::{bail, Result};
 use ffmpeg_sys_next::{
     av_dump_format, av_write_trailer, avformat_alloc_output_context2, avformat_free_context,
     avformat_write_header, avio_open, AVFormatContext,
 };
 
 use super::WrapperType;
+use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
 use crate::util::pathbuf_to_cstring;
 
@@ -19,7 +19,7 @@ pub struct FormatContext {
 }
 
 impl FormatContext {
-    pub fn new(out_path: PathBuf) -> Result<Self> {
+    pub fn new(out_path: PathBuf) -> Result<Self, VideoEncoderError> {
         let path_str = pathbuf_to_cstring(&out_path)?;
 
         let mut fmt = ptr::null_mut();
@@ -35,8 +35,11 @@ impl FormatContext {
         let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
 
         if status.is_error() {
-            // TODO log the error but don't return early.
-            dbg!(&status);
+            let err = VideoEncoderError::FfmpegSysError {
+                message: "Failed to set codec parameters.",
+                error_code: status,
+            };
+            println!("{err:?}");
         }
 
         if fmt.is_null() {
@@ -52,13 +55,16 @@ impl FormatContext {
             };
             let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
             if status.is_error() {
-                // TODO log the error but don't return early.
-                dbg!(&status);
+                let err = VideoEncoderError::FfmpegSysError {
+                    message: "Failed to set codec parameters.",
+                    error_code: status,
+                };
+                println!("{err:?}");
             }
         }
 
         if fmt.is_null() {
-            bail!("Unable to create the output context. Maybe the logs can say more about where the error has happened");
+            return Err(VideoEncoderError::OutputContextAllocation);
         }
 
         Ok(FormatContext {
@@ -79,30 +85,36 @@ impl FormatContext {
         }
     }
 
-    pub fn open_output_file(&mut self) -> Result<()> {
+    pub fn open_output_file(&mut self) -> Result<(), VideoEncoderError> {
         let err = unsafe { avio_open(&mut (*self.get_inner_mut()).pb, self.out_path.as_ptr(), 2) };
         let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
         if status.is_error() {
-            dbg!(&status);
-            bail!("Failed to open the output media file.");
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Failed to open the output media file.",
+                error_code: status,
+            });
         }
 
         let err = unsafe { avformat_write_header(self.get_inner_mut(), ptr::null_mut()) };
         let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
         if status.is_error() {
-            dbg!(&status);
-            bail!("Failed to write the stream header to the output media file.")
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Failed to write the stream header to the output media file.",
+                error_code: status,
+            });
         }
 
         Ok(())
     }
 
-    pub fn write_trailer(&mut self) -> Result<()> {
+    pub fn write_trailer(&mut self) -> Result<(), VideoEncoderError> {
         let err = unsafe { av_write_trailer(self.get_inner_mut()) };
         let status = FfmpegSysStatus::from_ffmpeg_sys_error(err);
         if status.is_error() {
-            dbg!(&status);
-            bail!("Error writing trailer.");
+            return Err(VideoEncoderError::FfmpegSysError {
+                message: "Error writing trailer.",
+                error_code: status,
+            });
         }
 
         Ok(())
