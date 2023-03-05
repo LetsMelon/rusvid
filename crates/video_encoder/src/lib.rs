@@ -14,6 +14,7 @@ use wrapper::*;
 use crate::util::rescale_q;
 
 pub(crate) const PIX_FMT: AVPixelFormat = AVPixelFormat::AV_PIX_FMT_YUV420P;
+// TODO test other flags, link https://ffmpeg.org/doxygen/trunk/group__libsws.html
 pub(crate) const SCALE_FLAGS: i32 = SWS_BICUBIC;
 
 pub struct Encoder {
@@ -28,9 +29,9 @@ pub struct Encoder {
     current_frame_index: usize,
 }
 
-// TODO use custom errors
 impl Encoder {
     // TODO replace fps's type with FPS type from `rusvid_lib`
+    // TODO replace resolutions tuple with `Resolution` struct from `rusvid_lib`
     pub fn new(
         path: impl Into<PathBuf>,
         resolution: (u32, u32),
@@ -70,7 +71,6 @@ impl Encoder {
 
         video_st.set_time_base(context.get_time_base());
 
-        // TODO create wrapper for SwsContext
         let scale_context = ScaleContext::new(resolution, resolution)?;
 
         codec.open_codec(&mut context)?;
@@ -157,7 +157,9 @@ impl Encoder {
 
         self.format_context.write_trailer()?;
 
-        // ? Drop the encoder to free the memory at this point in the code
+        // ? Drop the encoder to free the memory at this point in the code,
+        // ? is not entirely needed because `fn finish_stream(self)` captures Self (=Encoder),
+        // ? so the struct will be dropped nevertheless when the scope closes
         drop(self);
 
         Ok(())
