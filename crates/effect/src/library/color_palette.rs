@@ -48,7 +48,7 @@ impl EffectLogic for ColorPaletteEffect {
         if self.color_palette.is_empty() {
             return Err(EffectError::SizeError {
                 message: "Must have at least one color in the color palette",
-                value: Box::new(0),
+                value: 0,
             });
         }
 

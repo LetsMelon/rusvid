@@ -21,9 +21,6 @@ pub enum EffectError {
     #[error("error occurred in rhai: {0:?}")]
     Rhai(#[from] RhaiError),
 
-    #[error("{message}: {value:?}")]
-    SizeError {
-        message: &'static str,
-        value: Box<dyn Debug>,
-    },
+    #[error("{message}: {value}")]
+    SizeError { message: &'static str, value: u32 },
 }

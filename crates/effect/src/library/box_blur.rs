@@ -32,26 +32,26 @@ impl BoxBlur {
         if kernel_x < 2 {
             return Err(EffectError::SizeError {
                 message: "kernel_x must be bigger than 1",
-                value: Box::new(kernel_x),
+                value: kernel_x,
             });
         }
         if kernel_x % 2 != 1 {
             return Err(EffectError::SizeError {
                 message: "kernel_x must be an odd number",
-                value: Box::new(kernel_x),
+                value: kernel_x,
             });
         }
 
         if kernel_y < 2 {
             return Err(EffectError::SizeError {
                 message: "kernel_y must be bigger than 1",
-                value: Box::new(kernel_y),
+                value: kernel_y,
             });
         }
         if kernel_y % 2 != 1 {
             return Err(EffectError::SizeError {
                 message: "kernel_y must be an odd number",
-                value: Box::new(kernel_y),
+                value: kernel_y,
             });
         }
 
