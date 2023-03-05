@@ -1,7 +1,7 @@
-use anyhow::Result;
 use rayon::prelude::*;
 use rusvid_core::plane::Plane;
 
+use crate::error::EffectError;
 use crate::functions::grayscale;
 use crate::{EffectLogic, Element, ID};
 
@@ -34,7 +34,7 @@ impl Element for GrayscaleEffect {
 }
 
 impl EffectLogic for GrayscaleEffect {
-    fn apply(&self, original: Plane) -> Result<Plane> {
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError> {
         let width = original.width();
         let height = original.height();
 

@@ -1,8 +1,8 @@
-use anyhow::Result;
 use itertools::Itertools;
 use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
+use crate::error::EffectError;
 use crate::{EffectLogic, Element, ID};
 
 #[derive(Debug)]
@@ -57,7 +57,7 @@ impl Element for PixelateEffect {
 }
 
 impl EffectLogic for PixelateEffect {
-    fn apply(&self, original: Plane) -> Result<Plane> {
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError> {
         // TODO create extra config if last pixel in a row should be not fixed size or if the extra margin should be applied to the last pixel, (width & height)
         // eg.: pixel_width = 19px; width = 1920px; pixel_width * width = 1919px, last pixel either 1px wide or last one is 20px wide
         let pixels_count_width = original.width().div_ceil(self.pixel_width);
