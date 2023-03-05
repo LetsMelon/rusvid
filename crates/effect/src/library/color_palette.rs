@@ -1,8 +1,8 @@
-use anyhow::{bail, Result};
 use rayon::prelude::*;
 use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
+use crate::error::EffectError;
 use crate::functions::color_palette::transform;
 use crate::{EffectLogic, Element, ID};
 
@@ -44,9 +44,12 @@ impl Element for ColorPaletteEffect {
 }
 
 impl EffectLogic for ColorPaletteEffect {
-    fn apply(&self, original: Plane) -> Result<Plane> {
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError> {
         if self.color_palette.is_empty() {
-            bail!("Must have at least one color in the color palette");
+            return Err(EffectError::SizeError {
+                message: "Must have at least one color in the color palette",
+                value: Box::new(0),
+            });
         }
 
         let mut result = Plane::new(original.width(), original.height())?;

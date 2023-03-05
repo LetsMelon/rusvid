@@ -1,11 +1,11 @@
 use std::f64::consts::{E, PI};
 
-use anyhow::Result;
 use itertools::Itertools;
 use log::info;
 use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
+use crate::error::EffectError;
 use crate::{EffectLogic, Element, ID};
 
 fn gaussian_function(stdev: f64, x: i32, y: i32) -> f64 {
@@ -86,7 +86,7 @@ impl Element for GaussianBlur {
 }
 
 impl EffectLogic for GaussianBlur {
-    fn apply(&self, original: Plane) -> Result<Plane> {
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError> {
         let mut result = Plane::new(original.width(), original.height())?;
 
         for x in (self.kernel)..(result.width() as i32 - self.kernel) {

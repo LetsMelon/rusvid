@@ -1,9 +1,9 @@
-use anyhow::Result;
 use itertools::*;
 use rhai::{Dynamic, Engine, Func, OptimizationLevel, INT};
 use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
+use crate::error::{EffectError, RhaiError};
 use crate::{EffectLogic, Element, ID};
 
 pub struct ScriptingEffect {
@@ -56,7 +56,7 @@ impl Element for ScriptingEffect {
 }
 
 impl EffectLogic for ScriptingEffect {
-    fn apply(&self, original: Plane) -> Result<Plane> {
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError> {
         let width = original.width();
         let height = original.height();
 
@@ -85,8 +85,10 @@ impl EffectLogic for ScriptingEffect {
         });
 
         let function =
-            Func::<(INT, INT), Pixel>::create_from_script(engine, self.script, &self.entry_point)?;
+            Func::<(INT, INT), Pixel>::create_from_script(engine, self.script, &self.entry_point)
+                .map_err(|err| RhaiError::Parse(err))?;
 
+        // TODO fix `unwrap()` call
         let data = (0..(width as INT))
             .cartesian_product(0..(height as INT))
             .map(|(x, y)| function(x, y).unwrap())

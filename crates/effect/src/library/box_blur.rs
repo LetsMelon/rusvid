@@ -91,7 +91,7 @@ impl Element for BoxBlur {
 }
 
 impl EffectLogic for BoxBlur {
-    fn apply(&self, original: Plane) -> anyhow::Result<Plane> {
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError> {
         let mut result = Plane::new(original.width(), original.height())?;
 
         for x in (self.abs_d_x as u32)..(result.width() - self.abs_d_x as u32) {

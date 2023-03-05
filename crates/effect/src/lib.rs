@@ -1,7 +1,7 @@
 #![feature(int_roundings)]
 #![cfg_attr(coverage_nightly, feature(no_coverage))]
 
-use anyhow::Result;
+use error::EffectError;
 use rusvid_core::plane::Plane;
 
 pub mod error;
@@ -18,7 +18,7 @@ pub trait Element {
 }
 
 pub trait EffectLogic: std::fmt::Debug + Element {
-    fn apply(&self, original: Plane) -> Result<Plane>;
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError>;
 
     fn depends_on_other_effects_ids(&self) -> Vec<ID> {
         Vec::new()
