@@ -11,8 +11,18 @@ pub fn rescale_q(a: i64, bq: AVRational, cq: AVRational) -> i64 {
     unsafe { av_rescale_q(a, bq, cq) }
 }
 
-// TODO rename function to `path_to_cstring`
-pub fn pathbuf_to_cstring(path: &Path) -> Result<CString, VideoEncoderError> {
+#[inline]
+/// Transform a [`Path`] into an Result with an [`CString`] or an [`VideoEncoderError`]
+///
+/// # Errors
+/// - [`VideoEncoderError::Transform`]
+/// Is thrown if `path` isn't valid unicode.
+///
+/// - [`VideoEncoderError::NulError`]
+/// This function will return an error if the supplied bytes contain an internal 0 byte.
+/// The NulError returned will contain the bytes as well as the position of the nul byte.
+/// For more info see [`CString::new`](alloc::ffi::CString).
+pub fn path_to_cstring(path: &Path) -> Result<CString, VideoEncoderError> {
     let path_str = path.to_str().ok_or_else(|| VideoEncoderError::Transform {
         from: "&std::path::Path",
         to: "&str",

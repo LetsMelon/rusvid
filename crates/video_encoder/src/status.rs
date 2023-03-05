@@ -1,5 +1,5 @@
 #[derive(Debug)]
-/// Copied from [ffmpeg docs](https://ffmpeg.org/doxygen/2.5/error_8c.html)
+/// Copied status-codes from [ffmpeg docs](https://ffmpeg.org/doxygen/2.5/error_8c.html)
 pub enum FfmpegSysStatus {
     NoError,
     /// Bitstream filter not found.
@@ -59,16 +59,20 @@ pub enum FfmpegSysStatus {
 }
 
 impl FfmpegSysStatus {
+    /// Returns `true` if the value of `self` is not an error-code.
     pub fn is_ok(&self) -> bool {
         matches!(self, FfmpegSysStatus::NoError)
     }
 
+    /// Returns `true` if the value of `self` is an error-code
     pub fn is_error(&self) -> bool {
         !self.is_ok()
     }
 
+    /// Creates a [`FfmpegSysStatus`] from a `ffmpeg` error-code.
     pub fn from_ffmpeg_sys_error(value: i32) -> Self {
         match value {
+            // ! Only values `< 0` are errors in ffmpeg
             0..=i32::MAX => FfmpegSysStatus::NoError,
             ffmpeg_sys_next::AVERROR_BSF_NOT_FOUND => FfmpegSysStatus::BsfNotFound,
             ffmpeg_sys_next::AVERROR_BUFFER_TOO_SMALL => FfmpegSysStatus::BufferTooSmall,
@@ -100,6 +104,10 @@ impl FfmpegSysStatus {
         }
     }
 
+    /// Returns the corresponding value for the ffmpeg error.
+    /// Can be used to research online about the error.
+    ///
+    /// Only values `< 0` are errors. The value `0` is not an error.
     pub fn as_ffmpeg_sys_error(&self) -> i32 {
         match self {
             FfmpegSysStatus::NoError => 0,

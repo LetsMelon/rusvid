@@ -10,7 +10,7 @@ use ffmpeg_sys_next::{
 use super::WrapperType;
 use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
-use crate::util::pathbuf_to_cstring;
+use crate::util::path_to_cstring;
 
 pub struct FormatContext {
     out_path: CString,
@@ -20,7 +20,7 @@ pub struct FormatContext {
 
 impl FormatContext {
     pub fn new(out_path: PathBuf) -> Result<Self, VideoEncoderError> {
-        let path_str = pathbuf_to_cstring(&out_path)?;
+        let path_str = path_to_cstring(&out_path)?;
 
         let mut fmt = ptr::null_mut();
 

@@ -17,6 +17,9 @@ pub(crate) const PIX_FMT: AVPixelFormat = AVPixelFormat::AV_PIX_FMT_YUV420P;
 // TODO test other flags, link https://ffmpeg.org/doxygen/trunk/group__libsws.html
 pub(crate) const SCALE_FLAGS: i32 = SWS_BICUBIC;
 
+/// Encoder to encode multiple [`Plane`]s into a `.mp4` media file.
+///
+/// Can only encode into `x264` files.
 pub struct Encoder {
     format_context: FormatContext,
     video_st: Stream,
@@ -32,6 +35,9 @@ pub struct Encoder {
 impl Encoder {
     // TODO replace fps's type with FPS type from `rusvid_lib`
     // TODO replace resolutions tuple with `Resolution` struct from `rusvid_lib`
+    /// Crates a new [`Encoder`] for a media file with the given `path`, `resolution` and `fps`.
+    ///
+    /// Can return an [`VideoEncoderError`].
     pub fn new(
         path: impl Into<PathBuf>,
         resolution: (u32, u32),
@@ -105,6 +111,9 @@ impl Encoder {
         })
     }
 
+    /// Encodes a [`Plane`].
+    ///
+    /// Returns an [`VideoEncoderError`] if an error occurred.
     pub fn encode_plane(&mut self, plane: Plane) -> Result<(), VideoEncoderError> {
         let width = plane.width();
         let height = plane.height();
@@ -152,6 +161,10 @@ impl Encoder {
         Ok(())
     }
 
+    /// Must be called to save the media file.
+    /// Otherwise the media stream will be lost when the [`Encoder`] instance is dropped.
+    ///
+    /// Returns an [`VideoEncoderError`] if an error occurred.
     pub fn finish_stream(mut self) -> Result<(), VideoEncoderError> {
         self.context.send_stream_eof(&mut self.format_context)?;
 
