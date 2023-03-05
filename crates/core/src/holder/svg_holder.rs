@@ -294,10 +294,10 @@ impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
         let mut path = PathData::new();
         PathLike::extend_path_from_slice(&mut path, &self.path);
 
-        let fill = match &self.fill_color {
-            Some(color_like) => Some(color_like.translate()),
-            None => None,
-        };
+        let fill = self
+            .fill_color
+            .as_ref()
+            .map(|color_like| color_like.translate());
 
         let visibility = match self.visibility {
             true => Visibility::Visible,
@@ -308,7 +308,7 @@ impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
             id: self.id.clone(),
             visibility,
             fill,
-            stroke: self.stroke.clone().and_then(|s| Some(s.translate())),
+            stroke: self.stroke.clone().map(|s| s.translate()),
             data: Rc::new(path),
             ..resvg::usvg::Path::default()
         })
@@ -353,7 +353,7 @@ impl SvgHolder {
 impl TransformLogic for SvgHolder {
     fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError> {
         for item in &mut self.items.values_mut() {
-            item.transform(&transformation)?;
+            item.transform(transformation)?;
         }
 
         Ok(())

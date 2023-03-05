@@ -3,8 +3,6 @@ use std::io::BufWriter;
 use std::path::Path;
 
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use rayon::slice::ParallelSlice;
 use resvg::tiny_skia::Pixmap;
 use thiserror::Error;
 
@@ -62,11 +60,11 @@ impl Plane {
     }
 
     pub fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Result<Self, PlaneError> {
-        if width <= 0 {
+        const_assert_eq!(SIZE::MIN, 0);
+        if width == 0 {
             return Err(PlaneError::ValueGreaterZero("Width"));
         }
-
-        if height <= 0 {
+        if height == 0 {
             return Err(PlaneError::ValueGreaterZero("Height"));
         }
 
@@ -99,12 +97,12 @@ impl Plane {
     }
 
     pub fn as_data_flatten(&self) -> Vec<u8> {
-        self.data.par_iter().flat_map(|p| p.to_raw()).collect()
+        self.data.iter().flat_map(|p| p.to_raw()).collect()
     }
 
     /// `0xAARRGGBB`
     pub fn as_data_packed(&self) -> Vec<u32> {
-        self.data.par_iter().map(|p| p.to_raw_packed()).collect()
+        self.data.iter().map(|p| p.to_raw_packed()).collect()
     }
 
     /// Crates a `Result<Plane, PlaneError>` from a `image::RgbaImage`
@@ -126,7 +124,7 @@ impl Plane {
     pub fn as_rgb_image(self) -> Result<RgbImage, PlaneError> {
         let buf = self
             .data
-            .par_iter()
+            .iter()
             .flat_map(|v| [v[0], v[1], v[2]])
             .collect::<Vec<u8>>();
 
@@ -149,9 +147,17 @@ impl Plane {
         let width = image.width() as SIZE;
         let height = image.height() as SIZE;
 
+        #[cfg(feature = "parallel")]
         let data = image
             .as_bytes()
             .par_chunks(3)
+            .map(|channels| Pixel::new(channels[0], channels[1], channels[2], 255))
+            .collect::<Vec<_>>();
+
+        #[cfg(not(feature = "parallel"))]
+        let data = image
+            .as_bytes()
+            .chunks(3)
             .map(|channels| Pixel::new(channels[0], channels[1], channels[2], 255))
             .collect::<Vec<_>>();
 
@@ -160,9 +166,24 @@ impl Plane {
 
     /// Crates a `anyhow::Result<Plane>` from a `resvg::tiny_skia::Pixmap`
     pub fn from_pixmap(pixmap: Pixmap) -> Self {
+        #[cfg(feature = "parallel")]
         let data = pixmap
             .pixels()
             .par_iter()
+            .map(|x| {
+                let r = x.red();
+                let g = x.green();
+                let b = x.blue();
+                let a = x.alpha();
+
+                Pixel::new_raw([r, g, b, a])
+            })
+            .collect::<Vec<Pixel>>();
+
+        #[cfg(not(feature = "parallel"))]
+        let data = pixmap
+            .pixels()
+            .iter()
             .map(|x| {
                 let r = x.red();
                 let g = x.green();
@@ -202,7 +223,7 @@ impl Plane {
 
     /// Fill all pixel from the plane with the given color
     pub fn fill(&mut self, color: Pixel) {
-        self.data = vec![color; (self.width * self.height) as usize]
+        self.data.fill(color)
     }
 
     pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {

@@ -20,6 +20,7 @@ log = "0.4"
 resvg = { workspace = true }
 rusvid_core = { path = "../crates/core" }
 rusvid_effect = { path = "../crates/effect" }
+rusvid_video_encoder = { path = "../crates/video_encoder" }
 
 [dev-dependencies]
 rayon = "*"

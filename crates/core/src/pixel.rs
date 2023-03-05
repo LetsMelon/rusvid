@@ -49,10 +49,10 @@ impl Pixel {
     pub fn to_raw_packed(&self) -> u32 {
         let mut result = 0;
 
-        result |= (self.get_a() as u32) << (8 * 3);
-        result |= (self.get_r() as u32) << (8 * 2);
-        result |= (self.get_g() as u32) << (8 * 1);
-        result |= (self.get_b() as u32) << (8 * 0);
+        result |= (self.get_a() as u32) << 24;
+        result |= (self.get_r() as u32) << 16;
+        result |= (self.get_g() as u32) << 8;
+        result |= self.get_b() as u32;
 
         result
     }

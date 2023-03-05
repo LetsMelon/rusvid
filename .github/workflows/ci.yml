@@ -27,6 +27,11 @@ jobs:
           toolchain: nightly
           override: true
 
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libavutil-dev libavformat-dev libswscale-dev
+
       - uses: actions/cache@v3
         with:
           path: |
