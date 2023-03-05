@@ -1360,7 +1360,6 @@ dependencies = [
 name = "rusvid_effect"
 version = "0.1.1"
 dependencies = [
- "anyhow",
  "criterion",
  "itertools",
  "log",
