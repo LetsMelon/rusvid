@@ -128,7 +128,7 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "black_video"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rusvid_lib",
 ]
@@ -270,7 +270,7 @@ checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
 name = "comp_effect"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rusvid_lib",
 ]
@@ -662,7 +662,7 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "grid"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rusvid_lib",
 ]
@@ -852,7 +852,7 @@ dependencies = [
 
 [[package]]
 name = "layers"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rusvid_lib",
 ]
@@ -1207,7 +1207,7 @@ checksum = "3b42e27ef78c35d3998403c1d26f3efd9e135d3e5121b0a4845cc5cc27547f4f"
 
 [[package]]
 name = "read_svg_file"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rusvid_lib",
 ]
@@ -1325,7 +1325,7 @@ dependencies = [
 
 [[package]]
 name = "rusvid_cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1336,7 +1336,7 @@ dependencies = [
 
 [[package]]
 name = "rusvid_core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "approx",
@@ -1358,7 +1358,7 @@ dependencies = [
 
 [[package]]
 name = "rusvid_effect"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "criterion",
@@ -1390,7 +1390,7 @@ dependencies = [
 
 [[package]]
 name = "rusvid_video_encoder"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ffmpeg-sys-next",
  "rusvid_core",
@@ -1399,7 +1399,7 @@ dependencies = [
 
 [[package]]
 name = "rusvid_wasm"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",
@@ -1493,14 +1493,14 @@ checksum = "14a5df39617d7c8558154693a1bb8157a4aab8179209540cc0b10e5dc24e0b18"
 
 [[package]]
 name = "simple_animation"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rusvid_lib",
 ]
 
 [[package]]
 name = "simple_path"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rusvid_lib",
 ]
