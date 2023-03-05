@@ -4,6 +4,7 @@
 use anyhow::Result;
 use rusvid_core::plane::Plane;
 
+pub mod error;
 mod functions;
 pub mod library;
 
