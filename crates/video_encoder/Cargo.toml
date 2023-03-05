@@ -10,5 +10,5 @@ ffmpeg-sys-next = { version = "5.1.1", default-features = false, features = [ "a
 rusvid_core = { path = "../core" }
 thiserror = "1.0"
 
-[features]
-build = ["ffmpeg-sys-next/build"]
+# [features]
+# build = ["ffmpeg-sys-next/build"]
