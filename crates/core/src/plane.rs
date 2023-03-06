@@ -185,20 +185,14 @@ impl Plane {
             .pixels()
             .iter()
             .map(|x| {
-                let r = x.red();
-                let g = x.green();
-                let b = x.blue();
-                let a = x.alpha();
+                let c = x.get();
+                let bytes = c.to_ne_bytes();
 
-                Pixel::new_raw([r, g, b, a])
+                Pixel::new_raw(bytes)
             })
             .collect::<Vec<Pixel>>();
 
-        Plane {
-            width: pixmap.width(),
-            height: pixmap.height(),
-            data,
-        }
+        Plane::from_data_unchecked(pixmap.width(), pixmap.height(), data)
     }
 
     pub fn as_pixmap(self) -> Result<Pixmap, PlaneError> {

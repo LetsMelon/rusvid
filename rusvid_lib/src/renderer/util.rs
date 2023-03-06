@@ -1,4 +1,5 @@
 use anyhow::Result;
+use rayon::prelude::*;
 use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
@@ -6,11 +7,12 @@ use crate::effect::EffectLogic;
 
 pub fn combine_renders(width: u32, height: u32, images: Vec<Plane>) -> Result<Plane> {
     let images_as_data = images
-        .iter()
+        .par_iter()
         .map(|i| i.as_data())
         .collect::<Vec<&Vec<Pixel>>>();
 
     let data = (0..((width * height) as usize))
+        .into_par_iter()
         .map(|i| {
             images_as_data.iter().fold(Pixel::ZERO, |acc, value| {
                 let value = value[i];
