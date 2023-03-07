@@ -476,7 +476,8 @@ checksum = "8d7439c3735f405729d52c3fbbe4de140eaf938a1fe47d227c27f8254d4302a5"
 [[package]]
 name = "easer"
 version = "0.3.0"
-source = "git+https://github.com/orhanbalci/rust-easing?rev=872ea2c#872ea2c77d24f53d5f03e4b68b69d65d5f4ba05a"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fba524f8b83c9c5bde02c2bb1627de9d1f81980489a6d54168cdfd08c258f917"
 dependencies = [
  "num-traits",
 ]

@@ -8,3 +8,4 @@ out/
 **.png
 **.svg
 profile.json
+.env
