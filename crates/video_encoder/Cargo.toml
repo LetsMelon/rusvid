@@ -3,10 +3,10 @@ name = "rusvid_video_encoder"
 version = "0.2.0"
 edition = "2021"
 license = "Apache-2.0"
-description = "Core library for rusvid"
+description = "h264 mp4 encoder for rusvid"
 repository = "https://github.com/LetsMelon/rusvid"
 readme = "../../README.md"
-keywords = ["svg", "graphics", "animation"]
+keywords = ["svg", "graphics", "animation", "h264", "mp4"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
