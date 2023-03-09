@@ -4,6 +4,7 @@ edition = "2021"
 description = "Core library for rusvid"
 readme = "../../README.md"
 keywords = ["svg", "graphics", "animation"]
+documentation = "https://docs.rs/rusvid_core/"
 
 version.workspace = true
 license.workspace = true
