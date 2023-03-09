@@ -127,13 +127,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
-name = "black_video"
-version = "0.2.1"
-dependencies = [
- "rusvid_lib",
-]
-
-[[package]]
 name = "bumpalo"
 version = "3.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -267,13 +260,6 @@ name = "color_quant"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
-
-[[package]]
-name = "comp_effect"
-version = "0.2.1"
-dependencies = [
- "rusvid_lib",
-]
 
 [[package]]
 name = "concat-idents"
@@ -662,13 +648,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
-name = "grid"
-version = "0.2.1"
-dependencies = [
- "rusvid_lib",
-]
-
-[[package]]
 name = "half"
 version = "1.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -849,13 +828,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a53776d271cfb873b17c618af0298445c88afc52837f3e948fa3fafd131f449"
 dependencies = [
  "arrayvec",
-]
-
-[[package]]
-name = "layers"
-version = "0.2.1"
-dependencies = [
- "rusvid_lib",
 ]
 
 [[package]]
@@ -1207,13 +1179,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b42e27ef78c35d3998403c1d26f3efd9e135d3e5121b0a4845cc5cc27547f4f"
 
 [[package]]
-name = "read_svg_file"
-version = "0.2.1"
-dependencies = [
- "rusvid_lib",
-]
-
-[[package]]
 name = "regex"
 version = "1.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1490,20 +1455,6 @@ name = "simd-adler32"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "14a5df39617d7c8558154693a1bb8157a4aab8179209540cc0b10e5dc24e0b18"
-
-[[package]]
-name = "simple_animation"
-version = "0.2.1"
-dependencies = [
- "rusvid_lib",
-]
-
-[[package]]
-name = "simple_path"
-version = "0.2.1"
-dependencies = [
- "rusvid_lib",
-]
 
 [[package]]
 name = "simplecss"

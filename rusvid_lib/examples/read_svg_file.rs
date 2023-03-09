@@ -16,7 +16,7 @@ fn main() {
     let path = env::current_dir()
         .unwrap()
         .as_path()
-        .join("./examples/read_svg_file/assets/rect_gradient.svg");
+        .join("./rusvid_lib/examples/assets/rect_gradient.svg");
     let layer = Layer::from_file(composition.resolution(), &path).unwrap();
     composition.add_layer(layer);
 
