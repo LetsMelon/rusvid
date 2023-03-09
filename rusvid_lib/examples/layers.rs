@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use rusvid_lib::core::frame_image_format::FrameImageFormat;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 use rusvid_lib::resvg::usvg::{Fill, NodeKind, Paint, Path};
@@ -47,8 +46,7 @@ fn main() {
         .unwrap();
 
     let out_path = PathBuf::from("layers.mp4");
-    let tmp_path = PathBuf::from("./out");
 
-    let mut renderer = FfmpegRenderer::new(out_path, tmp_path, FrameImageFormat::Png);
+    let mut renderer = EmbeddedRenderer::new(out_path);
     renderer.render(composition).unwrap()
 }

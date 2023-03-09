@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-use rusvid_lib::core::frame_image_format::FrameImageFormat;
 use rusvid_lib::prelude::*;
 
 fn main() {
@@ -15,8 +14,7 @@ fn main() {
     let _ = composition.create_layer().unwrap();
 
     let out_path = PathBuf::from("black_video.mp4");
-    let tmp_path = PathBuf::from("./out");
 
-    let mut renderer = FfmpegRenderer::new(out_path, tmp_path, FrameImageFormat::Png);
+    let mut renderer = EmbeddedRenderer::new(out_path);
     renderer.render(composition).unwrap();
 }

@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use rusvid_lib::animation::prelude::*;
-use rusvid_lib::core::frame_image_format::FrameImageFormat;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 use rusvid_lib::resvg::usvg::{
@@ -93,6 +92,6 @@ fn main() {
         }
     }
 
-    let mut renderer = FfmpegRenderer::new("grid.mp4", "./out", FrameImageFormat::Png);
+    let mut renderer = EmbeddedRenderer::new("grid.mp4");
     renderer.render(composition).unwrap()
 }
