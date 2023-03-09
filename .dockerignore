@@ -1,2 +1,7 @@
 target/
 .env
+out/
+**.DS_Store
+**.log
+**.json
+**.txt
