@@ -6,6 +6,7 @@ use crate::error::EffectError;
 use crate::{EffectLogic, Element, ID};
 
 #[derive(Debug)]
+/// Effect to apply a [box blur](https://en.wikipedia.org/wiki/Box_blur) effect on a [`Plane`].
 pub struct BoxBlur {
     kernel_x: u32,
     kernel_y: u32,

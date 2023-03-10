@@ -6,6 +6,9 @@ use rusvid_core::plane::Plane;
 use crate::error::{EffectError, RhaiError};
 use crate::{EffectLogic, Element, ID};
 
+/// Effect to apply a custom effect on a [`Plane`].
+///
+/// The used scripting language is [rhai](https://rhai.rs/).
 pub struct ScriptingEffect {
     id: Option<String>,
 

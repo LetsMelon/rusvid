@@ -25,6 +25,7 @@ fn kernel_size(stdev: f64) -> i32 {
 }
 
 #[derive(Debug)]
+/// Effect to apply a [gaussian blur](https://en.wikipedia.org/wiki/Gaussian_blur) effect on a [`Plane`].
 pub struct GaussianBlur {
     stdev: f64,
     kernel: i32,

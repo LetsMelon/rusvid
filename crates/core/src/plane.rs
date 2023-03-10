@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::BufWriter;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
 use resvg::tiny_skia::Pixmap;
@@ -273,11 +273,17 @@ impl Plane {
         }
     }
 
-    pub fn save_with_format<P: AsRef<Path>>(
+    pub fn save_with_format(
         self,
-        path: P,
+        path: impl Into<PathBuf>,
         format: FrameImageFormat,
     ) -> Result<(), PlaneError> {
+        let mut path: PathBuf = path.into();
+
+        if path.extension().is_none() {
+            path.set_extension(format.file_extension());
+        }
+
         match format {
             FrameImageFormat::Png => self.save_as_png(path),
             FrameImageFormat::Bmp => self.save_as_bmp(path),

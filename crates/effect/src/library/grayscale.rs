@@ -6,6 +6,7 @@ use crate::functions::grayscale;
 use crate::{EffectLogic, Element, ID};
 
 #[derive(Debug, Default)]
+/// Effect to apply a [grayscale](https://en.wikipedia.org/wiki/Grayscale) effect on a [`Plane`].
 pub struct GrayscaleEffect {
     id: Option<String>,
 }

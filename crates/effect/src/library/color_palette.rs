@@ -7,6 +7,9 @@ use crate::functions::color_palette::transform;
 use crate::{EffectLogic, Element, ID};
 
 #[derive(Debug)]
+/// Effect to apply a color palette effect on a [`Plane`].
+///
+/// See [color quantization](https://en.wikipedia.org/wiki/Color_quantization) or [palette computing](https://en.wikipedia.org/wiki/Palette_(computing))
 pub struct ColorPaletteEffect {
     color_palette: Vec<Pixel>,
 

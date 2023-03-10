@@ -6,6 +6,7 @@ use crate::error::EffectError;
 use crate::{EffectLogic, Element, ID};
 
 #[derive(Debug)]
+/// Effect to apply a [pixelation](https://en.wikipedia.org/wiki/Pixelation) effect on a [`Plane`].
 pub struct PixelateEffect {
     pixel_width: u32,
     pixel_height: u32,
