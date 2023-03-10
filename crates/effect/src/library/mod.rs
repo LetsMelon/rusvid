@@ -14,3 +14,13 @@ pub use grayscale::GrayscaleEffect;
 pub use pixelate::PixelateEffect;
 #[cfg(feature = "scripting")]
 pub use scripting::ScriptingEffect;
+
+/*
+TODO effects to implement
+
+- https://en.wikipedia.org/wiki/Colour_banding
+- https://en.wikipedia.org/wiki/Dither
+- https://en.wikipedia.org/wiki/Posterization
+- https://en.wikipedia.org/wiki/Median_filter
+- https://en.wikipedia.org/wiki/Image_noise
+ */
