@@ -30,9 +30,13 @@ pub enum PlaneError {
     OutOfBound2d(u32, u32),
 }
 
+/// Used as resolution and coordinates
 pub type SIZE = u32;
 
 #[derive(Debug, Clone)]
+/// Structure to hold pixels for e.g.: a video-frame, an image, ... .
+///
+/// Can only store pixels as `RGBA` with a bit-depth of `8`, for more info see [`Pixel`]
 pub struct Plane {
     width: SIZE,
     height: SIZE,
@@ -46,10 +50,14 @@ fn position_to_index(x: SIZE, y: SIZE, multi: SIZE) -> usize {
 
 /// Coordinate system used: <https://learn.adafruit.com/adafruit-gfx-graphics-library/coordinate-system-and-units>
 impl Plane {
+    /// Create a new [`Plane`] with the given resolution. Fills the item with only ZEROS.
+    ///
+    /// Warning: this method will allocate `width * height * 4` bytes in memory!
     pub fn new(width: SIZE, height: SIZE) -> Result<Self, PlaneError> {
         Self::new_with_fill(width, height, Pixel::ZERO)
     }
 
+    /// Create a new [`Plane`] with the given resolution. Fills the item with the given `color`.
     pub fn new_with_fill(width: SIZE, height: SIZE, color: Pixel) -> Result<Self, PlaneError> {
         Self::from_data(
             width,
@@ -59,6 +67,7 @@ impl Plane {
         )
     }
 
+    /// Create a new [`Plane`] with the given resolution and fill it with the pixel information from `data`.
     pub fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Result<Self, PlaneError> {
         const_assert_eq!(SIZE::MIN, 0);
         if width == 0 {
@@ -80,6 +89,12 @@ impl Plane {
         Ok(Self::from_data_unchecked(width, height, data))
     }
 
+    /// Create a new [`Plane`] with the given resolution and fill it with the pixel information from `data`. For more infos about the items inside `data` see [`Pixel`]
+    ///
+    /// Warning: this function doesn't check if `width * height == data.len()`, `width != 0` or `height != 0`.
+    /// It will accept any values!
+    ///
+    /// For a safe use, it's advised to use the [`from_data`](Plane::from_data) method to create a new [`Plane`] from data.
     pub fn from_data_unchecked(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Self {
         Plane {
             width,
@@ -88,30 +103,51 @@ impl Plane {
         }
     }
 
+    /// Returns a reference to the data. For more infos about the items see [`Pixel`]
     pub fn as_data(&self) -> &Vec<Pixel> {
         &self.data
     }
 
+    /// Returns a mutable reference to the data. For more infos about the items see [`Pixel`]
     pub fn as_data_mut(&mut self) -> &mut Vec<Pixel> {
         &mut self.data
     }
 
+    /// Returns the data but flatten. For more infos about the items see [`Pixel::to_raw`](Pixel::to_raw)
+    ///
+    /// ```rust
+    /// use rusvid_core::pixel::Pixel;
+    ///
+    /// let p = Pixel::new(255, 0, 0, 100);
+    ///
+    /// assert_eq!(p.to_raw(), [255, 0, 0, 100]);
+    /// ```
     pub fn as_data_flatten(&self) -> Vec<u8> {
         self.data.iter().flat_map(|p| p.to_raw()).collect()
     }
 
-    /// `0xAARRGGBB`
+    /// Returns the data but flatten and packed. For more infos about the items see [`Pixel::to_raw_packed`](Pixel::to_raw_packed)
+    ///
+    /// ```rust
+    /// use rusvid_core::pixel::Pixel;
+    ///
+    /// let p = Pixel::new(0xFF, 0x00, 0xAA, 0x77);
+    ///
+    /// assert_eq!(p.to_raw_packed(), 0x77FF00AA);
+    /// //                            ^-- format: 0xAARRGGBB
+    /// ```
     pub fn as_data_packed(&self) -> Vec<u32> {
         self.data.iter().map(|p| p.to_raw_packed()).collect()
     }
 
-    /// Crates a `Result<Plane, PlaneError>` from a `image::RgbaImage`
+    /// Tries to create a [`Plane`] from [`image::RgbaImage`] or returns a [`PlaneError`].
     pub fn from_rgba_image(image: RgbaImage) -> Result<Self, PlaneError> {
         let width = image.width() as SIZE;
         let height = image.height() as SIZE;
 
         let mut plane = Plane::new(width, height)?;
 
+        // TODO use an iterator instead of the two for loops
         for x in 0..plane.width() {
             for y in 0..plane.height() {
                 *plane.pixel_mut_unchecked(x, y) = Pixel::new_raw(image.get_pixel(x, y).0);
@@ -121,6 +157,7 @@ impl Plane {
         Ok(plane)
     }
 
+    /// Consumes itself and tries to create an [`image::RgbImage`] or returns a [`PlaneError`].
     pub fn as_rgb_image(self) -> Result<RgbImage, PlaneError> {
         let buf = self
             .data
@@ -134,6 +171,7 @@ impl Plane {
         RgbImage::from_vec(self.width(), self.height(), buf).ok_or(PlaneError::ImageError)
     }
 
+    /// Consumes itself and tries to create an [`image::RgbaImage`] or returns a [`PlaneError`].
     pub fn as_rgba_image(self) -> Result<RgbaImage, PlaneError> {
         let buf = self.as_data_flatten();
 
@@ -143,18 +181,11 @@ impl Plane {
         RgbaImage::from_vec(self.width(), self.height(), buf).ok_or(PlaneError::ImageError)
     }
 
+    /// Tries to create a [`Plane`] from [`image::DynamicImage`] or returns a [`PlaneError`].
     pub fn from_dynamic_image(image: DynamicImage) -> Result<Self, PlaneError> {
         let width = image.width() as SIZE;
         let height = image.height() as SIZE;
 
-        #[cfg(feature = "parallel")]
-        let data = image
-            .as_bytes()
-            .par_chunks(3)
-            .map(|channels| Pixel::new(channels[0], channels[1], channels[2], 255))
-            .collect::<Vec<_>>();
-
-        #[cfg(not(feature = "parallel"))]
         let data = image
             .as_bytes()
             .chunks(3)
@@ -164,23 +195,8 @@ impl Plane {
         Plane::from_data(width, height, data)
     }
 
-    /// Crates a `anyhow::Result<Plane>` from a `resvg::tiny_skia::Pixmap`
+    /// Create a [`Plane`] from [`tiny_skia::Pixmap`]
     pub fn from_pixmap(pixmap: Pixmap) -> Self {
-        #[cfg(feature = "parallel")]
-        let data = pixmap
-            .pixels()
-            .par_iter()
-            .map(|x| {
-                let r = x.red();
-                let g = x.green();
-                let b = x.blue();
-                let a = x.alpha();
-
-                Pixel::new_raw([r, g, b, a])
-            })
-            .collect::<Vec<Pixel>>();
-
-        #[cfg(not(feature = "parallel"))]
         let data = pixmap
             .pixels()
             .iter()
@@ -195,6 +211,7 @@ impl Plane {
         Plane::from_data_unchecked(pixmap.width(), pixmap.height(), data)
     }
 
+    /// Consumes itself and tries to create an [`tiny_skia::Pixmap`] or returns a [`PlaneError`].
     pub fn as_pixmap(self) -> Result<Pixmap, PlaneError> {
         let mut pixmap =
             Pixmap::new(self.width(), self.height()).ok_or(PlaneError::TinySkiaError)?;
@@ -205,21 +222,22 @@ impl Plane {
         Ok(pixmap)
     }
 
-    /// Returns the plane's height in `SIZE`
+    /// Returns the plane's height as [`SIZE`]
     pub fn width(&self) -> SIZE {
         self.width
     }
 
-    /// Returns the plane's width in `SIZE`
+    /// Returns the plane's width as [`SIZE`]
     pub fn height(&self) -> SIZE {
         self.height
     }
 
-    /// Fill all pixel from the plane with the given color
+    /// Fill all pixels from the [`Plane`] with the given `color`. For more infos see [`Pixel`]
     pub fn fill(&mut self, color: Pixel) {
         self.data.fill(color)
     }
 
+    /// Get the [`Pixel`] from the given coordinates. Returns `None` if the coordinates are invalid.
     pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
         const_assert_eq!(SIZE::MIN, 0);
 
@@ -233,10 +251,13 @@ impl Plane {
         Some(self.pixel_unchecked(x, y))
     }
 
+    /// Get the [`Pixel`] from the given coordinates. Panics if the coordinates are invalid.
+    /// For a more safer method see [`pixel`](Plane::pixel).
     pub fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
         unsafe { self.data.get_unchecked(position_to_index(x, y, self.width)) }
     }
 
+    /// Get a mutable reference of the [`Pixel`] from the given coordinates. Returns `None` if the coordinates are invalid.
     pub fn pixel_mut(&mut self, x: SIZE, y: SIZE) -> Option<&mut Pixel> {
         if x > self.width {
             return None;
@@ -248,6 +269,8 @@ impl Plane {
         Some(self.pixel_mut_unchecked(x, y))
     }
 
+    /// Get a mutable reference of the [`Pixel`] from the given coordinates. Panics if the coordinates are invalid.
+    /// For a more safer method see [`pixel_mut`](Plane::pixel_mut).
     pub fn pixel_mut_unchecked(&mut self, x: SIZE, y: SIZE) -> &mut Pixel {
         unsafe {
             self.data
@@ -255,12 +278,15 @@ impl Plane {
         }
     }
 
+    /// Update the [`Pixel`] with the given coordinates with the `value`. Returns an [`PlaneError`] if the coordinates are invalid.
     pub fn put_pixel(&mut self, x: SIZE, y: SIZE, value: Pixel) -> Result<(), PlaneError> {
         *self.pixel_mut(x, y).ok_or(PlaneError::OutOfBound2d(x, y))? = value;
 
         Ok(())
     }
 
+    /// Update the [`Pixel`] with the given coordinates with the `value`. Panics if the coordinates are invalid.
+    /// For a more safer method see [`put_pixel`](Plane::put_pixel).
     pub fn put_pixel_unchecked(&mut self, x: SIZE, y: SIZE, value: Pixel) {
         *self.pixel_mut_unchecked(x, y) = value;
     }
@@ -273,6 +299,25 @@ impl Plane {
         }
     }
 
+    /// Save the plane with the given [`FrameImageFormat`] as the `path`.
+    ///
+    /// See also [`save_as_bmp`](Plane::save_as_bmp), [`save_as_png`](Plane::save_as_png) and [`save_as_jpg`](Plane::save_as_jpg) for the underlying functions.
+    ///
+    /// If the `path` doesn't have a extension than this function will the corresponding extension of `format` to the path.
+    ///
+    /// The internal code for the file extension looks something like that:
+    ///
+    /// ```rust
+    /// use std::path::PathBuf;
+    /// use rusvid_core::frame_image_format::FrameImageFormat;
+    ///
+    /// let mut path = PathBuf::from("my_file");
+    /// let format = FrameImageFormat::Jpg;
+    ///
+    /// path.set_extension(format.file_extension());
+    ///
+    /// assert_eq!(path.to_string_lossy(), "my_file.jpg");
+    /// ```
     pub fn save_with_format(
         self,
         path: impl Into<PathBuf>,
@@ -292,6 +337,7 @@ impl Plane {
     }
 
     // TODO implement first citizen `Plane-to-Bmp` function
+    /// Saves the [`Plane`] as a `bmp` file with the given `path`.
     pub fn save_as_bmp<P: AsRef<Path>>(self, path: P) -> Result<(), PlaneError> {
         let as_image = self.as_rgba_image()?;
         as_image
@@ -299,6 +345,7 @@ impl Plane {
             .map_err(|_| PlaneError::ImageError)
     }
 
+    /// Saves the [`Plane`] as a `png` file with the given `path`.
     pub fn save_as_png<P: AsRef<Path>>(self, path: P) -> Result<(), PlaneError> {
         use png::{BitDepth, ColorType, Compression, Encoder};
 
@@ -308,7 +355,7 @@ impl Plane {
         let mut encoder = Encoder::new(&mut w, self.width(), self.height());
         encoder.set_color(ColorType::Rgba);
         encoder.set_depth(BitDepth::Eight);
-        encoder.set_compression(Compression::Best);
+        encoder.set_compression(Compression::Default);
 
         let mut writer = encoder.write_header().unwrap();
 
@@ -319,6 +366,7 @@ impl Plane {
     }
 
     // TODO implement first citizen `Plane-to-JPG` function
+    /// Saves the [`Plane`] as a `jpg` file with the given `path`.
     pub fn save_as_jpg<P: AsRef<Path>>(self, path: P) -> Result<(), PlaneError> {
         let as_image = self.as_rgba_image()?;
         as_image
