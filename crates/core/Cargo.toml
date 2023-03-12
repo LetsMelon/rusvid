@@ -19,7 +19,7 @@ flo_curves = "0.6.1"
 geo = "0.24.0"
 glam = { version = "0.22.0", features = ["approx"] }
 image = { workspace = true, features = ["png", "bmp", "jpeg"] }
-paste = "1.0.11"
+paste = "1.0.12"
 png = "0.17.7"
 resvg = { workspace = true }
 rhai = { version = "1.12.0", optional = true }
