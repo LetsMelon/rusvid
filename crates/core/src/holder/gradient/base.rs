@@ -1,6 +1,6 @@
 use crate::holder::gradient::stop::Stop;
 use crate::holder::utils::TranslateIntoResvgGeneric;
-use crate::plane::Pixel;
+use crate::pixel::Pixel;
 
 #[derive(Debug, Clone, Default)]
 pub struct BaseGradient {

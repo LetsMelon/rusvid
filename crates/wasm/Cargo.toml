@@ -1,7 +1,10 @@
 [package]
 name = "rusvid_wasm"
-version = "0.1.0"
 edition = "2021"
+
+version.workspace = true
+license.workspace = true
+repository.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -13,6 +16,8 @@ crate-type = ["cdylib"]
 console_error_panic_hook = "0.1.7"
 js-sys = "0.3.60"
 lazy_static = "1.4.0"
-rusvid_core = { path = "../core" }
+rusvid_core = { path = "../core", version = "0.2.0" }
 wasm-bindgen = "0.2.63"
-web-sys = { version = "0.3.60", default-features = false, features = [ "console" ] }
+web-sys = { version = "0.3.60", default-features = false, features = [
+    "console",
+] }

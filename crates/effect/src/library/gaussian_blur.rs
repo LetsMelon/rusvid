@@ -1,20 +1,19 @@
 use std::f64::consts::{E, PI};
 
-use anyhow::Result;
 use itertools::Itertools;
 use log::info;
+use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
+use crate::error::EffectError;
 use crate::{EffectLogic, Element, ID};
 
-#[inline(always)]
 fn gaussian_function(stdev: f64, x: i32, y: i32) -> f64 {
     let pow_x = (x as f64).powf(2.0);
     let pow_y = (y as f64).powf(2.0);
     (1.0 / (2.0 * PI * stdev.powf(2.0))) * E.powf(-((pow_x + pow_y) / (2.0 * stdev.powf(2.0))))
 }
 
-#[inline(always)]
 fn kernel_size(stdev: f64) -> i32 {
     let mut kernel = (6.0 * stdev).ceil() as i32;
 
@@ -26,7 +25,9 @@ fn kernel_size(stdev: f64) -> i32 {
 }
 
 #[derive(Debug)]
+/// Effect to apply a [gaussian blur](https://en.wikipedia.org/wiki/Gaussian_blur) effect on a [`Plane`].
 pub struct GaussianBlur {
+    stdev: f64,
     kernel: i32,
 
     abs_d: i32,
@@ -36,7 +37,6 @@ pub struct GaussianBlur {
 }
 
 impl GaussianBlur {
-    #[inline(always)]
     pub fn new(stdev: f64) -> Self {
         let kernel = kernel_size(stdev);
         let abs_d = kernel.div_floor(2);
@@ -52,6 +52,7 @@ impl GaussianBlur {
             .collect::<Vec<f64>>();
 
         GaussianBlur {
+            stdev,
             kernel,
             abs_d,
             weights,
@@ -59,12 +60,19 @@ impl GaussianBlur {
         }
     }
 
-    #[inline(always)]
     pub fn new_with_id(stdev: f64, id: impl Into<ID>) -> Self {
         let mut obj = Self::new(stdev);
         obj.id = Some(id.into());
 
         obj
+    }
+
+    pub fn kernel(&self) -> i32 {
+        self.kernel
+    }
+
+    pub fn stdev(&self) -> f64 {
+        self.stdev
     }
 }
 
@@ -72,10 +80,14 @@ impl Element for GaussianBlur {
     fn id(&self) -> Option<&ID> {
         self.id.as_ref()
     }
+
+    fn name(&self) -> &str {
+        "gaussian blur"
+    }
 }
 
 impl EffectLogic for GaussianBlur {
-    fn apply(&self, original: Plane) -> Result<Plane> {
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError> {
         let mut result = Plane::new(original.width(), original.height())?;
 
         for x in (self.kernel)..(result.width() as i32 - self.kernel) {
@@ -102,7 +114,7 @@ impl EffectLogic for GaussianBlur {
                 result.put_pixel_unchecked(
                     x as u32,
                     y as u32,
-                    [sum[0] as u8, sum[1] as u8, sum[2] as u8, sum[3] as u8],
+                    Pixel::new(sum[0] as u8, sum[1] as u8, sum[2] as u8, sum[3] as u8),
                 );
             }
         }

@@ -8,6 +8,7 @@ use rusvid_core::holder::object::Object;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
 use rusvid_core::holder::transform::{Transform, TransformLogic};
+use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
@@ -52,7 +53,7 @@ pub fn render() -> js_sys::Uint8ClampedArray {
     let plane = object.render(width, height).unwrap();
     let data = plane.as_data();
 
-    js_sys::Uint8ClampedArray::from(&data.iter().flatten().map(|x| *x).collect::<Vec<u8>>()[..])
+    js_sys::Uint8ClampedArray::from(&data.iter().flat_map(|p| p.to_raw()).collect::<Vec<u8>>()[..])
 }
 
 #[wasm_bindgen]
@@ -62,12 +63,12 @@ pub fn transform_color(color: js_sys::Uint8ClampedArray) {
     let mut object = OBJECT.lock().unwrap();
     if color_vec.len() == 4 || color_vec.len() == 3 {
         object
-            .transform(&Transform::Color(Some(ColorLike::Color([
+            .transform(&Transform::Color(Some(ColorLike::Color(Pixel::new(
                 color_vec[0],
                 color_vec[1],
                 color_vec[2],
                 255,
-            ]))))
+            )))))
             .unwrap()
     } else {
         object.transform(&Transform::Color(None)).unwrap()
@@ -79,12 +80,12 @@ pub fn transform_stroke(paint: Option<js_sys::Uint8ClampedArray>, width: Option<
     let paint_vec_option = paint.map(|item| item.to_vec()).unwrap_or_default();
     let stroke = match (paint_vec_option.len(), width) {
         (3 | 4, Some(w)) => {
-            let c = ColorLike::Color([
+            let c = ColorLike::Color(Pixel::new(
                 paint_vec_option[0],
                 paint_vec_option[1],
                 paint_vec_option[2],
                 255,
-            ]);
+            ));
 
             Some(Stroke {
                 paint: c,
@@ -217,7 +218,7 @@ pub fn add_svg(data: js_sys::Int32Array, color: js_sys::Uint8ClampedArray) -> Op
             let b = color_as_vec[2];
             let a = color_as_vec[3];
 
-            Some(ColorLike::Color([r, g, b, a]))
+            Some(ColorLike::Color(Pixel::new(r, g, b, a)))
         }
         _ => None,
     };

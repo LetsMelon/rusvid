@@ -1,7 +1,7 @@
 use crate::holder::gradient::linear::LinearGradient;
 use crate::holder::gradient::radial::RadialGradient;
 use crate::holder::utils::TranslateIntoResvgGeneric;
-use crate::plane::Pixel;
+use crate::pixel::Pixel;
 
 #[derive(Debug, Clone)]
 pub enum ColorLike {
@@ -15,7 +15,7 @@ impl ColorLike {
         use resvg::usvg::Paint;
 
         match paint {
-            Paint::Color(c) => ColorLike::Color([c.red, c.green, c.blue, 255]),
+            Paint::Color(c) => ColorLike::Color(Pixel::new(c.red, c.green, c.blue, 255)),
             _ => todo!(),
         }
     }

@@ -3,21 +3,20 @@ name: CI
 on:
   push:
     paths:
-      - '**.rs'
-      - '**Cargo.**'
-      - '.github/workflows/ci.yml'
+      - "**.rs"
+      - "**Cargo.**"
+      - ".github/workflows/ci.yml"
   pull_request:
     paths:
-      - '**.rs'
-      - '**Cargo.**'
-      - '.github/workflows/ci.yml'
+      - "**.rs"
+      - "**Cargo.**"
+      - ".github/workflows/ci.yml"
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -28,18 +27,27 @@ jobs:
           toolchain: nightly
           override: true
 
-      - name: Cache Target
-        id: cache-target
-        uses: actions/cache@v3
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libavutil-dev libavformat-dev libswscale-dev
+
+      - uses: actions/cache@v3
         with:
-          path: target
-          key: ${{ runner.os }}-target
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build
-        run: cargo build --verbose --all-targets --all
+        run: cargo build --verbose --all-targets --all --all-features
+        env:
+          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: "sparse"
 
       - name: Test
-        run: cargo test --workspace
-
-#      - name: Bench
-#        run: cargo bench
+        run: cargo test --all --all-features
+        env:
+          CARGO_REGISTRIES_CRATES_IO_PROTOCOL: "sparse"

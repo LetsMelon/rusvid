@@ -3,7 +3,6 @@ use rusvid_core::point::Point;
 
 use super::utils::extend_path_from_slice;
 
-#[inline]
 pub fn rect_raw(position: Point, size: Point) -> Vec<PathSegment> {
     let x = position.x();
     let y = position.y();
@@ -23,7 +22,6 @@ pub fn rect_raw(position: Point, size: Point) -> Vec<PathSegment> {
     .to_vec()
 }
 
-#[inline]
 pub fn rect(position: Point, size: Point) -> PathData {
     let mut path = PathData::new();
 

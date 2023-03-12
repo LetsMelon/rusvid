@@ -1,8 +1,11 @@
 #![feature(int_roundings)]
+#![cfg_attr(coverage_nightly, feature(no_coverage))]
 
-use anyhow::Result;
+use error::EffectError;
 use rusvid_core::plane::Plane;
 
+pub mod error;
+mod functions;
 pub mod library;
 
 pub type ID = String;
@@ -10,10 +13,12 @@ pub type ID = String;
 // TODO move into separate file and use in the whole project for objects which can hold an id
 pub trait Element {
     fn id(&self) -> Option<&ID>;
+
+    fn name(&self) -> &str;
 }
 
 pub trait EffectLogic: std::fmt::Debug + Element {
-    fn apply(&self, original: Plane) -> Result<Plane>;
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError>;
 
     fn depends_on_other_effects_ids(&self) -> Vec<ID> {
         Vec::new()

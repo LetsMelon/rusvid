@@ -1,18 +1,20 @@
 use anyhow::Result;
-use rusvid_core::plane::{Pixel, Plane};
+use rayon::prelude::*;
+use rusvid_core::pixel::Pixel;
+use rusvid_core::plane::Plane;
 
 use crate::effect::EffectLogic;
 
-#[inline]
 pub fn combine_renders(width: u32, height: u32, images: Vec<Plane>) -> Result<Plane> {
     let images_as_data = images
-        .iter()
+        .par_iter()
         .map(|i| i.as_data())
         .collect::<Vec<&Vec<Pixel>>>();
 
     let data = (0..((width * height) as usize))
+        .into_par_iter()
         .map(|i| {
-            images_as_data.iter().fold([0_u8; 4], |acc, value| {
+            images_as_data.iter().fold(Pixel::ZERO, |acc, value| {
                 let value = value[i];
 
                 match (acc[3], value[3]) {
@@ -42,12 +44,12 @@ pub fn combine_renders(width: u32, height: u32, images: Vec<Plane>) -> Result<Pl
                         let mix_g = fg_g * fg_a / mix_a + bg_g * bg_a * (1.0 - fg_a) / mix_a;
                         let mix_b = fg_b * fg_a / mix_a + bg_b * bg_a * (1.0 - fg_a) / mix_a;
 
-                        [
+                        Pixel::new(
                             (mix_r * 255.0) as u8,
                             (mix_g * 255.0) as u8,
                             (mix_b * 255.0) as u8,
                             (mix_a * 255.0) as u8,
-                        ]
+                        )
                     }
                 }
             })
@@ -57,7 +59,6 @@ pub fn combine_renders(width: u32, height: u32, images: Vec<Plane>) -> Result<Pl
     Ok(Plane::from_data_unchecked(width, height, data))
 }
 
-#[inline]
 pub fn apply_effects(original: Plane, effects: &Vec<Box<dyn EffectLogic>>) -> Result<Plane> {
     let mut back = original;
 
@@ -73,12 +74,12 @@ mod tests {
     fn generate_plane(width: u32, height: u32) -> Plane {
         let data = (0..(width * height))
             .map(|i| {
-                [
+                Pixel::new(
                     i as u8,
                     (i * 2) as u8,
                     (i * 3) as u8,
                     (100 - (i as isize)).abs() as u8,
-                ]
+                )
             })
             .collect();
 

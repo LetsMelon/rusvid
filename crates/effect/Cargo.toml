@@ -1,12 +1,36 @@
 [package]
 name = "rusvid_effect"
-version = "0.1.0"
 edition = "2021"
+description = "Collection of predefined image effects for rusvid"
+readme = "../../README.md"
+keywords = ["svg", "graphics", "animation"]
+documentation = "https://docs.rs/rusvid_effect/"
+
+version.workspace = true
+license.workspace = true
+repository.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rusvid_core = { path = "../core" }
-anyhow = { workspace = true }
 itertools = "0.10.5"
 log = "0.4.17"
+rayon = "1.6.1"
+rhai = { version = "1.12.0", optional = true }
+rusvid_core = { path = "../core", version = "0.2.0" }
+thiserror = "1.0"
+
+[dev-dependencies]
+criterion = "0.4"
+rand = "0.8.5"
+
+[features]
+default = ["scripting"]
+scripting = ["dep:rhai", "rusvid_core/scripting"]
+
+[profile.dev.package.rhai]
+opt-level = 3
+
+[[bench]]
+name = "effect"
+harness = false

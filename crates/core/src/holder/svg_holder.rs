@@ -6,6 +6,7 @@ use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils::{random_id, TranslateIntoResvgGeneric};
+use crate::pixel::Pixel;
 use crate::point::Point;
 
 const BOUNDING_BOX_STEPS: i32 = 10;
@@ -26,7 +27,6 @@ pub struct SvgItem {
 }
 
 impl SvgItem {
-    #[inline]
     pub fn new_with_id(
         id: impl Into<String>,
         path: Vec<PathLike>,
@@ -43,7 +43,6 @@ impl SvgItem {
         }
     }
 
-    #[inline]
     pub fn new(path: Vec<PathLike>, fill_color: Option<ColorLike>) -> Self {
         Self::new_with_id(random_id(), path, fill_color)
     }
@@ -86,12 +85,10 @@ impl SvgItem {
                     use flo_curves::bezier::Curve;
                     use flo_curves::*;
 
-                    #[inline]
                     fn point_to_coord2(p: &Point) -> Coord2 {
                         Coord2(p.x(), p.y())
                     }
 
-                    #[inline]
                     fn coord2_to_point(c: &Coord2) -> Point {
                         Point::new(c.x(), c.y())
                     }
@@ -147,7 +144,7 @@ impl SvgItem {
 
         let mut my_box = SvgItem::new(vec![a, b, c, d, PathLike::Close], None);
         my_box.stroke = Some(Stroke {
-            paint: ColorLike::Color([0, 0, 0, 255]),
+            paint: ColorLike::Color(Pixel::new(0, 0, 0, 255)),
             width: 3.0,
             ..Default::default()
         });
@@ -297,10 +294,10 @@ impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
         let mut path = PathData::new();
         PathLike::extend_path_from_slice(&mut path, &self.path);
 
-        let fill = match &self.fill_color {
-            Some(color_like) => Some(color_like.translate()),
-            None => None,
-        };
+        let fill = self
+            .fill_color
+            .as_ref()
+            .map(|color_like| color_like.translate());
 
         let visibility = match self.visibility {
             true => Visibility::Visible,
@@ -311,7 +308,7 @@ impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
             id: self.id.clone(),
             visibility,
             fill,
-            stroke: self.stroke.clone().and_then(|s| Some(s.translate())),
+            stroke: self.stroke.clone().map(|s| s.translate()),
             data: Rc::new(path),
             ..resvg::usvg::Path::default()
         })
@@ -324,7 +321,6 @@ pub struct SvgHolder {
 }
 
 impl SvgHolder {
-    #[inline]
     pub fn new() -> Self {
         Self::default()
     }
@@ -357,7 +353,7 @@ impl SvgHolder {
 impl TransformLogic for SvgHolder {
     fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError> {
         for item in &mut self.items.values_mut() {
-            item.transform(&transformation)?;
+            item.transform(transformation)?;
         }
 
         Ok(())

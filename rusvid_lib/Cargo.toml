@@ -1,29 +1,28 @@
 [package]
 name = "rusvid_lib"
-version = "0.1.1"
 edition = "2021"
-license = "Apache-2.0"
 description = "SVG animator-library written in Rust"
-repository = "https://github.com/LetsMelon/rusvid"
 readme = "../README.md"
 keywords = ["svg", "graphics", "animation"]
+documentation = "https://docs.rs/rusvid_lib/"
+
+version.workspace = true
+license.workspace = true
+repository.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = { workspace = true }
-easer = { git = "https://github.com/orhanbalci/rust-easing", rev = "872ea2c" }
+easer = "0.3.0"
 glam = { version = "0.22.0", features = ["approx"] }
-image = { workspace = true, features = ["png", "bmp", "jpeg"] }
 itertools = "0.10.5"
 log = "0.4"
+rayon = "1.6.1"
 resvg = { workspace = true }
-rusvid_core = { path = "../crates/core" }
-rusvid_effect = { path = "../crates/effect" }
+rusvid_core = { path = "../crates/core", version = "0.2.0" }
+rusvid_effect = { path = "../crates/effect", version = "0.2.0" }
+rusvid_video_encoder = { path = "../crates/video_encoder", version = "0.2.0" }
 
 [dev-dependencies]
-rayon = "*"
-approx = "*"
-
-[features]
-parallel = ["image/jpeg_rayon"]
+approx = "0.5.1"

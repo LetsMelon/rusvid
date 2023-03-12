@@ -1,6 +1,5 @@
 use resvg::usvg::Color;
 
-#[inline(always)]
 fn hex_to_u8(value: &str) -> Option<u8> {
     u8::from_str_radix(value, 16).ok()
 }

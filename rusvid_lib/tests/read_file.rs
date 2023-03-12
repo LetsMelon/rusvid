@@ -1,5 +1,6 @@
 use std::env;
 
+use rusvid_core::pixel::Pixel;
 use rusvid_lib::metrics::MetricsVideo;
 use rusvid_lib::prelude::*;
 
@@ -7,9 +8,9 @@ mod dummy;
 
 use dummy::DummyRender;
 
-const PIXEL_TRANSPARENT: [u8; 4] = [0; 4];
-const PIXEL_WHITE: [u8; 4] = [255; 4];
-const PIXEL_BLACK: [u8; 4] = [0, 0, 0, 255];
+const PIXEL_TRANSPARENT: Pixel = Pixel::new_raw([0; 4]);
+const PIXEL_WHITE: Pixel = Pixel::new_raw([255; 4]);
+const PIXEL_BLACK: Pixel = Pixel::new_raw([0, 0, 0, 255]);
 
 #[test]
 fn renders_svg_file() {
@@ -46,8 +47,14 @@ fn renders_svg_file() {
     assert_eq!(buffer.pixel_unchecked(700, 500), &PIXEL_BLACK);
 
     // body
-    assert_eq!(buffer.pixel_unchecked(200, 300), &[245, 117, 0, 255]);
-    assert_eq!(buffer.pixel_unchecked(999, 300), &[246, 107, 0, 255]);
+    assert_eq!(
+        buffer.pixel_unchecked(200, 300),
+        &Pixel::new(245, 117, 0, 255)
+    );
+    assert_eq!(
+        buffer.pixel_unchecked(999, 300),
+        &Pixel::new(246, 107, 0, 255)
+    );
 
     // count pixels with alpha
     let pixels_with_alpha = buffer.into_iter().filter(|&item| item[3] > 0).count();

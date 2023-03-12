@@ -1,6 +1,5 @@
 use resvg::usvg::{PathData, PathSegment};
 
-#[inline]
 pub fn extend_path_from_slice(path: &mut PathData, slice: Vec<PathSegment>) {
     slice.iter().for_each(|p| match *p {
         PathSegment::MoveTo { x, y } => path.push_move_to(x, y),

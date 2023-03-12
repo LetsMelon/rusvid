@@ -41,7 +41,6 @@ impl ToString for H264Preset {
 }
 
 impl CliArgument for H264Preset {
-    #[inline(always)]
     fn build_cli_argument(&self) -> Vec<OsString> {
         vec![
             OsString::from("-preset"),
@@ -75,7 +74,6 @@ impl ToString for H264Tune {
 }
 
 impl CliArgument for H264Tune {
-    #[inline(always)]
     fn build_cli_argument(&self) -> Vec<OsString> {
         vec![
             OsString::from("-tune"),
@@ -92,7 +90,6 @@ pub struct H264Settings {
 }
 
 impl CliArgument for H264Settings {
-    #[inline(always)]
     fn build_cli_argument(&self) -> Vec<OsString> {
         let mut arguments = Vec::new();
 

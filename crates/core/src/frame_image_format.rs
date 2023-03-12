@@ -8,7 +8,6 @@ pub enum FrameImageFormat {
 }
 
 impl FrameImageFormat {
-    #[inline]
     pub fn file_extension(&self) -> String {
         match self {
             FrameImageFormat::Png => "png".to_string(),
@@ -17,7 +16,6 @@ impl FrameImageFormat {
         }
     }
 
-    #[inline]
     pub fn as_image_format(&self) -> ImageFormat {
         match self {
             FrameImageFormat::Png => ImageFormat::Png,
@@ -28,6 +26,7 @@ impl FrameImageFormat {
 }
 
 impl Default for FrameImageFormat {
+    #[cfg_attr(coverage_nightly, no_coverage)]
     fn default() -> Self {
         FrameImageFormat::Png
     }

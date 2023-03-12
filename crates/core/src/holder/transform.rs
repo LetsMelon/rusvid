@@ -26,7 +26,7 @@ pub trait TransformLogic: Debug {
     ) -> Result<(), TransformError> {
         Err(TransformError::NotImplemented(
             "transform_by_id",
-            format!("{:?}", self),
+            format!("{self:?}"),
         ))
     }
 }

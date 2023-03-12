@@ -7,3 +7,5 @@ out/
 **.mp4
 **.png
 **.svg
+profile.json
+.env

@@ -23,7 +23,6 @@ impl ToString for PixelFormats {
 }
 
 impl CliArgument for PixelFormats {
-    #[inline(always)]
     fn build_cli_argument(&self) -> Vec<OsString> {
         vec![
             OsString::from("-pix_fmt"),

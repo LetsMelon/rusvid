@@ -23,7 +23,6 @@ pub enum Resolution {
 }
 
 impl Resolution {
-    #[inline]
     /// Get the width and height of the resolution.
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;
@@ -47,7 +46,6 @@ impl Resolution {
         }
     }
 
-    #[inline]
     /// Get the width of the resolution.
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;
@@ -59,7 +57,6 @@ impl Resolution {
         self.value().0
     }
 
-    #[inline]
     /// Get the height of the resolution.
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;
@@ -71,7 +68,6 @@ impl Resolution {
         self.value().1
     }
 
-    #[inline]
     /// Get the width of the resolution as `f64`. Used for math
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;
@@ -83,7 +79,6 @@ impl Resolution {
         self.width() as f64
     }
 
-    #[inline]
     /// Get the height of the resolution as `f64`. Used for math
     /// ```rust
     /// use rusvid_lib::resolution::Resolution;

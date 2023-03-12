@@ -1,0 +1,24 @@
+[package]
+name = "rusvid_video_encoder"
+edition = "2021"
+description = "h264 mp4 encoder for rusvid"
+readme = "../../README.md"
+keywords = ["svg", "graphics", "animation", "h264", "mp4"]
+documentation = "https://docs.rs/rusvid_video_encoder/"
+
+version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ffmpeg-sys-next = { version = "5.1.1", default-features = false, features = [
+    "avformat",
+    "swscale",
+] }
+rusvid_core = { path = "../core", version = "0.2.0" }
+thiserror = "1.0"
+
+# [features]
+# build = ["ffmpeg-sys-next/build"]

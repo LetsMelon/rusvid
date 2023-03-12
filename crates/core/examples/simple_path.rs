@@ -6,6 +6,7 @@ use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
 use rusvid_core::holder::object::Object;
 use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
+use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 
 const SIZE: u32 = 300;
@@ -25,9 +26,9 @@ fn main() {
         ],
         Some(ColorLike::LinearGradient(LinearGradient::new(
             BaseGradient::new(vec![
-                Stop::new([2, 0, 36, 255], 0.0),
-                Stop::new([9, 9, 121, 255], 0.35),
-                Stop::new([0, 212, 255, 255], 1.0),
+                Stop::new(Pixel::new(2, 0, 36, 255), 0.0),
+                Stop::new(Pixel::new(9, 9, 121, 255), 0.35),
+                Stop::new(Pixel::new(0, 212, 255, 255), 1.0),
             ]),
         ))),
     );
@@ -52,7 +53,10 @@ fn main() {
             PathLike::Close,
         ],
         Some(ColorLike::LinearGradient(LinearGradient::new(
-            BaseGradient::new_from_colors(vec![[255, 0, 0, 255], [255, 100, 0, 255]]),
+            BaseGradient::new_from_colors(vec![
+                Pixel::new(255, 0, 0, 255),
+                Pixel::new(255, 100, 0, 255),
+            ]),
         ))),
     );
     // svg.add_item(heart.bounding_box_rect());

@@ -1,10 +1,12 @@
-use anyhow::{bail, Result};
 use itertools::Itertools;
+use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
+use crate::error::EffectError;
 use crate::{EffectLogic, Element, ID};
 
 #[derive(Debug)]
+/// Effect to apply a [box blur](https://en.wikipedia.org/wiki/Box_blur) effect on a [`Plane`].
 pub struct BoxBlur {
     kernel_x: u32,
     kernel_y: u32,
@@ -16,30 +18,42 @@ pub struct BoxBlur {
 }
 
 impl BoxBlur {
-    #[inline(always)]
-    pub fn new(kernel_size: u32) -> Result<Self> {
+    pub fn new(kernel_size: u32) -> Result<Self, EffectError> {
         Self::new_asymmetric(kernel_size, kernel_size)
     }
 
-    #[inline(always)]
-    pub fn new_with_id(kernel_size: u32, id: impl Into<ID>) -> Result<Self> {
+    pub fn new_with_id(kernel_size: u32, id: impl Into<ID>) -> Result<Self, EffectError> {
         let mut obj = Self::new(kernel_size)?;
         obj.id = Some(id.into());
 
         Ok(obj)
     }
 
-    #[inline(always)]
-    pub fn new_asymmetric(kernel_x: u32, kernel_y: u32) -> Result<Self> {
+    pub fn new_asymmetric(kernel_x: u32, kernel_y: u32) -> Result<Self, EffectError> {
         if kernel_x < 2 {
-            bail!("kernel_x must be bigger 1 ({})", kernel_x);
-        } else if kernel_x % 2 != 1 {
-            bail!("kernel_x must be odd ({})", kernel_x);
+            return Err(EffectError::SizeError {
+                message: "kernel_x must be bigger than 1",
+                value: kernel_x,
+            });
         }
+        if kernel_x % 2 != 1 {
+            return Err(EffectError::SizeError {
+                message: "kernel_x must be an odd number",
+                value: kernel_x,
+            });
+        }
+
         if kernel_y < 2 {
-            bail!("kernel_y must be bigger 1 ({})", kernel_y);
-        } else if kernel_y % 2 != 1 {
-            bail!("kernel_y must be odd ({})", kernel_y);
+            return Err(EffectError::SizeError {
+                message: "kernel_y must be bigger than 1",
+                value: kernel_y,
+            });
+        }
+        if kernel_y % 2 != 1 {
+            return Err(EffectError::SizeError {
+                message: "kernel_y must be an odd number",
+                value: kernel_y,
+            });
         }
 
         Ok(BoxBlur {
@@ -51,12 +65,19 @@ impl BoxBlur {
         })
     }
 
-    #[inline(always)]
-    pub fn new_asymmetric_with_id(kernel_x: u32, kernel_y: u32, id: impl Into<ID>) -> Result<Self> {
+    pub fn new_asymmetric_with_id(
+        kernel_x: u32,
+        kernel_y: u32,
+        id: impl Into<ID>,
+    ) -> Result<Self, EffectError> {
         let mut obj = Self::new_asymmetric(kernel_x, kernel_y)?;
         obj.id = Some(id.into());
 
         Ok(obj)
+    }
+
+    pub fn kernel(&self) -> (u32, u32) {
+        (self.kernel_x, self.kernel_y)
     }
 }
 
@@ -64,10 +85,14 @@ impl Element for BoxBlur {
     fn id(&self) -> Option<&ID> {
         self.id.as_ref()
     }
+
+    fn name(&self) -> &str {
+        "box blur"
+    }
 }
 
 impl EffectLogic for BoxBlur {
-    fn apply(&self, original: Plane) -> Result<Plane> {
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError> {
         let mut result = Plane::new(original.width(), original.height())?;
 
         for x in (self.abs_d_x as u32)..(result.width() - self.abs_d_x as u32) {
@@ -91,12 +116,12 @@ impl EffectLogic for BoxBlur {
                 result.put_pixel_unchecked(
                     x as u32,
                     y as u32,
-                    [
+                    Pixel::new(
                         (sum[0] / count) as u8,
                         (sum[1] / count) as u8,
                         (sum[2] / count) as u8,
                         (sum[3] / count) as u8,
-                    ],
+                    ),
                 );
             }
         }

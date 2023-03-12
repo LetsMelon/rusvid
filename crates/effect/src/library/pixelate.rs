@@ -1,10 +1,12 @@
-use anyhow::Result;
 use itertools::Itertools;
+use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 
+use crate::error::EffectError;
 use crate::{EffectLogic, Element, ID};
 
 #[derive(Debug)]
+/// Effect to apply a [pixelation](https://en.wikipedia.org/wiki/Pixelation) effect on a [`Plane`].
 pub struct PixelateEffect {
     pixel_width: u32,
     pixel_height: u32,
@@ -13,7 +15,7 @@ pub struct PixelateEffect {
 }
 
 impl PixelateEffect {
-    pub fn new(pixel_width: u32, pixel_height: u32) -> Self {
+    pub fn new_asymmetric(pixel_width: u32, pixel_height: u32) -> Self {
         PixelateEffect {
             pixel_width,
             pixel_height,
@@ -21,11 +23,27 @@ impl PixelateEffect {
         }
     }
 
-    pub fn new_with_id(pixel_width: u32, pixel_height: u32, id: impl Into<String>) -> Self {
-        let mut effect = Self::new(pixel_width, pixel_height);
+    pub fn new(pixel_size: u32) -> Self {
+        Self::new_asymmetric(pixel_size, pixel_size)
+    }
+
+    pub fn new_asymmetric_with_id(
+        pixel_width: u32,
+        pixel_height: u32,
+        id: impl Into<String>,
+    ) -> Self {
+        let mut effect = Self::new_asymmetric(pixel_width, pixel_height);
         effect.id = Some(id.into());
 
         effect
+    }
+
+    pub fn new_with_id(pixel_size: u32, id: impl Into<String>) -> Self {
+        Self::new_asymmetric_with_id(pixel_size, pixel_size, id)
+    }
+
+    pub fn kernel(&self) -> (u32, u32) {
+        (self.pixel_width, self.pixel_height)
     }
 }
 
@@ -33,10 +51,14 @@ impl Element for PixelateEffect {
     fn id(&self) -> Option<&ID> {
         self.id.as_ref()
     }
+
+    fn name(&self) -> &str {
+        "pixelate"
+    }
 }
 
 impl EffectLogic for PixelateEffect {
-    fn apply(&self, original: Plane) -> Result<Plane> {
+    fn apply(&self, original: Plane) -> Result<Plane, EffectError> {
         // TODO create extra config if last pixel in a row should be not fixed size or if the extra margin should be applied to the last pixel, (width & height)
         // eg.: pixel_width = 19px; width = 1920px; pixel_width * width = 1919px, last pixel either 1px wide or last one is 20px wide
         let pixels_count_width = original.width().div_ceil(self.pixel_width);
@@ -79,7 +101,7 @@ impl EffectLogic for PixelateEffect {
 
                 for i_x in from_pixels_width..to_pixels_width {
                     for i_y in from_pixels_height..to_pixels_height {
-                        result.put_pixel_unchecked(i_x, i_y, new_color);
+                        result.put_pixel_unchecked(i_x, i_y, Pixel::new_raw(new_color));
                     }
                 }
             }

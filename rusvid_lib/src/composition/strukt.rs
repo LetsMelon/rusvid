@@ -28,17 +28,14 @@ pub struct Composition {
 }
 
 impl Composition {
-    #[inline(always)]
     pub fn builder() -> CompositionBuilder {
         CompositionBuilder::default()
     }
 
-    #[inline(always)]
     pub fn resolution(&self) -> Resolution {
         self.resolution
     }
 
-    #[inline]
     fn check_or_create_layer(&mut self) -> Result<()> {
         if self.layers.is_empty() {
             self.create_layer().context("Couldn't create a layer")?;
@@ -46,17 +43,14 @@ impl Composition {
         Ok(())
     }
 
-    #[inline]
     pub fn add_layer(&mut self, layer: Layer) {
         self.layers.push(layer);
     }
 
-    #[inline]
     pub fn get_layers(&self) -> &Vec<Layer> {
         &self.layers
     }
 
-    #[inline]
     pub fn update(&mut self, frame_count: usize) -> Result<()> {
         for layer in &mut self.layers {
             layer.update(frame_count)?;
@@ -99,7 +93,6 @@ impl MetricsSize for Composition {
 }
 
 impl LayerLogic for Composition {
-    #[inline]
     fn rtree(&self) -> Option<&Tree> {
         if self.layers.is_empty() {
             None
@@ -108,7 +101,6 @@ impl LayerLogic for Composition {
         }
     }
 
-    #[inline]
     fn rtree_mut(&mut self) -> Option<&mut Tree> {
         if self.layers.is_empty() {
             None
@@ -117,19 +109,16 @@ impl LayerLogic for Composition {
         }
     }
 
-    #[inline]
     fn add_to_defs(&mut self, kind: NodeKind) -> Result<Node> {
         self.check_or_create_layer()?;
         self.layers[0].add_to_defs(kind)
     }
 
-    #[inline]
     fn add_to_root(&mut self, kind: NodeKind) -> Result<Node> {
         self.check_or_create_layer()?;
         self.layers[0].add_to_root(kind)
     }
 
-    #[inline]
     fn fill_with_link(&self, id: &str) -> Option<Fill> {
         if self.layers.is_empty() {
             None
@@ -138,13 +127,11 @@ impl LayerLogic for Composition {
         }
     }
 
-    #[inline]
     fn add_animation<T: Animation + 'static>(&mut self, animation: T) {
         self.check_or_create_layer().unwrap();
         self.layers[0].add_animation(animation);
     }
 
-    #[inline]
     fn add_effect<T: EffectLogic + 'static>(&mut self, effect: T) {
         self.effects.push(Box::new(effect))
     }
