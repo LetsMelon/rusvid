@@ -25,7 +25,11 @@ resvg = { workspace = true }
 rhai = { version = "1.12.0", optional = true }
 static_assertions = "1.1.0"
 thiserror = { workspace = true }
-uuid = { version = "1.2.2", default-features = false, features = [ "v4", "fast-rng", "js" ] }
+uuid = { version = "1.2.2", default-features = false, features = [
+    "v4",
+    "fast-rng",
+    "js",
+] }
 
 [dev-dependencies]
 anyhow = { workspace = true }
