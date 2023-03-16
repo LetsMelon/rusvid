@@ -6,4 +6,4 @@ pub mod stroke;
 pub mod svg_holder;
 pub mod transform;
 
-pub(crate) mod utils;
+pub mod utils;
