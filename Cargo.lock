@@ -1351,6 +1351,7 @@ dependencies = [
  "rusvid_core",
  "rusvid_effect",
  "rusvid_video_encoder",
+ "static_assertions",
 ]
 
 [[package]]

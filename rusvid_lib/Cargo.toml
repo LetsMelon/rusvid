@@ -23,6 +23,7 @@ resvg = { workspace = true }
 rusvid_core = { path = "../crates/core", version = "0.2.0" }
 rusvid_effect = { path = "../crates/effect", version = "0.2.0" }
 rusvid_video_encoder = { path = "../crates/video_encoder", version = "0.2.0" }
+static_assertions = "1.1.0"
 
 [dev-dependencies]
 approx = "0.5.1"

@@ -3,17 +3,15 @@ use std::path::Path;
 use std::process::Command;
 
 use anyhow::{bail, Result};
-use resvg::tiny_skia::Pixmap;
 use rusvid_core::plane::Plane;
 
 use crate::composition::Composition;
-use crate::layer::LayerLogic;
 
 pub mod embedded;
 pub mod ffmpeg;
 mod util;
 
-use util::{apply_effects, combine_renders};
+use util::combine_renders;
 
 pub trait Renderer {
     fn render(&mut self, composition: Composition) -> Result<()>;
@@ -24,40 +22,23 @@ pub trait Renderer {
     fn render_single(&self, composition: &Composition) -> Result<Plane> {
         let layers = composition.get_layers();
         if layers.is_empty() {
-            bail!("TODO: error")
+            bail!("No layers in composition");
         }
+
+        let resolution = composition.resolution();
 
         let mut frames = Vec::new();
         for layer in layers {
-            let mut pixmap = Pixmap::new(
-                composition.resolution().width(),
-                composition.resolution().height(),
-            )
-            .expect("Error while creating pixmap");
+            let plane = layer
+                .object
+                .render(resolution.width(), resolution.height())?;
 
-            resvg::render(
-                layer.rtree().expect("Expect a tree in the given layer"),
-                resvg::usvg::FitTo::Original,
-                resvg::tiny_skia::Transform::default(),
-                pixmap.as_mut(),
-            )
-            .expect("Error while rendering");
-            let mut frame = Plane::from_pixmap(pixmap);
+            // TODO apply effects on individual layers
 
-            if !layer.effects.is_empty() {
-                frame = apply_effects(frame, &layer.effects)?;
-            }
-
-            frames.push(frame);
+            frames.push(plane);
         }
 
-        let width = composition.resolution.width();
-        let height = composition.resolution.height();
-        let mut plane = combine_renders(width, height, frames)?;
-
-        plane = apply_effects(plane, &composition.effects)?;
-
-        Ok(plane)
+        combine_renders(resolution.width(), resolution.height(), frames)
     }
 }
 

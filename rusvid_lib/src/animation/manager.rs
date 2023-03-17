@@ -26,6 +26,7 @@ impl AnimationManager {
         self.animations.push(Box::new(animation))
     }
 
+    /*
     pub fn update(&mut self, frame_count: usize) -> Result<()> {
         for animation in &mut self.animations {
             let id = animation.object_id();
@@ -39,4 +40,5 @@ impl AnimationManager {
         }
         Ok(())
     }
+     */
 }
