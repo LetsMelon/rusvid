@@ -24,24 +24,23 @@ const_assert_eq!(
 
 #[derive(Debug)]
 pub struct Layer {
-    name: String,
+    _name: String,
 
+    // TODO why `pub`?
     pub object: Object,
-    resolution: Resolution,
 
     animations: Vec<AnimationType>,
     effects: Vec<Box<dyn EffectLogic>>,
 }
 
 impl Layer {
-    pub fn new(layer_type: LayerType, resolution: Resolution) -> Self {
+    pub fn new(layer_type: LayerType, _resolution: Resolution) -> Self {
         Self {
-            name: format!("new_layer_{}", random_id()),
+            _name: format!("layer_{}", random_id()),
             object: Object::new(match layer_type {
                 LayerType::Svg => TypesLike::Svg(SvgHolder::new()),
                 LayerType::Image => todo!(),
             }),
-            resolution,
 
             animations: Vec::new(),
             effects: Vec::new(),
