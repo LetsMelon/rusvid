@@ -1,6 +1,3 @@
-use anyhow::{Context, Result};
-use resvg::usvg::{AspectRatio, Size, Tree, ViewBox};
-
 use crate::composition::Composition;
 use crate::effect::EffectLogic;
 use crate::layer::Layer;
@@ -33,23 +30,6 @@ impl Default for CompositionBuilder {
 }
 
 impl CompositionBuilder {
-    pub(crate) fn create_tree_from_resolution(resolution: Resolution) -> Result<Tree> {
-        let size = Size::new(resolution.x(), resolution.y())
-            .context("Width oder height must be greater 0")?;
-
-        // TODO create helper function to create a tree
-        Ok(Tree {
-            size,
-            view_box: ViewBox {
-                rect: size.to_rect(0.0, 0.0),
-                aspect: AspectRatio::default(),
-            },
-            root: resvg::usvg::Node::new(resvg::usvg::NodeKind::Group(
-                resvg::usvg::Group::default(),
-            )),
-        })
-    }
-
     pub fn build(self) -> Composition {
         Composition {
             resolution: self.resolution,
