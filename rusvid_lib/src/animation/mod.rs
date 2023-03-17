@@ -1,5 +1,4 @@
 pub mod curves;
-pub mod manager;
 pub mod position_animation;
 
 use self::position_animation::NewPositionAnimation;
