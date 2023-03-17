@@ -1,4 +1,3 @@
-#![feature(get_mut_unchecked)]
 #![feature(variant_count)]
 
 pub mod animation;
