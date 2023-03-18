@@ -19,7 +19,6 @@ glam = { version = "0.22.0", features = ["approx"] }
 itertools = "0.10.5"
 log = "0.4"
 rayon = "1.6.1"
-resvg = { workspace = true }
 rusvid_core = { path = "../crates/core", version = "0.2.0" }
 rusvid_effect = { path = "../crates/effect", version = "0.2.0" }
 rusvid_video_encoder = { path = "../crates/video_encoder", version = "0.2.0" }
