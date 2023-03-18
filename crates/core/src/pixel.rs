@@ -37,6 +37,39 @@ impl Pixel {
         Self::new_raw([r, g, b, a])
     }
 
+    pub fn from_hex_string(hex_string: &str) -> Option<Self> {
+        #[inline(always)]
+        fn hex_to_u8(value: &str) -> Option<u8> {
+            u8::from_str_radix(value, 16).ok()
+        }
+
+        #[inline(always)]
+        fn from_rgb(value: &str) -> Option<Pixel> {
+            let r = hex_to_u8(&value[0..2])?;
+            let g = hex_to_u8(&value[2..4])?;
+            let b = hex_to_u8(&value[4..6])?;
+
+            Some(Pixel::new(r, g, b, 255))
+        }
+
+        #[inline(always)]
+        fn from_rgba(value: &str) -> Option<Pixel> {
+            let mut c = from_rgb(value)?;
+
+            c.set_a(hex_to_u8(&value[6..8])?);
+
+            Some(c)
+        }
+
+        match hex_string.len() {
+            6 => from_rgb(hex_string),
+            7 => from_rgb(&hex_string[1..hex_string.len()]),
+            8 => from_rgba(hex_string),
+            9 => from_rgba(&hex_string[1..hex_string.len()]),
+            _ => None,
+        }
+    }
+
     pub const fn new_raw(values: [u8; 4]) -> Self {
         Pixel(values)
     }
