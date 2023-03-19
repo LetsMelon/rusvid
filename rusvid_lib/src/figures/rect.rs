@@ -1,32 +1,24 @@
-use resvg::usvg::{PathData, PathSegment};
+use rusvid_core::holder::likes::PathLike;
 use rusvid_core::point::Point;
 
-use super::utils::extend_path_from_slice;
-
-pub fn rect_raw(position: Point, size: Point) -> Vec<PathSegment> {
+pub fn rect_raw(position: Point, size: Point) -> Vec<PathLike> {
     let x = position.x();
     let y = position.y();
     let width = size.x();
     let height = size.y();
 
-    [
-        PathSegment::MoveTo { x, y },
-        PathSegment::LineTo { x: x + width, y },
-        PathSegment::LineTo {
-            x: x + width,
-            y: y + height,
-        },
-        PathSegment::LineTo { x, y: y + height },
-        PathSegment::ClosePath,
+    vec![
+        PathLike::Move(Point::new(x, y)),
+        PathLike::Line(Point::new(x + width, y)),
+        PathLike::Line(Point::new(x + width, y + height)),
+        PathLike::Line(Point::new(x, y + height)),
     ]
-    .to_vec()
 }
 
-pub fn rect(position: Point, size: Point) -> PathData {
-    let mut path = PathData::new();
+pub fn rect(position: Point, size: Point) -> Vec<PathLike> {
+    let mut path = rect_raw(position, size);
 
-    let rect_path = rect_raw(position, size);
-    extend_path_from_slice(&mut path, rect_path);
+    path.push(PathLike::Close);
 
     path
 }

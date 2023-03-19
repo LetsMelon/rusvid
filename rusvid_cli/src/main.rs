@@ -5,7 +5,9 @@ use chrono::Local;
 use fern::{log_file, Dispatch};
 use log::{debug, LevelFilter};
 use rusvid_lib::animation::position_animation::NewPositionAnimation;
+use rusvid_lib::animation::AnimationType;
 use rusvid_lib::figures::prelude::circle;
+use rusvid_lib::figures::rect::rect;
 use rusvid_lib::layer::LayerType;
 use rusvid_lib::prelude::holder::gradient::base::BaseGradient;
 use rusvid_lib::prelude::holder::gradient::linear::LinearGradient;
@@ -51,15 +53,12 @@ fn main() {
     let layer = composition.create_new_layer(LayerType::Svg).unwrap();
 
     let id = if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
-        let rect_raw = vec![
-            PathLike::Move(Point::new(200.0, 200.0)),
-            PathLike::Line(Point::new(200.0, 500.0)),
-            PathLike::Line(Point::new(500.0, 500.0)),
-            PathLike::Line(Point::new(500.0, 200.0)),
-        ];
         let fill = Some(ColorLike::Color(Pixel::new(255, 0, 0, 255)));
 
-        let rect = SvgItem::new(rect_raw, fill);
+        let rect = SvgItem::new(
+            rect(Point::new_symmetric(200.0), Point::new_symmetric(300.0)),
+            fill,
+        );
 
         svg_data.add_item(rect)
     } else {
@@ -73,7 +72,7 @@ fn main() {
         Linear::new(),
     ));
 
-    let circle_position = resolution.as_point() / 2.0;
+    let circle_position = Point::new(700.0, 850.0);
     let id = if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
         let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
             BaseGradient::new_from_colors(vec![
@@ -82,12 +81,19 @@ fn main() {
             ]),
         )));
 
-        let rect = SvgItem::new(circle(circle_position, 50.0), fill);
+        let rect = SvgItem::new(circle(circle_position, 250.0), fill);
 
         svg_data.add_item(rect)
     } else {
         panic!("Can't add a svg to the layer")
     };
+
+    layer.add_animation(AnimationType::Position(NewPositionAnimation::new(
+        id,
+        (0, 90),
+        (circle_position, resolution.as_point() / 2.0),
+        Sine::new(),
+    )));
 
     /*
     layer.add_linear_gradient(LinearGradient {
@@ -139,21 +145,6 @@ fn main() {
         },
     });
 
-    let circle_position = Point::new(700.0, 850.0);
-    layer
-        .add_to_root(NodeKind::Path(Path {
-            id: "circle".to_string(),
-            stroke: Some(Stroke {
-                paint: layer.get_linear_gradient("lg2").unwrap(),
-                width: NonZeroPositiveF64::new(100.0).unwrap(),
-                ..Stroke::default()
-            }),
-            rendering_mode: Default::default(),
-            data: Rc::new(circle(circle_position, 600.0)),
-            ..Path::default()
-        }))
-        .unwrap();
-
     let mut path = equilateral_triangle(Point::new(400.0, 400.0), 350.0);
     path.transform(Transform::new_rotate(2.5));
     layer
@@ -191,10 +182,6 @@ fn main() {
     layer.add_animation(PositionAnimation::new(
         "rect",
         Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap(),
-    ));
-    layer.add_animation(PositionAnimation::new(
-        "circle",
-        Sine::new(0, 90, circle_position, resolution.as_point() / 2.0).unwrap(),
     ));
     */
 
