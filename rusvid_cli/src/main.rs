@@ -5,7 +5,10 @@ use chrono::Local;
 use fern::{log_file, Dispatch};
 use log::{debug, LevelFilter};
 use rusvid_lib::animation::position_animation::NewPositionAnimation;
+use rusvid_lib::figures::prelude::circle;
 use rusvid_lib::layer::LayerType;
+use rusvid_lib::prelude::holder::gradient::base::BaseGradient;
+use rusvid_lib::prelude::holder::gradient::linear::LinearGradient;
 use rusvid_lib::prelude::holder::likes::{ColorLike, PathLike, TypesLike};
 use rusvid_lib::prelude::holder::svg_holder::SvgItem;
 use rusvid_lib::prelude::*;
@@ -63,22 +66,28 @@ fn main() {
         panic!("Can't add a svg to the layer")
     };
 
-    // layer.add_position_animation(PositionAnimation::new(
-    //     id,
-    //     Linear::new(
-    //         0,
-    //         60,
-    //         Point::new_symmetric(200.0),
-    //         Point::new_symmetric(500.0),
-    //     )
-    //     .unwrap(),
-    // ));
     layer.add_position_animation(NewPositionAnimation::new(
         id,
         (0, 60),
         (Point::ZERO, Point::new(500.0, 750.0)),
         Linear::new(),
     ));
+
+    let circle_position = resolution.as_point() / 2.0;
+    let id = if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
+        let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
+            BaseGradient::new_from_colors(vec![
+                Pixel::from_hex_string("9769f0").unwrap(),
+                Pixel::from_hex_string("fbc7d4").unwrap(),
+            ]),
+        )));
+
+        let rect = SvgItem::new(circle(circle_position, 50.0), fill);
+
+        svg_data.add_item(rect)
+    } else {
+        panic!("Can't add a svg to the layer")
+    };
 
     /*
     layer.add_linear_gradient(LinearGradient {

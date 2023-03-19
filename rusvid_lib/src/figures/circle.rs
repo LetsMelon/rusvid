@@ -1,93 +1,33 @@
-use resvg::usvg::{PathData, PathSegment};
+use std::f64::consts::PI;
+
+const TWO_PI: f64 = PI * 2.0;
+
+use rusvid_core::holder::likes::PathLike;
 use rusvid_core::point::Point;
 
-use super::utils::extend_path_from_slice;
+pub fn circle(position: Point, radius: f64) -> Vec<PathLike> {
+    let circumference = radius * TWO_PI;
+    let n = ((circumference / 32.0) as usize).max(32);
 
-fn sin_radius(angle: f64, radius: f64) -> f64 {
-    angle.sin() * radius
-}
+    let alpha = TWO_PI / (n as f64);
 
-fn cos_radius(angle: f64, radius: f64) -> f64 {
-    angle.cos() * radius
-}
-
-pub fn arc_segment(position: Point, radius: f64, a1: f64, a2: f64) -> (PathSegment, Point) {
-    let start_angle = a1 * (std::f64::consts::PI / 180.0);
-    let end_angle = a2 * (std::f64::consts::PI / 180.0);
-    let half_angle = (end_angle - start_angle) / 2.0;
-    let k = (4.0 / 3.0) * ((1.0 - half_angle.cos()) / half_angle.sin());
-
-    let p1x = position.x() + cos_radius(start_angle, radius);
-    let p1y = position.y() + sin_radius(start_angle, radius);
-    let p4x = position.x() + cos_radius(end_angle, radius);
-    let p4y = position.y() + sin_radius(end_angle, radius);
-    let p2x = p1x - (k * sin_radius(start_angle, radius));
-    let p2y = p1y + (k * cos_radius(start_angle, radius));
-    let p3x = p4x + (k * sin_radius(end_angle, radius));
-    let p3y = p4y - (k * cos_radius(end_angle, radius));
-
-    (
-        PathSegment::CurveTo {
-            x1: p2x,
-            y1: p2y,
-            x2: p3x,
-            y2: p3y,
-            x: p4x,
-            y: p4y,
-        },
-        Point::new(p1x, p1y),
-    )
-}
-
-pub fn arc(position: Point, radius: f64, start_angle: f64, end_angle: f64) -> Vec<PathSegment> {
     let mut segments = Vec::new();
 
-    let mut a2;
-    let mut a1 = start_angle;
+    segments.push(PathLike::Move(position + Point::new(radius, 0.0)));
 
-    let mut total_angle = (360.0_f64).min(end_angle - start_angle);
-    while total_angle > 0.0 {
-        a2 = a1 + total_angle.min(90.0);
-
-        let (segment, point_2d) = arc_segment(position, radius, a1, a2);
-        let point = if a1 == start_angle {
-            PathSegment::MoveTo {
-                x: point_2d.x(),
-                y: point_2d.y(),
-            }
-        } else {
-            PathSegment::LineTo {
-                x: point_2d.x(),
-                y: point_2d.y(),
-            }
-        };
-        segments.push(point);
-        segments.push(segment);
-
-        total_angle -= (a2 - a1).abs();
-        a1 = a2;
+    for i in 0..n {
+        let i = i as f64;
+        segments.push(PathLike::Line(
+            position + Point::new((alpha * i).cos() * radius, (alpha * i).sin() * radius),
+        ));
     }
 
-    segments
-}
-
-pub fn circle_raw(position: Point, radius: f64) -> Vec<PathSegment> {
-    let mut segments = arc(position, radius, 0.0, 360.0);
-
-    segments.push(PathSegment::ClosePath);
+    segments.push(PathLike::Close);
 
     segments
 }
 
-pub fn circle(position: Point, radius: f64) -> PathData {
-    let mut path = PathData::new();
-
-    let circle_path = circle_raw(position, radius);
-    extend_path_from_slice(&mut path, circle_path);
-
-    path
-}
-
+/*
 #[cfg(test)]
 mod tests {
     use crate::figures::circle::*;
@@ -200,3 +140,4 @@ mod tests {
         assert!(equal_path_segment(circle[8], PathSegment::ClosePath));
     }
 }
+ */
