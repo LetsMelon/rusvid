@@ -8,11 +8,13 @@ use rusvid_lib::animation::position_animation::NewPositionAnimation;
 use rusvid_lib::animation::AnimationType;
 use rusvid_lib::figures::prelude::circle;
 use rusvid_lib::figures::rect::rect;
+use rusvid_lib::figures::triangle::equilateral_triangle;
 use rusvid_lib::layer::LayerType;
 use rusvid_lib::prelude::holder::gradient::base::BaseGradient;
 use rusvid_lib::prelude::holder::gradient::linear::LinearGradient;
 use rusvid_lib::prelude::holder::likes::{ColorLike, PathLike, TypesLike};
 use rusvid_lib::prelude::holder::svg_holder::SvgItem;
+use rusvid_lib::prelude::holder::transform::{Transform, TransformLogic};
 use rusvid_lib::prelude::*;
 
 fn setup_logger() -> Result<String> {
@@ -66,9 +68,16 @@ fn main() {
     };
 
     layer.add_position_animation(NewPositionAnimation::new(
-        id,
-        (0, 60),
-        (Point::ZERO, Point::new(500.0, 750.0)),
+        &id,
+        (0, 200),
+        (Point::new_symmetric(200.0), Point::new(1250.0, 500.0)),
+        Linear::new(),
+    ));
+
+    layer.add_position_animation(NewPositionAnimation::new(
+        &id,
+        (220, 290),
+        (Point::new(1250.0, 500.0), Point::ZERO),
         Linear::new(),
     ));
 
@@ -89,11 +98,28 @@ fn main() {
     };
 
     layer.add_animation(AnimationType::Position(NewPositionAnimation::new(
-        id,
+        &id,
         (0, 90),
         (circle_position, resolution.as_point() / 2.0),
         Sine::new(),
     )));
+
+    if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
+        let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
+            BaseGradient::new_from_colors(vec![
+                Pixel::new(0, 255, 0, 255),
+                Pixel::new(0, 0, 255, 255),
+            ]),
+        )));
+
+        let mut item = SvgItem::new(equilateral_triangle(Point::new(400.0, 400.0), 350.0), fill);
+
+        item.transform(&Transform::Rotate(2.5)).unwrap();
+
+        svg_data.add_item(item)
+    } else {
+        panic!("Can't add a svg to the layer")
+    };
 
     /*
     layer.add_linear_gradient(LinearGradient {
@@ -144,45 +170,6 @@ fn main() {
             ],
         },
     });
-
-    let mut path = equilateral_triangle(Point::new(400.0, 400.0), 350.0);
-    path.transform(Transform::new_rotate(2.5));
-    layer
-        .add_to_root(NodeKind::Path(Path {
-            id: "triangle".to_string(),
-            fill: layer.fill_with_link("lg1"),
-            data: Rc::new(path),
-            ..Path::default()
-        }))
-        .unwrap();
-
-    let pixel_position = Point::new(20.0, 20.0);
-    layer
-        .add_to_root(NodeKind::Path(Path {
-            id: "rect".to_string(),
-            fill: match layer.fill_with_link("lg1") {
-                None => None,
-                Some(mut f) => {
-                    f.opacity = NormalizedF64::new(0.75).unwrap();
-                    Some(f)
-                }
-            },
-            data: Rc::new(rect(
-                pixel_position,
-                resolution.as_point() / Point::new(2.0, 3.0),
-            )),
-            ..Path::default()
-        }))
-        .unwrap();
-
-    layer.add_animation(PositionAnimation::new(
-        "rect",
-        Linear::new(0, 200, pixel_position, (1250.0, 500.0).into()).unwrap(),
-    ));
-    layer.add_animation(PositionAnimation::new(
-        "rect",
-        Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap(),
-    ));
     */
 
     let mut renderer = EmbeddedRenderer::new("out.mp4");

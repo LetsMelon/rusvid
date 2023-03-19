@@ -17,15 +17,15 @@ pub struct NewPositionAnimation {
 }
 
 impl NewPositionAnimation {
-    pub fn new<T: Function + 'static>(
-        id: impl Into<String>,
+    pub fn new<T: Function + 'static, I: Into<String> + Clone>(
+        id: &I,
         frames: (usize, usize),
         positions: (Point, Point),
         curve: T,
     ) -> Self {
         NewPositionAnimation {
             curve: Box::new(curve),
-            object_id: id.into(),
+            object_id: id.clone().into(),
             start_frame: frames.0,
             end_frame: frames.1,
             start_position: positions.0,
