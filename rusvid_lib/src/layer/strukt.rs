@@ -7,7 +7,7 @@ use rusvid_core::holder::utils::random_id;
 use rusvid_effect::EffectLogic;
 use static_assertions::const_assert_eq;
 
-use crate::animation::position_animation::NewPositionAnimation;
+use crate::animation::position_animation::PositionAnimation;
 use crate::animation::{Animation, AnimationType};
 use crate::resolution::Resolution;
 
@@ -67,7 +67,7 @@ impl Layer {
         self.animations.push(animation)
     }
 
-    pub fn add_position_animation(&mut self, animation: NewPositionAnimation) {
+    pub fn add_position_animation(&mut self, animation: PositionAnimation) {
         self.add_animation(AnimationType::Position(animation))
     }
 

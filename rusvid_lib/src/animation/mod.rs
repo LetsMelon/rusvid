@@ -1,11 +1,11 @@
 pub mod curves;
 pub mod position_animation;
 
-use self::position_animation::NewPositionAnimation;
+use self::position_animation::PositionAnimation;
 
 #[derive(Debug)]
 pub enum AnimationType {
-    Position(NewPositionAnimation),
+    Position(PositionAnimation),
 }
 
 impl Animation for AnimationType {
@@ -89,6 +89,6 @@ pub trait Function: std::fmt::Debug {
 // TODO remove prelude
 pub mod prelude {
     pub use super::curves::*;
-    pub use super::position_animation::NewPositionAnimation;
+    pub use super::position_animation::PositionAnimation;
     pub use super::{Animation, Function};
 }

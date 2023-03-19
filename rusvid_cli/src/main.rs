@@ -4,7 +4,7 @@ use anyhow::Result;
 use chrono::Local;
 use fern::{log_file, Dispatch};
 use log::{debug, LevelFilter};
-use rusvid_lib::animation::position_animation::NewPositionAnimation;
+use rusvid_lib::animation::position_animation::PositionAnimation;
 use rusvid_lib::animation::AnimationType;
 use rusvid_lib::figures::prelude::circle;
 use rusvid_lib::figures::rect::rect;
@@ -67,14 +67,14 @@ fn main() {
         panic!("Can't add a svg to the layer")
     };
 
-    layer.add_position_animation(NewPositionAnimation::new(
+    layer.add_position_animation(PositionAnimation::new(
         &id,
         (0, 200),
         (Point::new_symmetric(200.0), Point::new(1250.0, 500.0)),
         Linear::new(),
     ));
 
-    layer.add_position_animation(NewPositionAnimation::new(
+    layer.add_position_animation(PositionAnimation::new(
         &id,
         (220, 290),
         (Point::new(1250.0, 500.0), Point::ZERO),
@@ -97,7 +97,7 @@ fn main() {
         panic!("Can't add a svg to the layer")
     };
 
-    layer.add_animation(AnimationType::Position(NewPositionAnimation::new(
+    layer.add_animation(AnimationType::Position(PositionAnimation::new(
         &id,
         (0, 90),
         (circle_position, resolution.as_point() / 2.0),

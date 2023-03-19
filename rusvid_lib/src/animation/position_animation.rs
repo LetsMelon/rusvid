@@ -3,7 +3,7 @@ use rusvid_core::prelude::Point;
 use super::{Animation, Function};
 
 #[derive(Debug)]
-pub struct NewPositionAnimation {
+pub struct PositionAnimation {
     curve: Box<dyn Function>,
     object_id: String,
 
@@ -16,14 +16,14 @@ pub struct NewPositionAnimation {
     end_position: Point,
 }
 
-impl NewPositionAnimation {
+impl PositionAnimation {
     pub fn new<T: Function + 'static, I: Into<String> + Clone>(
         id: &I,
         frames: (usize, usize),
         positions: (Point, Point),
         curve: T,
     ) -> Self {
-        NewPositionAnimation {
+        Self {
             curve: Box::new(curve),
             object_id: id.clone().into(),
             start_frame: frames.0,
@@ -47,7 +47,7 @@ impl NewPositionAnimation {
     }
 }
 
-impl Animation for NewPositionAnimation {
+impl Animation for PositionAnimation {
     fn object_id(&self) -> &str {
         &self.object_id
     }
