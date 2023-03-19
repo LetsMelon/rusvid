@@ -8,6 +8,7 @@ use rusvid_effect::EffectLogic;
 use static_assertions::const_assert_eq;
 
 use crate::animation::position_animation::PositionAnimation;
+use crate::animation::set_color_animation::SetColorAnimation;
 use crate::animation::{Animation, AnimationType};
 use crate::resolution::Resolution;
 
@@ -51,9 +52,29 @@ impl Layer {
         for animation in &self.animations {
             let id = animation.object_id();
 
-            if animation.status_running(frame_count) {
+            let start_frame = animation.start_frame();
+            let end_frame = animation.end_frame();
+
+            let status_running = if start_frame == end_frame
+                && animation.check_variant(&AnimationType::SetColor(SetColorAnimation::new(
+                    &"nothing", 0, None,
+                ))) {
+                start_frame == frame_count
+            } else {
+                animation.status_running(frame_count)
+            };
+
+            if status_running {
                 let transform = match animation {
-                    AnimationType::Position(p_a) => Transform::Position(p_a.position(frame_count)),
+                    AnimationType::Position(animation) => {
+                        Transform::Position(animation.position(frame_count))
+                    }
+                    AnimationType::SetColor(animation) => {
+                        Transform::Color(animation.color_like().clone())
+                    }
+                    AnimationType::ChangeColor(animation) => {
+                        Transform::Color(Some(animation.color_at_frame(frame_count)))
+                    }
                 };
 
                 self.object.transform_by_id(id, &transform)?;

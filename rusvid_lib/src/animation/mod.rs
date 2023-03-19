@@ -1,29 +1,52 @@
+pub mod change_color_animation;
 pub mod curves;
 pub mod position_animation;
+pub mod set_color_animation;
 
+use self::change_color_animation::ChangeColorAnimation;
 use self::position_animation::PositionAnimation;
+use self::set_color_animation::SetColorAnimation;
 
 #[derive(Debug)]
 pub enum AnimationType {
     Position(PositionAnimation),
+    SetColor(SetColorAnimation),
+    ChangeColor(ChangeColorAnimation),
+}
+
+impl AnimationType {
+    pub fn check_variant(&self, other: &Self) -> bool {
+        match (self, other) {
+            (AnimationType::Position(_), AnimationType::Position(_)) => true,
+            (AnimationType::SetColor(_), AnimationType::SetColor(_)) => true,
+            (AnimationType::ChangeColor(_), AnimationType::ChangeColor(_)) => true,
+            _ => false,
+        }
+    }
 }
 
 impl Animation for AnimationType {
     fn object_id(&self) -> &str {
         match self {
-            AnimationType::Position(p_animation) => p_animation.object_id(),
+            AnimationType::Position(animation) => animation.object_id(),
+            AnimationType::SetColor(animation) => animation.object_id(),
+            AnimationType::ChangeColor(animation) => animation.object_id(),
         }
     }
 
     fn start_frame(&self) -> usize {
         match self {
-            AnimationType::Position(p_a) => p_a.start_frame(),
+            AnimationType::Position(animation) => animation.start_frame(),
+            AnimationType::SetColor(animation) => animation.start_frame(),
+            AnimationType::ChangeColor(animation) => animation.start_frame(),
         }
     }
 
     fn end_frame(&self) -> usize {
         match self {
-            AnimationType::Position(p_a) => p_a.end_frame(),
+            AnimationType::Position(animation) => animation.end_frame(),
+            AnimationType::SetColor(animation) => animation.end_frame(),
+            AnimationType::ChangeColor(animation) => animation.end_frame(),
         }
     }
 }

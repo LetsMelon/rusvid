@@ -4,7 +4,9 @@ use anyhow::Result;
 use chrono::Local;
 use fern::{log_file, Dispatch};
 use log::{debug, LevelFilter};
+use rusvid_lib::animation::change_color_animation::ChangeColorAnimation;
 use rusvid_lib::animation::position_animation::PositionAnimation;
+use rusvid_lib::animation::set_color_animation::SetColorAnimation;
 use rusvid_lib::animation::AnimationType;
 use rusvid_lib::figures::prelude::circle;
 use rusvid_lib::figures::rect::rect;
@@ -127,6 +129,13 @@ fn main() {
         (0, 90),
         (circle_position, resolution.as_point() / 2.0),
         Sine::new(),
+    )));
+
+    layer.add_animation(AnimationType::ChangeColor(ChangeColorAnimation::new(
+        &rect_id,
+        (0, 100),
+        (Pixel::new(255, 100, 0, 255), Pixel::new(255, 0, 255, 255)),
+        Sine::new_with_ease_type(EaseType::InOut),
     )));
 
     let mut renderer = EmbeddedRenderer::new("out.mp4");

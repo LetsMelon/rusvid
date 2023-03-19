@@ -1,26 +1,29 @@
-use rusvid_core::prelude::Point;
+use rusvid_core::holder::likes::ColorLike;
+use rusvid_core::prelude::Pixel;
 
 use super::{Animation, Function};
 
 #[derive(Debug)]
-pub struct PositionAnimation {
-    curve: Box<dyn Function>,
+pub struct ChangeColorAnimation {
     object_id: String,
+
+    curve: Box<dyn Function>,
 
     /// Range `[start_frame, end_frame)`
     start_frame: usize,
+
     /// Range `[start_frame, end_frame)`
     end_frame: usize,
 
-    start_position: Point,
-    end_position: Point,
+    start_color: Pixel,
+    end_color: Pixel,
 }
 
-impl PositionAnimation {
+impl ChangeColorAnimation {
     pub fn new<T: Function + 'static, I: Into<String> + Clone>(
         id: &I,
         frames: (usize, usize),
-        positions: (Point, Point),
+        colors: (Pixel, Pixel),
         curve: T,
     ) -> Self {
         Self {
@@ -28,26 +31,34 @@ impl PositionAnimation {
             object_id: id.clone().into(),
             start_frame: frames.0,
             end_frame: frames.1,
-            start_position: positions.0,
-            end_position: positions.1,
+            start_color: colors.0,
+            end_color: colors.1,
         }
     }
 
-    pub fn position(&self, frame: usize) -> Point {
+    pub fn color_at_frame(&self, frame: usize) -> ColorLike {
         let frame_delta = (self.end_frame() - self.start_frame() - 1) as f32;
         let my_frame = (frame - self.start_frame()) as f32;
 
         let percentage = my_frame / frame_delta;
 
-        // println!("\t\t{frame}: {percentage:.3}");
+        let delta = self
+            .end_color
+            .to_raw()
+            .iter()
+            .map(|v| *v as f32)
+            .zip(self.start_color.to_raw().iter().map(|v| *v as f32))
+            .map(|(end_color, start_color)| {
+                start_color + (end_color - start_color) * (self.curve.delta(percentage))
+            })
+            .map(|delta| delta as u8)
+            .collect::<Vec<_>>();
 
-        let distance_delta = self.end_position - self.start_position;
-
-        self.start_position + distance_delta * (self.curve.delta(percentage) as f64)
+        ColorLike::Color(Pixel::new(delta[0], delta[1], delta[2], delta[3]))
     }
 }
 
-impl Animation for PositionAnimation {
+impl Animation for ChangeColorAnimation {
     fn object_id(&self) -> &str {
         &self.object_id
     }
