@@ -52,9 +52,9 @@ impl Layer {
         for animation in &self.animations {
             let id = animation.object_id();
 
+            // TODO fix `animation.status_running` when being called by a animation that only runs at one frame, like `AnimationType::SetColor`
             let start_frame = animation.start_frame();
             let end_frame = animation.end_frame();
-
             let status_running = if start_frame == end_frame
                 && animation.check_variant(&AnimationType::SetColor(SetColorAnimation::new(
                     &"nothing", 0, None,
