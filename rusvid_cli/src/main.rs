@@ -54,56 +54,6 @@ fn main() {
 
     let layer = composition.create_new_layer(LayerType::Svg).unwrap();
 
-    let id = if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
-        let fill = Some(ColorLike::Color(Pixel::new(255, 0, 0, 255)));
-
-        let rect = SvgItem::new(
-            rect(Point::new_symmetric(200.0), Point::new_symmetric(300.0)),
-            fill,
-        );
-
-        svg_data.add_item(rect)
-    } else {
-        panic!("Can't add a svg to the layer")
-    };
-
-    layer.add_position_animation(PositionAnimation::new(
-        &id,
-        (0, 200),
-        (Point::new_symmetric(200.0), Point::new(1250.0, 500.0)),
-        Linear::new(),
-    ));
-
-    layer.add_position_animation(PositionAnimation::new(
-        &id,
-        (220, 290),
-        (Point::new(1250.0, 500.0), Point::ZERO),
-        Linear::new(),
-    ));
-
-    let circle_position = Point::new(700.0, 850.0);
-    let id = if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
-        let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
-            BaseGradient::new_from_colors(vec![
-                Pixel::from_hex_string("9769f0").unwrap(),
-                Pixel::from_hex_string("fbc7d4").unwrap(),
-            ]),
-        )));
-
-        let rect = SvgItem::new(circle(circle_position, 250.0), fill);
-
-        svg_data.add_item(rect)
-    } else {
-        panic!("Can't add a svg to the layer")
-    };
-
-    layer.add_animation(AnimationType::Position(PositionAnimation::new(
-        &id,
-        (0, 90),
-        (circle_position, resolution.as_point() / 2.0),
-        Sine::new(),
-    )));
-
     if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
         let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
             BaseGradient::new_from_colors(vec![
@@ -121,56 +71,63 @@ fn main() {
         panic!("Can't add a svg to the layer")
     };
 
-    /*
-    layer.add_linear_gradient(LinearGradient {
-        id: "lg1".into(),
-        x1: 0.0,
-        y1: 0.0,
-        x2: 1.0,
-        y2: 0.0,
-        base: BaseGradient {
-            units: Units::ObjectBoundingBox,
-            transform: Transform::default(),
-            spread_method: SpreadMethod::Pad,
-            stops: vec![
-                Stop {
-                    offset: StopOffset::ZERO,
-                    color: Color::new_rgb(0, 255, 0),
-                    opacity: Opacity::ONE,
-                },
-                Stop {
-                    offset: StopOffset::ONE,
-                    color: Color::new_rgb(0, 0, 255),
-                    opacity: Opacity::ONE,
-                },
-            ],
-        },
-    });
-    layer.add_linear_gradient(LinearGradient {
-        id: "lg2".into(),
-        x1: 0.0,
-        y1: 0.0,
-        x2: 1.0,
-        y2: 0.0,
-        base: BaseGradient {
-            units: Units::ObjectBoundingBox,
-            transform: Transform::default(),
-            spread_method: SpreadMethod::Pad,
-            stops: vec![
-                Stop {
-                    offset: StopOffset::ZERO,
-                    color: color_from_hex("9769f0".to_string()).unwrap(),
-                    opacity: Opacity::ONE,
-                },
-                Stop {
-                    offset: StopOffset::ONE,
-                    color: color_from_hex("fbc7d4".to_string()).unwrap(),
-                    opacity: Opacity::ONE,
-                },
-            ],
-        },
-    });
-    */
+    let circle_position = Point::new(700.0, 850.0);
+    let circle_id = if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
+        let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
+            BaseGradient::new_from_colors(vec![
+                Pixel::from_hex_string("9769f0").unwrap(),
+                Pixel::from_hex_string("fbc7d4").unwrap(),
+            ]),
+        )));
+
+        let rect = SvgItem::new(circle(circle_position, 250.0), fill);
+
+        svg_data.add_item(rect)
+    } else {
+        panic!("Can't add a svg to the layer")
+    };
+
+    let rect_id = if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
+        let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
+            BaseGradient::new_from_colors(vec![
+                Pixel::new(0, 255, 0, 155),
+                Pixel::new(0, 0, 255, 155),
+            ]),
+        )));
+
+        let rect = SvgItem::new(
+            rect(
+                Point::new_symmetric(20.0),
+                resolution.as_point() / Point::new(2.0, 3.0),
+            ),
+            fill,
+        );
+
+        svg_data.add_item(rect)
+    } else {
+        panic!("Can't add a svg to the layer")
+    };
+
+    layer.add_position_animation(PositionAnimation::new(
+        &rect_id,
+        (0, 200),
+        (Point::new_symmetric(20.0), Point::new(1250.0, 500.0)),
+        Linear::new(),
+    ));
+
+    layer.add_position_animation(PositionAnimation::new(
+        &rect_id,
+        (220, 290),
+        (Point::new(1250.0, 500.0), Point::ZERO),
+        Linear::new(),
+    ));
+
+    layer.add_animation(AnimationType::Position(PositionAnimation::new(
+        &circle_id,
+        (0, 90),
+        (circle_position, resolution.as_point() / 2.0),
+        Sine::new(),
+    )));
 
     let mut renderer = EmbeddedRenderer::new("out.mp4");
     renderer.render(composition).unwrap();
