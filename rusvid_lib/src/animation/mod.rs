@@ -34,6 +34,11 @@ impl Animation for AnimationType {
         }
     }
 
+    type OUTPUT = Result<(), String>;
+    fn get_value(&self, _: usize) -> Self::OUTPUT {
+        todo!()
+    }
+
     fn start_frame(&self) -> usize {
         match self {
             AnimationType::Position(animation) => animation.start_frame(),
@@ -53,6 +58,10 @@ impl Animation for AnimationType {
 
 pub trait Animation: std::fmt::Debug {
     fn object_id(&self) -> &str;
+
+    type OUTPUT;
+
+    fn get_value(&self, frame: usize) -> Self::OUTPUT;
 
     /// Animation duration: [start_frame, end_frame)
     fn start_frame(&self) -> usize;

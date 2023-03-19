@@ -32,8 +32,15 @@ impl PositionAnimation {
             end_position: positions.1,
         }
     }
+}
 
-    pub fn position(&self, frame: usize) -> Point {
+impl Animation for PositionAnimation {
+    fn object_id(&self) -> &str {
+        &self.object_id
+    }
+
+    type OUTPUT = Point;
+    fn get_value(&self, frame: usize) -> Self::OUTPUT {
         let frame_delta = (self.end_frame() - self.start_frame() - 1) as f32;
         let my_frame = (frame - self.start_frame()) as f32;
 
@@ -44,12 +51,6 @@ impl PositionAnimation {
         let distance_delta = self.end_position - self.start_position;
 
         self.start_position + distance_delta * (self.curve.delta(percentage) as f64)
-    }
-}
-
-impl Animation for PositionAnimation {
-    fn object_id(&self) -> &str {
-        &self.object_id
     }
 
     fn start_frame(&self) -> usize {

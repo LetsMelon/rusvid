@@ -65,19 +65,19 @@ impl Layer {
             };
 
             if status_running {
-                let transform = match animation {
+                let transformation = match animation {
                     AnimationType::Position(animation) => {
-                        Transform::Position(animation.position(frame_count))
+                        Transform::Position(animation.get_value(frame_count))
                     }
                     AnimationType::SetColor(animation) => {
-                        Transform::Color(animation.color_like().clone())
+                        Transform::Color(animation.get_value(frame_count))
                     }
                     AnimationType::ChangeColor(animation) => {
-                        Transform::Color(Some(animation.color_at_frame(frame_count)))
+                        Transform::Color(Some(animation.get_value(frame_count)))
                     }
                 };
 
-                self.object.transform_by_id(id, &transform)?;
+                self.object.transform_by_id(id, &transformation)?;
             }
         }
 

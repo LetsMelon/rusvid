@@ -19,15 +19,16 @@ impl SetColorAnimation {
             color_like: color,
         }
     }
-
-    pub fn color_like(&self) -> &Option<ColorLike> {
-        &self.color_like
-    }
 }
 
 impl Animation for SetColorAnimation {
     fn object_id(&self) -> &str {
         &self.object_id
+    }
+
+    type OUTPUT = Option<ColorLike>;
+    fn get_value(&self, _: usize) -> Self::OUTPUT {
+        self.color_like.clone()
     }
 
     fn start_frame(&self) -> usize {

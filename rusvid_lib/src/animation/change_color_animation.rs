@@ -63,6 +63,28 @@ impl Animation for ChangeColorAnimation {
         &self.object_id
     }
 
+    type OUTPUT = ColorLike;
+    fn get_value(&self, frame: usize) -> Self::OUTPUT {
+        let frame_delta = (self.end_frame() - self.start_frame() - 1) as f32;
+        let my_frame = (frame - self.start_frame()) as f32;
+
+        let percentage = my_frame / frame_delta;
+
+        let delta = self
+            .end_color
+            .to_raw()
+            .iter()
+            .map(|v| *v as f32)
+            .zip(self.start_color.to_raw().iter().map(|v| *v as f32))
+            .map(|(end_color, start_color)| {
+                start_color + (end_color - start_color) * (self.curve.delta(percentage))
+            })
+            .map(|delta| delta as u8)
+            .collect::<Vec<_>>();
+
+        ColorLike::Color(Pixel::new(delta[0], delta[1], delta[2], delta[3]))
+    }
+
     fn start_frame(&self) -> usize {
         self.start_frame
     }
