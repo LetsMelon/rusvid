@@ -1,12 +1,11 @@
-use std::rc::Rc;
-
+use rusvid_core::holder::gradient::base::BaseGradient;
+use rusvid_core::holder::gradient::linear::LinearGradient;
+use rusvid_core::holder::likes::{ColorLike, TypesLike};
+use rusvid_core::holder::svg_holder::SvgItem;
 use rusvid_lib::animation::prelude::*;
+use rusvid_lib::animation::AnimationType;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
-use rusvid_lib::resvg::usvg::{
-    BaseGradient, Color, Fill, LinearGradient, NodeKind, Opacity, Paint, Path, SpreadMethod, Stop,
-    StopOffset, Transform, Units,
-};
 
 fn main() {
     let resolution = Resolution::FHD;
@@ -19,54 +18,32 @@ fn main() {
 
     let frames = composition.frames();
 
-    let background_layer = composition.create_layer().unwrap();
-
-    background_layer.add_linear_gradient(LinearGradient {
-        id: "bg".into(),
-        x1: 0.0,
-        y1: 0.0,
-        x2: 1.0,
-        y2: 0.0,
-        base: BaseGradient {
-            units: Units::ObjectBoundingBox,
-            transform: Transform::new_rotate(35.0),
-            spread_method: SpreadMethod::Pad,
-            stops: vec![
-                Stop {
-                    offset: StopOffset::ZERO,
-                    color: Color::new_rgb(0, 215, 255),
-                    opacity: Opacity::ONE,
-                },
-                Stop {
-                    offset: StopOffset::new(0.5).unwrap(),
-                    color: Color::new_rgb(9, 9, 121),
-                    opacity: Opacity::ONE,
-                },
-                Stop {
-                    offset: StopOffset::ONE,
-                    color: Color::new_rgb(0, 215, 255),
-                    opacity: Opacity::ONE,
-                },
-            ],
-        },
-    });
+    let background_layer = composition.create_new_layer(LayerType::Svg).unwrap();
 
     let start_pos = resolution.as_point() * Point::NEG_ONE;
-    background_layer
-        .add_to_root(NodeKind::Path(Path {
-            id: "bg_obj".to_string(),
-            fill: background_layer.fill_with_link("bg"),
-            data: Rc::new(rect(start_pos, resolution.as_point() * 2.0)),
-            ..Path::default()
-        }))
-        .unwrap();
+    let bg_id = if let TypesLike::Svg(svg_data) = background_layer.object.data_mut() {
+        let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
+            BaseGradient::new_from_colors(vec![
+                Pixel::new(0, 215, 255, 255),
+                Pixel::new(9, 9, 121, 255),
+                Pixel::new(0, 215, 255, 255),
+            ]),
+        )));
 
-    background_layer.add_animation(PositionAnimation::new(
-        "bg_obj",
-        Linear::new(0, frames, start_pos, Point::ZERO).unwrap(),
-    ));
+        let rect = SvgItem::new(rect(start_pos, resolution.as_point() * 2.0), fill);
 
-    let grid_layer = composition.create_layer().unwrap();
+        svg_data.add_item(rect)
+    } else {
+        panic!("Can't add a svg to the layer")
+    };
+    background_layer.add_animation(AnimationType::Position(PositionAnimation::new(
+        &bg_id,
+        (0, frames),
+        (start_pos, Point::ZERO),
+        Linear::new(),
+    )));
+
+    let grid_layer = composition.create_new_layer(LayerType::Svg).unwrap();
 
     let grid_size = Point::new(32.0, 18.0);
     let margin = Point::new(5.0, 5.0);
@@ -78,17 +55,14 @@ fn main() {
             let extra_margin = margin * (coordinates_as_point + Point::ONE);
             let rect_pos = coordinates_as_point * rect_size + extra_margin;
 
-            grid_layer
-                .add_to_root(NodeKind::Path(Path {
-                    id: "rect".to_string(),
-                    fill: Some(Fill {
-                        paint: Paint::Color(Color::new_rgb(0, 0, 0)),
-                        ..Fill::default()
-                    }),
-                    data: Rc::new(rect(rect_pos, rect_size)),
-                    ..Path::default()
-                }))
-                .unwrap();
+            if let TypesLike::Svg(svg_data) = grid_layer.object.data_mut() {
+                let rect = SvgItem::new(
+                    rect(rect_pos, rect_size),
+                    Some(ColorLike::Color(Pixel::BLACK)),
+                );
+
+                svg_data.add_item(rect);
+            }
         }
     }
 
