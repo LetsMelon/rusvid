@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use rusvid_lib::prelude::*;
 
 fn main() {
@@ -11,10 +9,8 @@ fn main() {
         .duration(2)
         .build();
 
-    let _ = composition.create_layer().unwrap();
+    let _ = composition.create_new_layer(LayerType::Svg).unwrap();
 
-    let out_path = PathBuf::from("black_video.mp4");
-
-    let mut renderer = EmbeddedRenderer::new(out_path);
+    let mut renderer = EmbeddedRenderer::new("black_video.mp4");
     renderer.render(composition).unwrap();
 }
