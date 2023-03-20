@@ -54,7 +54,7 @@ fn main() {
         .duration(3)
         .build();
 
-    let layer = composition.create_new_layer(LayerType::Svg).unwrap();
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
 
     if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
         let fill = Some(ColorLike::LinearGradient(LinearGradient::new(

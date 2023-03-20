@@ -9,7 +9,7 @@ fn main() {
         .duration(2)
         .build();
 
-    let _ = composition.create_new_layer(LayerType::Svg).unwrap();
+    let _ = composition.create_layer(LayerType::Svg).unwrap();
 
     let mut renderer = EmbeddedRenderer::new("black_video.mp4");
     renderer.render(composition).unwrap();

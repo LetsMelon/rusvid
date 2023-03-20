@@ -18,7 +18,7 @@ fn main() {
 
     let frames = composition.frames();
 
-    let background_layer = composition.create_new_layer(LayerType::Svg).unwrap();
+    let background_layer = composition.create_layer(LayerType::Svg).unwrap();
 
     let start_pos = resolution.as_point() * Point::NEG_ONE;
     let bg_id = if let TypesLike::Svg(svg_data) = background_layer.object.data_mut() {
@@ -43,7 +43,7 @@ fn main() {
         Linear::new(),
     )));
 
-    let grid_layer = composition.create_new_layer(LayerType::Svg).unwrap();
+    let grid_layer = composition.create_layer(LayerType::Svg).unwrap();
 
     let grid_size = Point::new(32.0, 18.0);
     let margin = Point::new(5.0, 5.0);

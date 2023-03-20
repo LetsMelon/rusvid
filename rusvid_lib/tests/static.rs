@@ -21,7 +21,7 @@ fn renders_correctly_static() {
         .duration(1)
         .build();
 
-    let layer = composition.create_new_layer(LayerType::Svg).unwrap();
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
 
     if let TypesLike::Svg(svg_holder) = layer.object.data_mut() {
         let mut item = SvgItem::new(

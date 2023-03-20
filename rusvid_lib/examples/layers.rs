@@ -12,7 +12,7 @@ fn main() {
         .duration(2)
         .build();
 
-    let layer = composition.create_new_layer(LayerType::Svg).unwrap();
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
 
     let rect_size = Point::new(250.0, 250.0);
     let pixel_position = (resolution.as_point() / 2.0) - (rect_size / 2.0);
@@ -25,7 +25,7 @@ fn main() {
     }
 
     let size = resolution.x() / 10.0;
-    let layer = composition.create_new_layer(LayerType::Svg).unwrap();
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
     if let TypesLike::Svg(svg_data) = layer.object.data_mut() {
         let fill = Some(ColorLike::Color(Pixel::from_hex_string("#FF1212").unwrap()));
 

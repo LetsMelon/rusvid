@@ -15,7 +15,7 @@ fn main() {
         .build();
     let frames = composition.frames();
 
-    let layer = composition.create_new_layer(LayerType::Svg).unwrap();
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
 
     let rect_size = Point::new(250.0, 250.0);
     let rect_pos = Point::ZERO;

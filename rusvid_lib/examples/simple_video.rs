@@ -14,7 +14,7 @@ fn main() {
         .duration(2)
         .build();
 
-    let layer = composition.create_new_layer(LayerType::Svg).unwrap();
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
 
     let rect_size = Point::new(250.0, 250.0);
     let pixel_position = (resolution.as_point() / 2.0) - (rect_size / 2.0);

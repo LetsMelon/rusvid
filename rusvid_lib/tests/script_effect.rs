@@ -55,7 +55,7 @@ fn script_effect() {
         .add_effect(ScriptingEffect::new("width_height_gradient", SCRIPT))
         .build();
 
-    let layer = composition.create_new_layer(LayerType::Svg).unwrap();
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
     if let TypesLike::Svg(svg_holder) = layer.object.data_mut() {
         svg_holder.add_item(SvgItem::new(rect(Point::ZERO, resolution.as_point()), None));
     }
