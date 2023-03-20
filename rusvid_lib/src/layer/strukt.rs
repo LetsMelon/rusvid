@@ -31,7 +31,7 @@ pub struct Layer {
     pub object: Object,
 
     animations: Vec<AnimationType>,
-    effects: Vec<Box<dyn EffectLogic>>,
+    pub(crate) effects: Vec<Box<dyn EffectLogic>>,
 }
 
 impl Layer {

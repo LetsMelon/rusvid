@@ -29,16 +29,24 @@ pub trait Renderer {
 
         let mut frames = Vec::new();
         for layer in layers {
-            let plane = layer
+            let mut plane = layer
                 .object
                 .render(resolution.width(), resolution.height())?;
 
-            // TODO apply effects on individual layers
+            for effect in &layer.effects {
+                plane = effect.apply(plane)?;
+            }
 
             frames.push(plane);
         }
 
-        combine_renders(resolution.width(), resolution.height(), frames)
+        let mut combined = combine_renders(resolution.width(), resolution.height(), frames)?;
+
+        for effect in &composition.effects {
+            combined = effect.apply(combined)?;
+        }
+
+        Ok(combined)
     }
 }
 
