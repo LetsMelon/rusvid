@@ -1,7 +1,7 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use rusvid_core::holder::likes::TypesLike;
 use rusvid_core::holder::object::Object;
-use rusvid_core::holder::svg_holder::SvgHolder;
+use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
 use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::holder::utils::random_id;
 use rusvid_effect::EffectLogic;
@@ -90,6 +90,14 @@ impl Layer {
 
     pub fn add_position_animation(&mut self, animation: PositionAnimation) {
         self.add_animation(AnimationType::Position(animation))
+    }
+
+    pub fn add_svg_item(&mut self, item: SvgItem) -> Result<String> {
+        if let TypesLike::Svg(svg_data) = self.object.data_mut() {
+            Ok(svg_data.add_item(item))
+        } else {
+            bail!("Can't add a SvgItem to the layer");
+        }
     }
 
     pub fn add_effect<T: EffectLogic + 'static>(&mut self, effect: T) {
