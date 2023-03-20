@@ -57,6 +57,7 @@ impl Composition {
         &mut self.layers
     }
 
+    // TODO rename to `create_layer`
     pub fn create_new_layer(&mut self, layer_type: LayerType) -> Option<&mut Layer> {
         let layer = Layer::new(layer_type, self.resolution());
         self.layers.push(layer);
