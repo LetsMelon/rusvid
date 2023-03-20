@@ -106,11 +106,30 @@ macro_rules! implement_math_operator {
             }
         }
     };
+    ($operant:ident, $fct:ident, f32 for Point) => {
+        impl std::ops::$operant<f32> for Point {
+            type Output = Point;
+            fn $fct(self, rhs: f32) -> Self::Output {
+                Point(self.0.$fct(rhs))
+            }
+        }
+    };
     ($operant:ident, $fct:ident, f64 for Point) => {
         impl std::ops::$operant<f64> for Point {
             type Output = Point;
             fn $fct(self, rhs: f64) -> Self::Output {
                 Point(self.0.$fct(rhs))
+            }
+        }
+    };
+    ($operant:ident, $fct:ident, Point for f32) => {
+        impl std::ops::$operant<Point> for f32 {
+            type Output = Point;
+            fn $fct(self, rhs: Self::Output) -> Self::Output {
+                Point(DVec2 {
+                    x: self.$fct(rhs.x()),
+                    y: self.$fct(rhs.y()),
+                })
             }
         }
     };

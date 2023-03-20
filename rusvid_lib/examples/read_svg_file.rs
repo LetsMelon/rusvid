@@ -1,3 +1,4 @@
+/*
 use std::env;
 use std::path::PathBuf;
 
@@ -23,4 +24,9 @@ fn main() {
 
     let mut renderer = EmbeddedRenderer::new(out_path);
     renderer.render(composition).unwrap()
+}
+ */
+
+fn main() {
+    todo!()
 }

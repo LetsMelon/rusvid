@@ -1,4 +1,3 @@
-use anyhow::{anyhow, Result};
 use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
@@ -9,10 +8,10 @@ use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 
-fn render_and_save(object: &Object, name: &str) -> Result<()> {
-    let plane = object.render(300, 300)?;
+fn render_and_save(object: &Object, name: &str) {
+    let plane = object.render(300, 300).unwrap();
     let path = format!("example_simple_transform_{}.png", name);
-    plane.save_as_png(path).map_err(|err| anyhow!(err))
+    plane.save_as_png(path).unwrap()
 }
 
 fn main() {
@@ -47,7 +46,7 @@ fn main() {
     ));
 
     let mut object = Object::new(TypesLike::Svg(svg));
-    render_and_save(&object, "output").unwrap();
+    render_and_save(&object, "output");
 
     object
         .transform_by_id(
@@ -59,7 +58,7 @@ fn main() {
             })),
         )
         .unwrap();
-    render_and_save(&object, "stroke").unwrap();
+    render_and_save(&object, "stroke");
 
     object
         .transform_by_id(
@@ -67,35 +66,35 @@ fn main() {
             &Transform::Color(Some(ColorLike::Color(Pixel::new(230, 57, 70, 255)))),
         )
         .unwrap();
-    render_and_save(&object, "color").unwrap();
+    render_and_save(&object, "color");
 
     object
         .transform_by_id(&triangle_id, &Transform::Position(Point::new(200.0, 200.0)))
         .unwrap();
-    render_and_save(&object, "position").unwrap();
+    render_and_save(&object, "position");
 
     object
         .transform_by_id(&heart_id, &Transform::Move(Point::new(50.0, 0.0)))
         .unwrap();
-    render_and_save(&object, "move").unwrap();
+    render_and_save(&object, "move");
 
     object
         .transform_by_id(&triangle_id, &Transform::Scale(Point::new_symmetric(1.5)))
         .unwrap();
-    render_and_save(&object, "scale").unwrap();
+    render_and_save(&object, "scale");
 
     object
         .transform_by_id(&triangle_id, &Transform::Rotate(15.0_f64.to_radians()))
         .unwrap();
-    render_and_save(&object, "rotate").unwrap();
+    render_and_save(&object, "rotate");
 
     object
         .transform_by_id(&triangle_id, &Transform::Color(None))
         .unwrap();
-    render_and_save(&object, "color_none").unwrap();
+    render_and_save(&object, "color_none");
 
     object
         .transform_by_id(&triangle_id, &Transform::Visibility(false))
         .unwrap();
-    render_and_save(&object, "visibility").unwrap();
+    render_and_save(&object, "visibility");
 }

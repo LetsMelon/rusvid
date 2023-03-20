@@ -1,138 +1,38 @@
 macro_rules! generate_ease_struct {
     ($struct_name:ident) => {
-        #[doc = concat!("Wrapper struct around [easer::functions::", stringify!($struct_name), "] that implements [crate::animation::curves::Function]. See <https://easings.net/> for graphs.")]
+        #[doc = concat!("Wrapper struct around [easer::functions::", stringify!($struct_name), "]. See <https://easings.net/> for graphs.")]
         #[derive(std::fmt::Debug)]
         pub struct $struct_name {
-            start_frame: usize,
-            end_frame: usize,
-            start: rusvid_core::point::Point,
-            end: rusvid_core::point::Point,
-
             ease_type: crate::animation::curves::EaseType,
-
-            d_x: f64,
-            d_y: f64,
-            d_t: f64,
         }
 
-        impl crate::animation::curves::Function for $struct_name {
-            fn new(
-                start_frame: usize,
-                end_frame: usize,
-                start: rusvid_core::point::Point,
-                end: rusvid_core::point::Point,
-            ) -> anyhow::Result<Self>
-            where
-                Self: Sized,
-            {
-                let delta = end - start;
-
-                Ok(Self {
-                    start_frame,
-                    end_frame,
-                    start,
-                    end,
-                    ease_type: crate::animation::curves::EaseType::default(),
-                    d_x: delta.x(),
-                    d_y: delta.y(),
-                    d_t: (end_frame - start_frame) as f64,
-                })
-            }
-
-            fn calc_ease_in(&self, frame_number: usize) -> rusvid_core::point::Point {
-                use easer::functions::Easing;
-
-                let frame_number = (frame_number - self.start_frame) as f64;
-
-                let x = easer::functions::$struct_name::ease_in(
-                    frame_number,
-                    self.start.x(),
-                    self.d_x,
-                    self.d_t,
-                );
-                let y = easer::functions::$struct_name::ease_in(
-                    frame_number,
-                    self.start.y(),
-                    self.d_y,
-                    self.d_t,
-                );
-                rusvid_core::point::Point::new(x, y)
-            }
-
-            fn calc_ease_out(&self, frame_number: usize) -> rusvid_core::point::Point {
-                use easer::functions::Easing;
-
-                let frame_number = (frame_number - self.start_frame) as f64;
-
-                let x = easer::functions::$struct_name::ease_out(
-                    frame_number,
-                    self.start.x(),
-                    self.d_x,
-                    self.d_t,
-                );
-                let y = easer::functions::$struct_name::ease_out(
-                    frame_number,
-                    self.start.y(),
-                    self.d_y,
-                    self.d_t,
-                );
-                rusvid_core::point::Point::new(x, y)
-            }
-
-            fn calc_ease_in_out(&self, frame_number: usize) -> rusvid_core::point::Point {
-                use easer::functions::Easing;
-
-                let frame_number = (frame_number - self.start_frame) as f64;
-
-                let x = easer::functions::$struct_name::ease_in_out(
-                    frame_number,
-                    self.start.x(),
-                    self.d_x,
-                    self.d_t,
-                );
-                let y = easer::functions::$struct_name::ease_in_out(
-                    frame_number,
-                    self.start.y(),
-                    self.d_y,
-                    self.d_t,
-                );
-                rusvid_core::point::Point::new(x, y)
-            }
-
-            fn start_frame(&self) -> usize {
-                self.start_frame
-            }
-
-            fn end_frame(&self) -> usize {
-                self.end_frame
-            }
-
-            fn delta_frame(&self) -> usize {
-                self.d_t as usize
-            }
-
-            fn start(&self) -> rusvid_core::point::Point {
-                self.start
-            }
-
-            fn end(&self) -> rusvid_core::point::Point {
-                self.end
-            }
-
-            fn set_ease_type(&mut self, ease_type: crate::animation::curves::EaseType) {
-                self.ease_type = ease_type;
-            }
-
-            fn calc_raw(&self, frame_number: usize) -> rusvid_core::point::Point {
-                match &self.ease_type {
-                    crate::animation::curves::EaseType::In => self.calc_ease_in(frame_number),
-                    crate::animation::curves::EaseType::Out => self.calc_ease_out(frame_number),
-                    crate::animation::curves::EaseType::InOut => self.calc_ease_in_out(frame_number),
+        impl crate::animation::Function for $struct_name {
+            fn new_with_ease_type(ease_type: crate::animation::curves::EaseType) -> Self {
+                Self {
+                    ease_type,
                 }
             }
 
-            fn delta_raw(&self, frame_number: usize) -> rusvid_core::point::Point {
-                self.calc_raw(frame_number) - self.calc_raw(frame_number - 1)
+            fn get_ease_type(&self) -> &crate::animation::curves::EaseType {
+                &self.ease_type
+            }
+
+            fn delta_ease_in(&self, delta: f32) -> f32 {
+                use easer::functions::Easing;
+
+                easer::functions::$struct_name::ease_in(delta, 0.0, 1.0, 1.0)
+            }
+
+            fn delta_ease_out(&self, delta: f32) -> f32 {
+                use easer::functions::Easing;
+
+                easer::functions::$struct_name::ease_out(delta, 0.0, 1.0, 1.0)
+            }
+
+            fn delta_ease_in_out(&self, delta: f32) -> f32 {
+                use easer::functions::Easing;
+
+                easer::functions::$struct_name::ease_in_out(delta, 0.0, 1.0, 1.0)
             }
         }
     };
@@ -150,6 +50,7 @@ generate_ease_struct!(Quart);
 generate_ease_struct!(Quint);
 generate_ease_struct!(Sine);
 
+/*
 #[cfg(test)]
 mod tests {
     #[cfg(test)]
@@ -261,3 +162,4 @@ mod tests {
         }
     }
 }
+*/

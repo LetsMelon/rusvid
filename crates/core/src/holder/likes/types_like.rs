@@ -8,6 +8,16 @@ pub enum TypesLike {
     Image(ImageHolder),
 }
 
+impl TypesLike {
+    pub const VARIANT_COUNT: usize = std::mem::variant_count::<TypesLike>();
+}
+
+impl Default for TypesLike {
+    fn default() -> Self {
+        Self::Svg(Default::default())
+    }
+}
+
 impl TransformLogic for TypesLike {
     fn transform(&mut self, transformation: &Transform) -> Result<(), TransformError> {
         match self {

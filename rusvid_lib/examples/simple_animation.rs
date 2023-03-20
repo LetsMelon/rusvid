@@ -1,11 +1,9 @@
-use std::path::PathBuf;
-use std::rc::Rc;
-
+use rusvid_core::holder::likes::{ColorLike, TypesLike};
+use rusvid_core::holder::svg_holder::SvgItem;
 use rusvid_lib::animation::prelude::*;
+use rusvid_lib::animation::AnimationType;
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
-use rusvid_lib::resvg::usvg::{Fill, NodeKind, Paint, Path};
-use rusvid_lib::utils::color_from_hex;
 
 fn main() {
     let resolution = Resolution::HD;
@@ -17,36 +15,27 @@ fn main() {
         .build();
     let frames = composition.frames();
 
-    let layer = composition.create_layer().unwrap();
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
 
     let rect_size = Point::new(250.0, 250.0);
     let rect_pos = Point::ZERO;
-    layer
-        .add_to_root(NodeKind::Path(Path {
-            id: "rect".to_string(),
-            fill: Some(Fill {
-                paint: Paint::Color(color_from_hex("#1212FF".to_string()).unwrap()),
-                ..Fill::default()
-            }),
-            data: Rc::new(rect(rect_pos, rect_size)),
-            ..Path::default()
-        }))
-        .unwrap();
+    let rect_id = if let TypesLike::Svg(svg_holder) = layer.object.data_mut() {
+        let fill = Some(ColorLike::Color(Pixel::from_hex_string("#1212FF").unwrap()));
 
-    layer.add_animation(PositionAnimation::new(
-        "rect",
-        Cubic::new_with_ease_type(
-            0,
-            frames,
-            rect_pos,
-            resolution.as_point() - rect_size,
-            EaseType::InOut,
-        )
-        .unwrap(),
-    ));
+        let rect = SvgItem::new(rect(rect_pos, rect_size), fill);
 
-    let out_path = PathBuf::from("simple_animation.mp4");
+        svg_holder.add_item(rect)
+    } else {
+        panic!("Can't add a svg to the layer")
+    };
 
-    let mut renderer = EmbeddedRenderer::new(out_path);
+    layer.add_animation(AnimationType::Position(PositionAnimation::new(
+        &rect_id,
+        (0, frames),
+        (rect_pos, resolution.as_point() - rect_pos),
+        Cubic::new_with_ease_type(EaseType::InOut),
+    )));
+
+    let mut renderer = EmbeddedRenderer::new("simple_animation.mp4");
     renderer.render(composition).unwrap()
 }

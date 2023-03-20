@@ -1,19 +1,23 @@
-use std::rc::Rc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::Result;
 use chrono::Local;
 use fern::{log_file, Dispatch};
 use log::{debug, LevelFilter};
-use rusvid_lib::animation::prelude::*;
-use rusvid_lib::figures::prelude::*;
+use rusvid_lib::animation::change_color_animation::ChangeColorAnimation;
+use rusvid_lib::animation::position_animation::PositionAnimation;
+use rusvid_lib::animation::set_color_animation::SetColorAnimation;
+use rusvid_lib::animation::AnimationType;
+use rusvid_lib::figures::prelude::circle;
+use rusvid_lib::figures::rect::rect;
+use rusvid_lib::figures::triangle::equilateral_triangle;
+use rusvid_lib::layer::LayerType;
+use rusvid_lib::prelude::holder::gradient::base::BaseGradient;
+use rusvid_lib::prelude::holder::gradient::linear::LinearGradient;
+use rusvid_lib::prelude::holder::likes::{ColorLike, PathLike, TypesLike};
+use rusvid_lib::prelude::holder::svg_holder::SvgItem;
+use rusvid_lib::prelude::holder::transform::{Transform, TransformLogic};
 use rusvid_lib::prelude::*;
-use rusvid_lib::renderer::embedded::EmbeddedRenderer;
-use rusvid_lib::resvg::usvg::{
-    BaseGradient, Color, LinearGradient, NodeKind, NonZeroPositiveF64, NormalizedF64, Opacity,
-    Path, SpreadMethod, Stop, StopOffset, Stroke, Transform, Units,
-};
-use rusvid_lib::utils::color_from_hex;
 
 fn setup_logger() -> Result<String> {
     let time_stamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
@@ -44,143 +48,96 @@ fn main() {
 
     let mut composition = Composition::builder()
         .resolution(resolution)
-        .framerate(24)
-        .duration(10)
-        // .add_effect(PixelateEffect::new(15, 15))
-        // .add_effect(ColorPaletteEffect::new(vec![
-        //     [10, 56, 120, 255],
-        //     [100, 100, 0, 255],
-        //     [100, 10, 100, 255],
-        //     [90, 12, 30, 255],
-        // ]))
-        .add_effect(GrayscaleEffect::new())
-        // .add_effect(BoxBlur::new(5).unwrap())
-        // .add_effect(GaussianBlur::new(3.0))
+        // .framerate(60)
+        // .duration(5)
+        .framerate(30)
+        .duration(3)
         .build();
 
-    let layer = composition.create_layer().unwrap(); // Layer::new(composition.resolution());
-    layer.add_linear_gradient(LinearGradient {
-        id: "lg2".into(),
-        x1: 0.0,
-        y1: 0.0,
-        x2: 1.0,
-        y2: 0.0,
-        base: BaseGradient {
-            units: Units::ObjectBoundingBox,
-            transform: Transform::default(),
-            spread_method: SpreadMethod::Pad,
-            stops: vec![
-                Stop {
-                    offset: StopOffset::ZERO,
-                    color: color_from_hex("9796f0".to_string()).unwrap(),
-                    opacity: Opacity::ONE,
-                },
-                Stop {
-                    offset: StopOffset::ONE,
-                    color: color_from_hex("fbc7d4".to_string()).unwrap(),
-                    opacity: Opacity::ONE,
-                },
-            ],
-        },
-    });
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
+
+    layer
+        .add_svg_item({
+            let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
+                BaseGradient::new_from_colors(vec![
+                    Pixel::new(0, 255, 0, 255),
+                    Pixel::new(0, 0, 255, 255),
+                ]),
+            )));
+
+            let mut item =
+                SvgItem::new(equilateral_triangle(Point::new(400.0, 400.0), 350.0), fill);
+
+            item.transform(&Transform::Rotate(2.5)).unwrap();
+
+            item
+        })
+        .unwrap();
 
     let circle_position = Point::new(700.0, 850.0);
-    layer
-        .add_to_root(NodeKind::Path(Path {
-            id: "circle".to_string(),
-            stroke: Some(Stroke {
-                paint: layer.get_linear_gradient("lg2").unwrap(),
-                width: NonZeroPositiveF64::new(100.0).unwrap(),
-                ..Stroke::default()
-            }),
-            rendering_mode: Default::default(),
-            data: Rc::new(circle(circle_position, 600.0)),
-            ..Path::default()
-        }))
-        .unwrap();
-    layer.add_animation(PositionAnimation::new(
-        "circle",
-        Elastic::new_with_ease_type(
-            0,
-            90,
-            circle_position,
-            resolution.as_point() / 2.0,
-            EaseType::Out,
-        )
-        .unwrap(),
-    ));
-    let pixel_size = 20;
-    layer.add_effect(PixelateEffect::new_asymmetric(pixel_size, pixel_size));
+    let circle_id = layer
+        .add_svg_item({
+            let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
+                BaseGradient::new_from_colors(vec![
+                    Pixel::from_hex_string("9769f0").unwrap(),
+                    Pixel::from_hex_string("fbc7d4").unwrap(),
+                ]),
+            )));
 
-    let layer = composition.create_layer().unwrap();
-    layer.add_linear_gradient(LinearGradient {
-        id: "lg1".into(),
-        x1: 0.0,
-        y1: 0.0,
-        x2: 1.0,
-        y2: 0.0,
-        base: BaseGradient {
-            units: Units::ObjectBoundingBox,
-            transform: Transform::default(),
-            spread_method: SpreadMethod::Pad,
-            stops: vec![
-                Stop {
-                    offset: StopOffset::ZERO,
-                    color: Color::new_rgb(0, 255, 0),
-                    opacity: Opacity::ONE,
-                },
-                Stop {
-                    offset: StopOffset::ONE,
-                    color: Color::new_rgb(0, 0, 255),
-                    opacity: Opacity::ONE,
-                },
-            ],
-        },
-    });
+            let item = SvgItem::new(circle(circle_position, 250.0), fill);
 
-    let mut path = equilateral_triangle(Point::new(400.0, 400.0), 350.0);
-    path.transform(Transform::new_rotate(2.5));
-    layer
-        .add_to_root(NodeKind::Path(Path {
-            id: "triangle".to_string(),
-            fill: layer.fill_with_link("lg1"),
-            data: Rc::new(path),
-            ..Path::default()
-        }))
+            item
+        })
         .unwrap();
 
-    let pixel_position = Point::new(20.0, 20.0);
-    layer
-        .add_to_root(NodeKind::Path(Path {
-            id: "rect".to_string(),
-            fill: match layer.fill_with_link("lg1") {
-                None => None,
-                Some(mut f) => {
-                    f.opacity = NormalizedF64::new(0.75).unwrap();
-                    Some(f)
-                }
-            },
-            data: Rc::new(rect(
-                pixel_position,
-                resolution.as_point() / Point::new(2.0, 3.0),
-            )),
-            ..Path::default()
-        }))
+    let rect_id = layer
+        .add_svg_item({
+            let fill = Some(ColorLike::LinearGradient(LinearGradient::new(
+                BaseGradient::new_from_colors(vec![
+                    Pixel::new(0, 255, 0, 155),
+                    Pixel::new(0, 0, 255, 155),
+                ]),
+            )));
+
+            let item = SvgItem::new(
+                rect(
+                    Point::new_symmetric(20.0),
+                    resolution.as_point() / Point::new(2.0, 3.0),
+                ),
+                fill,
+            );
+
+            item
+        })
         .unwrap();
-    layer.add_animation(PositionAnimation::new(
-        "rect",
-        Linear::new(0, 200, pixel_position, (1250.0, 500.0).into()).unwrap(),
-    ));
-    layer.add_animation(PositionAnimation::new(
-        "rect",
-        Linear::new(220, 290, (1250.0, 500.0).into(), (0.0, 0.0).into()).unwrap(),
+
+    layer.add_position_animation(PositionAnimation::new(
+        &rect_id,
+        (0, 200),
+        (Point::new_symmetric(20.0), Point::new(1250.0, 500.0)),
+        Linear::new(),
     ));
 
-    // let mut renderer = FfmpegRenderer::builder()
-    //     .out_path("out.mp4")
-    //     .frame_output_format(FrameImageFormat::Png)
-    //     .build();
-    // renderer.render(composition).unwrap();
+    layer.add_position_animation(PositionAnimation::new(
+        &rect_id,
+        (220, 290),
+        (Point::new(1250.0, 500.0), Point::ZERO),
+        Linear::new(),
+    ));
+
+    layer.add_animation(AnimationType::Position(PositionAnimation::new(
+        &circle_id,
+        (0, 90),
+        (circle_position, resolution.as_point() / 2.0),
+        Sine::new(),
+    )));
+
+    layer.add_animation(AnimationType::ChangeColor(ChangeColorAnimation::new(
+        &rect_id,
+        (0, 100),
+        (Pixel::new(255, 100, 0, 255), Pixel::new(255, 0, 255, 255)),
+        Sine::new_with_ease_type(EaseType::InOut),
+    )));
 
     let mut renderer = EmbeddedRenderer::new("out.mp4");
     renderer.render(composition).unwrap();

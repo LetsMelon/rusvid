@@ -1,15 +1,12 @@
-use std::rc::Rc;
-
+use rusvid_core::holder::likes::TypesLike;
+use rusvid_core::holder::svg_holder::SvgItem;
 use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::rect::rect;
-use rusvid_lib::layer::LayerLogic;
-use rusvid_lib::prelude::ScriptingEffect;
+use rusvid_lib::prelude::{LayerType, ScriptingEffect};
 use rusvid_lib::resolution::Resolution;
-use rusvid_lib::resvg::usvg::{Fill, NodeKind, Paint, Path};
 use rusvid_lib::types::AsPoint;
-use rusvid_lib::utils::color_from_hex;
 
 mod dummy;
 
@@ -58,17 +55,10 @@ fn script_effect() {
         .add_effect(ScriptingEffect::new("width_height_gradient", SCRIPT))
         .build();
 
-    composition
-        .add_to_root(NodeKind::Path(Path {
-            id: "ul".to_string(),
-            fill: Some(Fill {
-                paint: Paint::Color(color_from_hex("000000".to_string()).unwrap()),
-                ..Fill::default()
-            }),
-            data: Rc::new(rect(Point::ZERO, resolution.as_point())),
-            ..Path::default()
-        }))
-        .unwrap();
+    let layer = composition.create_layer(LayerType::Svg).unwrap();
+    if let TypesLike::Svg(svg_holder) = layer.object.data_mut() {
+        svg_holder.add_item(SvgItem::new(rect(Point::ZERO, resolution.as_point()), None));
+    }
 
     let image_render = DummyRender::default();
 

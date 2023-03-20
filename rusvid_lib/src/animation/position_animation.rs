@@ -1,43 +1,63 @@
-use std::fmt::Debug;
-use std::rc::Rc;
+use rusvid_core::prelude::Point;
 
-use log::debug;
-use resvg::usvg::PathData;
-
-use crate::animation::curves::Function;
-use crate::animation::Animation;
+use super::{Animation, Function};
 
 #[derive(Debug)]
 pub struct PositionAnimation {
     curve: Box<dyn Function>,
     object_id: String,
+
+    /// Range `[start_frame, end_frame)`
+    start_frame: usize,
+    /// Range `[start_frame, end_frame)`
+    end_frame: usize,
+
+    start_position: Point,
+    end_position: Point,
 }
 
 impl PositionAnimation {
-    pub fn new<T: Function + 'static>(id: impl Into<String>, curve: T) -> Self {
-        PositionAnimation {
+    pub fn new<T: Function + 'static, I: Into<String> + Clone>(
+        id: &I,
+        frames: (usize, usize),
+        positions: (Point, Point),
+        curve: T,
+    ) -> Self {
+        Self {
             curve: Box::new(curve),
-            object_id: id.into(),
+            object_id: id.clone().into(),
+            start_frame: frames.0,
+            end_frame: frames.1,
+            start_position: positions.0,
+            end_position: positions.1,
         }
     }
 }
 
 impl Animation for PositionAnimation {
-    unsafe fn update(&mut self, mut path: Rc<PathData>, frame_count: &usize) -> anyhow::Result<()> {
-        if *frame_count >= self.curve.start_frame() && *frame_count <= self.curve.end_frame() {
-            let pd = Rc::get_mut_unchecked(&mut path);
-
-            let delta = self.curve.delta(*frame_count);
-            debug!("Update {}: {:?}", self.object_id(), delta);
-            pd.transform(resvg::usvg::Transform::new_translate(delta.x(), delta.y()));
-            // let pos = self.meta.calc(frame_count);
-            // println!("{} -> {:?}", frame_count, pos);
-            // set_path(&mut pd, pos);
-        }
-        Ok(())
-    }
-
     fn object_id(&self) -> &str {
         &self.object_id
+    }
+
+    type OUTPUT = Point;
+    fn get_value(&self, frame: usize) -> Self::OUTPUT {
+        let frame_delta = (self.end_frame() - self.start_frame() - 1) as f32;
+        let my_frame = (frame - self.start_frame()) as f32;
+
+        let percentage = my_frame / frame_delta;
+
+        // println!("\t\t{frame}: {percentage:.3}");
+
+        let distance_delta = self.end_position - self.start_position;
+
+        self.start_position + distance_delta * (self.curve.delta(percentage) as f64)
+    }
+
+    fn start_frame(&self) -> usize {
+        self.start_frame
+    }
+
+    fn end_frame(&self) -> usize {
+        self.end_frame
     }
 }
