@@ -27,7 +27,7 @@ const_assert_eq!(
 pub struct Layer {
     _name: String,
 
-    // TODO why `pub`?
+    // TODO remove pub
     pub object: Object,
 
     animations: Vec<AnimationType>,
