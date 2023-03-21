@@ -4,6 +4,7 @@ pub mod likes;
 pub mod object;
 pub mod stroke;
 pub mod svg_holder;
+pub mod svg_item;
 pub mod transform;
 
 pub mod utils;

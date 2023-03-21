@@ -5,7 +5,8 @@ use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
 use rusvid_core::holder::object::Object;
-use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
+use rusvid_core::holder::svg_holder::SvgHolder;
+use rusvid_core::holder::svg_item::SvgItem;
 use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 

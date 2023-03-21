@@ -6,7 +6,6 @@ use fern::{log_file, Dispatch};
 use log::{debug, LevelFilter};
 use rusvid_lib::animation::change_color_animation::ChangeColorAnimation;
 use rusvid_lib::animation::position_animation::PositionAnimation;
-use rusvid_lib::animation::set_color_animation::SetColorAnimation;
 use rusvid_lib::animation::AnimationType;
 use rusvid_lib::figures::prelude::circle;
 use rusvid_lib::figures::rect::rect;
@@ -14,8 +13,8 @@ use rusvid_lib::figures::triangle::equilateral_triangle;
 use rusvid_lib::layer::LayerType;
 use rusvid_lib::prelude::holder::gradient::base::BaseGradient;
 use rusvid_lib::prelude::holder::gradient::linear::LinearGradient;
-use rusvid_lib::prelude::holder::likes::{ColorLike, PathLike, TypesLike};
-use rusvid_lib::prelude::holder::svg_holder::SvgItem;
+use rusvid_lib::prelude::holder::likes::ColorLike;
+use rusvid_lib::prelude::holder::svg_item::SvgItem;
 use rusvid_lib::prelude::holder::transform::{Transform, TransformLogic};
 use rusvid_lib::prelude::*;
 

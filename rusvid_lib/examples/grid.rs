@@ -1,7 +1,7 @@
 use rusvid_core::holder::gradient::base::BaseGradient;
 use rusvid_core::holder::gradient::linear::LinearGradient;
 use rusvid_core::holder::likes::{ColorLike, TypesLike};
-use rusvid_core::holder::svg_holder::SvgItem;
+use rusvid_core::holder::svg_item::SvgItem;
 use rusvid_lib::animation::prelude::*;
 use rusvid_lib::animation::AnimationType;
 use rusvid_lib::figures::prelude::*;

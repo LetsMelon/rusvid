@@ -1,5 +1,5 @@
 use rusvid_core::holder::likes::{ColorLike, TypesLike};
-use rusvid_core::holder::svg_holder::SvgItem;
+use rusvid_core::holder::svg_item::SvgItem;
 use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;

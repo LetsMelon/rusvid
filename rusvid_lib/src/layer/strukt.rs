@@ -1,7 +1,8 @@
 use anyhow::{bail, Result};
 use rusvid_core::holder::likes::TypesLike;
 use rusvid_core::holder::object::Object;
-use rusvid_core::holder::svg_holder::{SvgHolder, SvgItem};
+use rusvid_core::holder::svg_holder::SvgHolder;
+use rusvid_core::holder::svg_item::SvgItem;
 use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::holder::utils::random_id;
 use rusvid_effect::EffectLogic;
