@@ -9,7 +9,7 @@ repository.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.66"
+anyhow = { workspace = true }
 chrono = "0.4.24"
 fern = "0.6.1"
 log = "0.4"
