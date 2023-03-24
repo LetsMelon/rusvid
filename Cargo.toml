@@ -3,7 +3,7 @@ default-members = ["rusvid_cli"]
 members = ["rusvid_lib", "rusvid_cli", "crates/*"]
 
 [workspace.dependencies]
-anyhow = "1.0.66"
+anyhow = "1.0.70"
 thiserror = "1.0.39"
 
 [workspace.package]
