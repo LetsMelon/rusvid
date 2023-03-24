@@ -16,7 +16,7 @@ repository.workspace = true
 approx = "0.5.1"
 concat-idents = "1.1.4"
 # TODO Maybe replace flo_curve with 'kurbo'
-flo_curves = "0.6.1"
+flo_curves = "0.7.0"
 geo = "0.24.0"
 glam = { version = "0.22.0", features = ["approx"] }
 image = { version = "0.24", features = ["bmp", "jpeg"] }
