@@ -23,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Move examples into `/rusvid_lib`
 - Use embedded renderer in `rusvid_lib/examples`
 - Move `Layer` struct into separate file ([#64])
-
 - Updated `chrono` to `0.24.0` ([#82]).
 - Updated `geo` to `0.24.0` ([#80]).
 - Updated `paste` to `1.0.12` ([#77]).
