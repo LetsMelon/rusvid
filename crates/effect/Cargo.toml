@@ -2,7 +2,7 @@
 name = "rusvid_effect"
 edition = "2021"
 description = "Collection of predefined image effects for rusvid"
-readme = "../../README.md"
+readme = "./README.md"
 keywords = ["svg", "graphics", "animation"]
 documentation = "https://docs.rs/rusvid_effect/"
 
