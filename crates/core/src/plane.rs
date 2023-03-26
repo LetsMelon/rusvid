@@ -322,7 +322,7 @@ impl Plane {
         self,
         path: impl Into<PathBuf>,
         format: FrameImageFormat,
-    ) -> Result<(), PlaneError> {
+    ) -> Result<PathBuf, PlaneError> {
         let mut path: PathBuf = path.into();
 
         if path.extension().is_none() {
@@ -330,10 +330,12 @@ impl Plane {
         }
 
         match format {
-            FrameImageFormat::Png => self.save_as_png(path),
-            FrameImageFormat::Bmp => self.save_as_bmp(path),
-            FrameImageFormat::Jpg => self.save_as_jpg(path),
-        }
+            FrameImageFormat::Png => self.save_as_png(path.clone())?,
+            FrameImageFormat::Bmp => self.save_as_bmp(path.clone())?,
+            FrameImageFormat::Jpg => self.save_as_jpg(path.clone())?,
+        };
+
+        Ok(path)
     }
 
     // TODO implement first citizen `Plane-to-Bmp` function
