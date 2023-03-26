@@ -9,6 +9,7 @@ use crate::composition::Composition;
 
 pub mod embedded;
 pub mod ffmpeg;
+pub mod frame;
 mod util;
 
 use util::combine_renders;

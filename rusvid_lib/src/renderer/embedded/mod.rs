@@ -5,9 +5,10 @@ use log::{debug, info};
 use rusvid_video_encoder::Encoder;
 
 use crate::composition::Composition;
-use crate::prelude::MetricsVideo;
+use crate::metrics::MetricsVideo;
 use crate::renderer::Renderer;
 
+#[derive(Debug)]
 pub struct EmbeddedRenderer {
     out_path: PathBuf,
 }
@@ -22,6 +23,8 @@ impl EmbeddedRenderer {
 
 impl Renderer for EmbeddedRenderer {
     fn render(&mut self, mut composition: Composition) -> Result<()> {
+        info!("Using renderer: {:?}", self);
+
         let out_path = self.out_path.clone();
         let mut video_encoder = Encoder::new(
             out_path,

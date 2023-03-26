@@ -61,6 +61,8 @@ impl FfmpegRenderer {
 
 impl Renderer for FfmpegRenderer {
     fn render(&mut self, mut composition: Composition) -> Result<()> {
+        info!("Using renderer: {:?}", self);
+
         self.framerate = composition.framerate;
 
         let file_extension = self.frame_output_format.file_extension();
