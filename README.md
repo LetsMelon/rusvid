@@ -1,5 +1,10 @@
 # rusvid
 
+![Crates.io Version](https://img.shields.io/crates/v/rusvid_lib)
+![docs.rs](https://img.shields.io/docsrs/rusvid_lib)
+![Lines of code](https://img.shields.io/tokei/lines/github/LetsMelon/rusvid)
+![Crates.io Downloads](https://img.shields.io/crates/d/rusvid_lib)
+
 Write and render svg-animations with Rust ✨
 
 (no gui or cli, under active development)
