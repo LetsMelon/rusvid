@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Implemented animation `ChangeColorAnimation` (#64)
-- Implemented animation `PositionAnimation` (#64)
-- Implemented animation `SetColorAnimation` (#64)
-- Implemented enum `AnimationType` to hold the animations (#64)
+- Added `EmbeddedRenderer` to create a `mp4`-video which needs ffmpeg installed and findable via path, for more info see the `Dockerfile` ([#64])
+- Added `FrameRenderer` to store the individual frames on the disk ([#90])
+- Implemented animation `ChangeColorAnimation` ([#64])
+- Implemented animation `PositionAnimation` ([#64])
+- Implemented animation `SetColorAnimation` ([#64])
+- Implemented enum `AnimationType` to hold the animations ([#64])
 
 ### Fixed
 
@@ -20,18 +22,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Move examples into `/rusvid_lib`
 - Use embedded renderer in `rusvid_lib/examples`
-- Move `Layer` struct into separate file (#64)
-
-- Updated `chrono` to `0.24.0` (#82).
-- Updated `geo` to `0.24.0` (#80).
-- Updated `paste` to `1.0.12` (#77).
-- Updated `rayon` to `1.7.0` (#78).
-- Updated `thiserror` to `1.0.39` (#79).
+- Move `Layer` struct into separate file ([#64])
+- Updated `chrono` to `0.24.0` ([#82]).
+- Updated `geo` to `0.24.0` ([#80]).
+- Updated `paste` to `1.0.12` ([#77]).
+- Updated `rayon` to `1.7.0` ([#78]).
+- Updated `thiserror` to `1.0.39` ([#79]).
 
 ### Breaking
 
-- Switch from resvg to self made svg holder (`rusvid_core/holder/`) (#64)
+- Switch from resvg to self made svg holder (`rusvid_core/holder/`) ([#64])
 - Remove `resvg` from re-export
-- Replaced `utils/rgb_from_hex` and `utils/color_from_hex` with `rusvid_core::pixel::Pixel::from_hex_string` (#64)
+- Replaced `utils/rgb_from_hex` and `utils/color_from_hex` with `rusvid_core::pixel::Pixel::from_hex_string` ([#64])
 
 [unreleased]: https://github.com/LetsMelon/rusvid/compare/0.2.1...HEAD
+
+[#64]: https://github.com/LetsMelon/rusvid/pull/64
+[#77]: https://github.com/LetsMelon/rusvid/pull/77
+[#78]: https://github.com/LetsMelon/rusvid/pull/78
+[#79]: https://github.com/LetsMelon/rusvid/pull/79
+[#80]: https://github.com/LetsMelon/rusvid/pull/80
+[#82]: https://github.com/LetsMelon/rusvid/pull/82
+[#90]: https://github.com/LetsMelon/rusvid/pull/90

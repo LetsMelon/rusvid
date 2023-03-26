@@ -22,6 +22,7 @@ pub mod prelude {
     pub use crate::metrics::{MetricsSize, MetricsVideo};
     pub use crate::renderer::embedded::EmbeddedRenderer;
     pub use crate::renderer::ffmpeg::FfmpegRenderer;
+    pub use crate::renderer::frame::FrameRenderer;
     pub use crate::renderer::Renderer;
     pub use crate::resolution::Resolution;
     pub use crate::types::*;

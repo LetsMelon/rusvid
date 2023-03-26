@@ -138,6 +138,7 @@ fn main() {
         Sine::new_with_ease_type(EaseType::InOut),
     )));
 
-    let mut renderer = EmbeddedRenderer::new("out.mp4");
+    // let mut renderer = EmbeddedRenderer::new("out.mp4");
+    let mut renderer = FrameRenderer::new_with_file_type("./out", FrameImageFormat::Jpg);
     renderer.render(composition).unwrap();
 }
