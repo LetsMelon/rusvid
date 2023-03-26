@@ -2,7 +2,7 @@
 name = "rusvid_video_encoder"
 edition = "2021"
 description = "h264 mp4 encoder for rusvid"
-readme = "../../README.md"
+readme = "./README.md"
 keywords = ["svg", "graphics", "animation", "h264", "mp4"]
 documentation = "https://docs.rs/rusvid_video_encoder/"
 
