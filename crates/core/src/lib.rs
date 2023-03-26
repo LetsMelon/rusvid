@@ -1,4 +1,3 @@
-#![feature(iter_array_chunks)]
 #![feature(variant_count)]
 #![feature(is_some_and)]
 #![cfg_attr(coverage_nightly, feature(no_coverage))]
