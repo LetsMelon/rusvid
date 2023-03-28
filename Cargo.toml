@@ -1,6 +1,6 @@
 [workspace]
 default-members = ["rusvid_cli"]
-members = ["rusvid_lib", "rusvid_cli", "crates/*"]
+members = ["rusvid_lib", "rusvid_cli", "rusvid_file", "crates/*"]
 
 [workspace.dependencies]
 anyhow = "1.0.66"
