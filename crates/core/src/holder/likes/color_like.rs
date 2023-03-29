@@ -1,9 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use crate::holder::gradient::linear::LinearGradient;
 use crate::holder::gradient::radial::RadialGradient;
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::pixel::Pixel;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ColorLike {
     Color(Pixel),
     LinearGradient(LinearGradient),

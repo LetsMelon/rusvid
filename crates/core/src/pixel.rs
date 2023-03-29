@@ -1,6 +1,8 @@
 use std::ops::{Index, IndexMut};
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Pixel([u8; 4]);
 
 impl std::fmt::Debug for Pixel {

@@ -1,10 +1,12 @@
 use std::rc::Rc;
 
+use serde::{Deserialize, Serialize};
+
 use crate::holder::gradient::base::BaseGradient;
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::point::Point;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LinearGradient {
     point_1: Point,
     point_2: Point,
