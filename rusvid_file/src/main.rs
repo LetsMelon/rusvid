@@ -9,10 +9,7 @@ use wrapper::*;
 fn main() {
     let comp = Composition {
         framerate: 24,
-        resolution: Resolution {
-            width: 1920,
-            height: 1080,
-        },
+        resolution: Resolution::new(1920, 1080),
         layers: vec![
             Layer {
                 objects: vec![Object {

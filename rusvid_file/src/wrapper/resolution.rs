@@ -8,6 +8,12 @@ pub struct Resolution {
     pub height: u32,
 }
 
+impl Resolution {
+    pub fn new(width: u32, height: u32) -> Self {
+        Self { width, height }
+    }
+}
+
 impl TranslateIntoRusvidGeneric for Resolution {
     type OUTPUT = rusvid_lib::resolution::Resolution;
 
