@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::holder::likes::ColorLike;
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::pixel::Pixel;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct Stop {
     pub(crate) offset: f64,
     pub(crate) color: Pixel,

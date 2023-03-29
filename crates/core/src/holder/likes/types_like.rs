@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::holder::image_holder::ImageHolder;
 use crate::holder::svg_holder::SvgHolder;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum TypesLike {
     Svg(SvgHolder),
     Image(ImageHolder),

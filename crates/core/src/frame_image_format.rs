@@ -1,6 +1,7 @@
 use image::ImageFormat;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum FrameImageFormat {
     Png,
     Bmp,

@@ -1,6 +1,7 @@
 use approx::AbsDiffEq;
 use geo::{Centroid, LineString, Polygon};
 use resvg::usvg::{PathData, PathSegment};
+use serde::{Deserialize, Serialize};
 
 use crate::holder::likes::utils::{coord2_to_point, point_to_coord2};
 use crate::holder::utils::TranslateIntoResvgGeneric;
@@ -10,7 +11,7 @@ use crate::point::Point;
 const DELTA: f64 = 0.0001;
 const BOUNDING_BOX_STEPS: u32 = 10;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum PathLike {
     Move(Point),
     Line(Point),

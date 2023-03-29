@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::holder::gradient::stop::Stop;
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::pixel::Pixel;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct BaseGradient {
     // TODO add transformation like 'rotation', ...
     stops: Vec<Stop>,
