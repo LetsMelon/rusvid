@@ -2,9 +2,10 @@ use std::fmt::Debug;
 
 mod third_party;
 
+use serde::{Deserialize, Serialize};
 pub use third_party::*;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum EaseType {
     In,
     Out,

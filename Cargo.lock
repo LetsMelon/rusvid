@@ -1384,6 +1384,7 @@ dependencies = [
  "rusvid_core",
  "rusvid_effect",
  "rusvid_video_encoder",
+ "serde",
  "static_assertions",
 ]
 

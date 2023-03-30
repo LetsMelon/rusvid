@@ -1,8 +1,9 @@
 use rusvid_core::holder::likes::ColorLike;
+use serde::{Deserialize, Serialize};
 
 use super::Animation;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SetColorAnimation {
     object_id: String,
 

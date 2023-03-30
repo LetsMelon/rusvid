@@ -1,10 +1,11 @@
 use rusvid_core::point::{AsPoint, Point};
+use serde::{Deserialize, Serialize};
 
 use crate::metrics::{MetricsSize, MetricsVideo};
 use crate::types::ResolutionType;
 
 // TODO implement sth to create a `Resolution` from 'forms'/'sizes' like 'A4' and the combination of DPI
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 /// Enum for common resolutions and custom ones
 ///
 /// Currently only has presets for resolutions with 16:9 format. For other formats use `Resolution::Custom(width, height)`.

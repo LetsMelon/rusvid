@@ -11,13 +11,57 @@ use crate::point::Point;
 const DELTA: f64 = 0.0001;
 const BOUNDING_BOX_STEPS: u32 = 10;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+// TODO write custom `Deserialize`
+#[derive(Debug, Clone, Copy, Deserialize)]
 pub enum PathLike {
+    /// Svg path: `M x y`
     Move(Point),
+    /// Svg path: `L x y`
     Line(Point),
+    /// Svg path: `C x y, x1 y1, x2 y2`
     /// end_point, control_point_start, control_point_end
     CurveTo(Point, Point, Point),
+    /// Svg path: `Z`
     Close,
+}
+
+impl Serialize for PathLike {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        #[inline]
+        fn format_float(value: f64) -> String {
+            if value.trunc() == value {
+                format!("{}", value as u32)
+            } else {
+                format!("{:.4}", value)
+            }
+        }
+
+        match self {
+            PathLike::Move(p) => serializer.serialize_str(&format!(
+                "M {} {}",
+                format_float(p.x()),
+                format_float(p.y())
+            )),
+            PathLike::Line(p) => serializer.serialize_str(&format!(
+                "L {} {}",
+                format_float(p.x()),
+                format_float(p.y())
+            )),
+            PathLike::CurveTo(e_p, c_s, c_e) => serializer.serialize_str(&format!(
+                "C {} {}, {} {}, {} {}",
+                format_float(c_s.x()),
+                format_float(c_s.y()),
+                format_float(c_e.x()),
+                format_float(c_e.y()),
+                format_float(e_p.x()),
+                format_float(e_p.y())
+            )),
+            PathLike::Close => serializer.serialize_str("Z"),
+        }
+    }
 }
 
 impl PartialEq<PathLike> for PathLike {

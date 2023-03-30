@@ -1,5 +1,6 @@
 use anyhow::Result;
 use log::debug;
+use serde::{Deserialize, Serialize};
 
 use crate::composition::CompositionBuilder;
 use crate::effect::EffectLogic;
@@ -9,7 +10,7 @@ use crate::resolution::Resolution;
 use crate::types::FPS;
 
 // TODO remove pub's
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Composition {
     /// The resolution of the composition
     pub(crate) resolution: Resolution,
@@ -24,6 +25,8 @@ pub struct Composition {
 
     pub layers: Vec<Layer>,
 
+    #[serde(skip)]
+    // TODO remove serde skip
     pub(crate) effects: Vec<Box<dyn EffectLogic>>,
 }
 

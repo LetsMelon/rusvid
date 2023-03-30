@@ -3,11 +3,13 @@ pub mod curves;
 pub mod position_animation;
 pub mod set_color_animation;
 
+use serde::{Deserialize, Serialize};
+
 use self::change_color_animation::ChangeColorAnimation;
 use self::position_animation::PositionAnimation;
 use self::set_color_animation::SetColorAnimation;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum AnimationType {
     Position(PositionAnimation),
     SetColor(SetColorAnimation),
