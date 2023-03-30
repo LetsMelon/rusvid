@@ -33,7 +33,8 @@ fn main() {
         &rect_id,
         (0, frames),
         (rect_pos, resolution.as_point() - rect_pos),
-        Cubic::new_with_ease_type(EaseType::InOut),
+        FunctionType::Cubic,
+        EaseType::InOut,
     )));
 
     let mut renderer = EmbeddedRenderer::new("simple_animation.mp4");

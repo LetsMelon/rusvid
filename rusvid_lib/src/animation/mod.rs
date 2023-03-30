@@ -89,33 +89,9 @@ pub trait Animation: std::fmt::Debug {
 }
 
 pub trait Function: std::fmt::Debug {
-    fn new() -> Self
-    where
-        Self: Sized,
-    {
-        Self::new_with_ease_type(Default::default())
-    }
-
-    fn new_with_ease_type(ease_type: crate::animation::curves::EaseType) -> Self
-    where
-        Self: Sized;
-
-    fn get_ease_type(&self) -> &crate::animation::curves::EaseType;
-
     fn delta_ease_in(&self, delta: f32) -> f32;
     fn delta_ease_out(&self, delta: f32) -> f32;
     fn delta_ease_in_out(&self, delta: f32) -> f32;
-
-    fn delta(&self, delta: f32) -> f32 {
-        assert!(delta >= 0.0);
-        assert!(delta <= 1.0);
-
-        match self.get_ease_type() {
-            crate::animation::curves::EaseType::In => self.delta_ease_in(delta),
-            crate::animation::curves::EaseType::Out => self.delta_ease_out(delta),
-            crate::animation::curves::EaseType::InOut => self.delta_ease_in_out(delta),
-        }
-    }
 }
 
 // TODO remove prelude

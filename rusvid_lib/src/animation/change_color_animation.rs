@@ -2,12 +2,14 @@ use rusvid_core::holder::likes::ColorLike;
 use rusvid_core::prelude::Pixel;
 
 use super::{Animation, Function};
+use crate::prelude::{EaseType, FunctionType};
 
 #[derive(Debug)]
 pub struct ChangeColorAnimation {
     object_id: String,
 
-    curve: Box<dyn Function>,
+    curve: FunctionType,
+    ease: EaseType,
 
     /// Range `[start_frame, end_frame)`
     start_frame: usize,
@@ -20,14 +22,16 @@ pub struct ChangeColorAnimation {
 }
 
 impl ChangeColorAnimation {
-    pub fn new<T: Function + 'static, I: Into<String> + Clone>(
+    pub fn new<I: Into<String> + Clone>(
         id: &I,
         frames: (usize, usize),
         colors: (Pixel, Pixel),
-        curve: T,
+        curve: FunctionType,
+        ease: EaseType,
     ) -> Self {
         Self {
-            curve: Box::new(curve),
+            curve,
+            ease,
             object_id: id.clone().into(),
             start_frame: frames.0,
             end_frame: frames.1,
@@ -49,7 +53,7 @@ impl ChangeColorAnimation {
             .map(|v| *v as f32)
             .zip(self.start_color.to_raw().iter().map(|v| *v as f32))
             .map(|(end_color, start_color)| {
-                start_color + (end_color - start_color) * (self.curve.delta(percentage))
+                start_color + (end_color - start_color) * (self.curve.delta(self.ease, percentage))
             })
             .map(|delta| delta as u8)
             .collect::<Vec<_>>();
@@ -77,7 +81,7 @@ impl Animation for ChangeColorAnimation {
             .map(|v| *v as f32)
             .zip(self.start_color.to_raw().iter().map(|v| *v as f32))
             .map(|(end_color, start_color)| {
-                start_color + (end_color - start_color) * (self.curve.delta(percentage))
+                start_color + (end_color - start_color) * (self.curve.delta(self.ease, percentage))
             })
             .map(|delta| delta as u8)
             .collect::<Vec<_>>();

@@ -40,7 +40,8 @@ fn main() {
         &bg_id,
         (0, frames),
         (start_pos, Point::ZERO),
-        Linear::new(),
+        FunctionType::Linear,
+        EaseType::default(),
     )));
 
     let grid_layer = composition.create_layer(LayerType::Svg).unwrap();

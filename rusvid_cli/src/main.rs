@@ -114,31 +114,35 @@ fn main() {
         &rect_id,
         (0, 200),
         (Point::new_symmetric(20.0), Point::new(1250.0, 500.0)),
-        Linear::new(),
+        FunctionType::Linear,
+        EaseType::default(),
     ));
 
     layer.add_position_animation(PositionAnimation::new(
         &rect_id,
         (220, 290),
         (Point::new(1250.0, 500.0), Point::ZERO),
-        Linear::new(),
+        FunctionType::Linear,
+        EaseType::default(),
     ));
 
     layer.add_animation(AnimationType::Position(PositionAnimation::new(
         &circle_id,
         (0, 90),
         (circle_position, resolution.as_point() / 2.0),
-        Sine::new(),
+        FunctionType::Sine,
+        EaseType::default(),
     )));
 
     layer.add_animation(AnimationType::ChangeColor(ChangeColorAnimation::new(
         &rect_id,
         (0, 100),
         (Pixel::new(255, 100, 0, 255), Pixel::new(255, 0, 255, 255)),
-        Sine::new_with_ease_type(EaseType::InOut),
+        FunctionType::Sine,
+        EaseType::InOut,
     )));
 
     // let mut renderer = EmbeddedRenderer::new("out.mp4");
-    let mut renderer = FrameRenderer::new_with_file_type("./out", FrameImageFormat::Jpg);
+    let mut renderer = FrameRenderer::new_with_file_type("./out", FrameImageFormat::Bmp);
     renderer.render(composition).unwrap();
 }

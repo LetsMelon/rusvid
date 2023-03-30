@@ -1,11 +1,14 @@
 use rusvid_core::prelude::Point;
 
 use super::{Animation, Function};
+use crate::prelude::{EaseType, FunctionType};
 
 #[derive(Debug)]
 pub struct PositionAnimation {
-    curve: Box<dyn Function>,
     object_id: String,
+
+    curve: FunctionType,
+    ease: EaseType,
 
     /// Range `[start_frame, end_frame)`
     start_frame: usize,
@@ -17,14 +20,16 @@ pub struct PositionAnimation {
 }
 
 impl PositionAnimation {
-    pub fn new<T: Function + 'static, I: Into<String> + Clone>(
+    pub fn new<I: Into<String> + Clone>(
         id: &I,
         frames: (usize, usize),
         positions: (Point, Point),
-        curve: T,
+        curve: FunctionType,
+        ease: EaseType,
     ) -> Self {
         Self {
-            curve: Box::new(curve),
+            curve,
+            ease,
             object_id: id.clone().into(),
             start_frame: frames.0,
             end_frame: frames.1,
@@ -50,7 +55,7 @@ impl Animation for PositionAnimation {
 
         let distance_delta = self.end_position - self.start_position;
 
-        self.start_position + distance_delta * (self.curve.delta(percentage) as f64)
+        self.start_position + distance_delta * (self.curve.delta(self.ease, percentage) as f64)
     }
 
     fn start_frame(&self) -> usize {
