@@ -11,8 +11,8 @@ use crate::point::Point;
 const DELTA: f64 = 0.0001;
 const BOUNDING_BOX_STEPS: u32 = 10;
 
-// TODO write custom `Deserialize`
-#[derive(Debug, Clone, Copy, Deserialize)]
+// TODO write custom `Deserialize`r and uncomment custom `Serialize`r
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum PathLike {
     /// Svg path: `M x y`
     Move(Point),
@@ -25,6 +25,7 @@ pub enum PathLike {
     Close,
 }
 
+/*
 impl Serialize for PathLike {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -63,6 +64,7 @@ impl Serialize for PathLike {
         }
     }
 }
+*/
 
 impl PartialEq<PathLike> for PathLike {
     fn eq(&self, other: &PathLike) -> bool {
