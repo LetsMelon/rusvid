@@ -1,7 +1,5 @@
 use std::fmt::Debug;
 
-use crate::animation::Function;
-
 mod third_party;
 
 pub use third_party::*;

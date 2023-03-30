@@ -1379,6 +1379,7 @@ dependencies = [
  "glam",
  "itertools",
  "log",
+ "paste",
  "rayon",
  "rusvid_core",
  "rusvid_effect",

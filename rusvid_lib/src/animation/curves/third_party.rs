@@ -8,21 +8,15 @@ macro_rules! generate_ease_struct {
     ($struct_name:ident) => {
         #[doc = concat!("Wrapper struct around [easer::functions::", stringify!($struct_name), "]. See <https://easings.net/> for graphs.")]
         #[derive(std::fmt::Debug)]
-        pub struct $struct_name {
-            ease_type: crate::animation::curves::EaseType,
+        pub struct $struct_name;
+
+        impl $struct_name {
+            pub const fn new() -> Self {
+                Self {}
+            }
         }
 
         impl crate::animation::Function for $struct_name {
-            fn new_with_ease_type(ease_type: crate::animation::curves::EaseType) -> Self {
-                Self {
-                    ease_type,
-                }
-            }
-
-            fn get_ease_type(&self) -> &crate::animation::curves::EaseType {
-                &self.ease_type
-            }
-
             fn delta_ease_in(&self, delta: f32) -> f32 {
                 use easer::functions::Easing;
 
@@ -49,13 +43,22 @@ macro_rules! generate_ease_struct {
         }
 
         impl FunctionType {
-            #[inline(always)]
-            fn get_struct(&self) -> Box<dyn crate::animation::Function> {
-                use crate::animation::Function;
+            paste::paste! {
+                $(
+                    #[allow(non_upper_case_globals)]
+                    const [<CONST_  $x >]: $x = $x::new();
+                )*
+            }
 
+            #[inline(always)]
+            fn get_struct(&self) -> Box<&'static dyn crate::animation::Function> {
                 match self {
                     $(
-                        Self::$x => Box::new($x::new()),
+                        Self::$x => Box::new(
+                            paste::paste! {
+                                & Self::[<CONST_ $x>]
+                            }
+                        ),
                     )*
                 }
             }
