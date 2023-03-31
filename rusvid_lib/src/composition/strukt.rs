@@ -30,6 +30,9 @@ pub struct Composition {
     pub(crate) effects: Vec<Box<dyn EffectLogic>>,
 }
 
+unsafe impl Send for Composition {}
+unsafe impl Sync for Composition {}
+
 impl Composition {
     pub fn builder() -> CompositionBuilder {
         CompositionBuilder::default()

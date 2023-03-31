@@ -1,29 +1,56 @@
+use std::sync::Arc;
+
 use axum::extract::{DefaultBodyLimit, Multipart};
 use axum::http::{header, HeaderMap, HeaderValue, Method, StatusCode};
 use axum::response::IntoResponse;
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::Router;
 use fern::Dispatch;
 use log::LevelFilter;
 use rusvid_lib::composition::Composition;
+use rusvid_lib::prelude::holder::utils::random_id;
+use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::trace::TraceLayer;
 
+#[derive(Debug)]
+struct SharedData {
+    composition: Composition,
+    id: String,
+}
+
 #[tokio::main]
 async fn main() {
-    // tracing_subscriber::fmt::init();
     Dispatch::new()
         .level(LevelFilter::Debug)
         .chain(std::io::stdout())
         .apply()
         .unwrap();
 
+    let (tx, mut rx): (UnboundedSender<SharedData>, UnboundedReceiver<SharedData>) =
+        mpsc::unbounded_channel();
+
+    tokio::spawn(async move {
+        while let Some(message) = rx.recv().await {
+            println!("{}: {:?}", message.id, message.composition);
+        }
+    });
+
+    let shared_tx = Arc::new(tx);
+
     // build our application with a single route
     let app = Router::new()
-        .route("/", get(|| async { "Hello, World!" }).post(accept_form))
+        .route("/", get(|| async { "Hello, World!" }))
+        .route(
+            "/upload",
+            post({
+                let shared_state = Arc::clone(&shared_tx);
+                move |multipart| accept_form(multipart, shared_state)
+            }),
+        )
         .layer(
             ServiceBuilder::new()
                 .layer(DefaultBodyLimit::disable())
@@ -45,7 +72,10 @@ async fn main() {
         .unwrap();
 }
 
-async fn accept_form(mut multipart: Multipart) -> impl IntoResponse {
+async fn accept_form(
+    mut multipart: Multipart,
+    tx: Arc<UnboundedSender<SharedData>>,
+) -> impl IntoResponse {
     let mut file = None;
     while let Some(field) = multipart.next_field().await.unwrap() {
         let name = field.name().unwrap().to_string();
@@ -57,13 +87,20 @@ async fn accept_form(mut multipart: Multipart) -> impl IntoResponse {
         }
     }
 
-    let out = serde_yaml::from_slice::<Composition>(&file.unwrap());
-    println!("{out:?}");
+    let id = random_id();
+
+    let out = serde_yaml::from_slice::<Composition>(&file.unwrap()).unwrap();
+    tx.send(SharedData {
+        composition: out,
+        id: id.clone(),
+    })
+    .unwrap();
+
     // let mut renderer = EmbeddedRenderer::new("out.mp4");
     // renderer.render(out.unwrap()).unwrap();
 
     let mut headers = HeaderMap::new();
-    headers.insert(header::ETAG, "random_id".parse().unwrap());
+    headers.insert(header::ETAG, id.parse().unwrap());
 
     (StatusCode::CREATED, headers)
 }
