@@ -35,7 +35,8 @@ async fn main() {
                         .allow_methods([Method::GET, Method::POST]),
                 )
                 .layer(CompressionLayer::new()),
-        );
+        )
+        .fallback(|| async { StatusCode::NOT_FOUND });
 
     // run it with hyper on localhost:3000
     axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
