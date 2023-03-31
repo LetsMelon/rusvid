@@ -3,7 +3,7 @@ use std::sync::Arc;
 use axum::extract::{DefaultBodyLimit, Multipart};
 use axum::http::{header, HeaderMap, HeaderValue, Method, StatusCode};
 use axum::response::IntoResponse;
-use axum::routing::{get, post};
+use axum::routing::{any, get, post};
 use axum::Router;
 use fern::Dispatch;
 use log::LevelFilter;
@@ -41,9 +41,9 @@ async fn main() {
 
     let shared_tx = Arc::new(tx);
 
-    // build our application with a single route
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
+        .route("/health", any(|| async { StatusCode::OK }))
         .route(
             "/upload",
             post({
