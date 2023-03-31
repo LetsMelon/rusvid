@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-axum = "0.6.12"
+axum = { version = "0.6.12", features = ["multipart"] }
 fern = "0.6.2"
 log = "0.4.17"
 rusvid_lib = { path = "../rusvid_lib", version = "0.2.1" }
