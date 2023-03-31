@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::extract::{DefaultBodyLimit, Multipart};
 use axum::http::{header, HeaderMap, HeaderValue, Method, StatusCode};
 use axum::response::IntoResponse;
@@ -39,15 +37,13 @@ async fn main() {
         }
     });
 
-    let shared_tx = Arc::new(tx);
-
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/health", any(|| async { StatusCode::OK }))
         .route(
             "/upload",
             post({
-                let shared_state = Arc::clone(&shared_tx);
+                let shared_state = tx.clone();
                 move |multipart| accept_form(multipart, shared_state)
             }),
         )
@@ -74,7 +70,7 @@ async fn main() {
 
 async fn accept_form(
     mut multipart: Multipart,
-    tx: Arc<UnboundedSender<SharedData>>,
+    tx: UnboundedSender<SharedData>,
 ) -> impl IntoResponse {
     let mut file = None;
     while let Some(field) = multipart.next_field().await.unwrap() {
