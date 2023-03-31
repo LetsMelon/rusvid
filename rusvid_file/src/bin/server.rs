@@ -45,12 +45,15 @@ async fn main() {
             post({
                 let shared_state = tx.clone();
                 move |multipart| accept_form(multipart, shared_state)
-            }),
+            })
+            .layer(
+                ServiceBuilder::new()
+                    .layer(DefaultBodyLimit::disable())
+                    .layer(RequestBodyLimitLayer::new(1 * 1024 * 1024)),
+            ),
         )
         .layer(
             ServiceBuilder::new()
-                .layer(DefaultBodyLimit::disable())
-                .layer(RequestBodyLimitLayer::new(100 * 1024 * 1024))
                 .layer(TraceLayer::new_for_http())
                 .layer(
                     CorsLayer::new()
