@@ -1,10 +1,17 @@
+use rusvid_lib::prelude::Composition;
 use rusvid_lib::renderer::embedded::EmbeddedRenderer;
 use rusvid_lib::renderer::Renderer;
 use tokio::sync::mpsc::UnboundedReceiver;
 
-use crate::{ItemStatus, SharedData, SharedItemList};
+use crate::status_types::{ItemStatus, SharedItemList};
 
-pub async fn renderer(mut rx: UnboundedReceiver<SharedData>, shared_list: SharedItemList) {
+#[derive(Debug)]
+pub struct Message {
+    pub composition: Composition,
+    pub id: String,
+}
+
+pub async fn renderer(mut rx: UnboundedReceiver<Message>, shared_list: SharedItemList) {
     while let Some(message) = rx.recv().await {
         println!("{}: {:?}", message.id, message.composition);
 

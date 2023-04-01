@@ -1,6 +1,5 @@
-use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 use axum::extract::DefaultBodyLimit;
 use axum::http::{HeaderValue, Method, StatusCode};
@@ -8,8 +7,6 @@ use axum::routing::{any, get, post};
 use axum::Router;
 use fern::Dispatch;
 use log::LevelFilter;
-use rusvid_lib::composition::Composition;
-use serde::Serialize;
 use tokio::sync::mpsc;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
@@ -18,30 +15,11 @@ use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::trace::TraceLayer;
 
 use crate::handler::{status, video};
+use crate::status_types::SharedItemList;
 
 mod handler;
-mod renderer;
-
-#[derive(Debug)]
-pub struct SharedData {
-    composition: Composition,
-    id: String,
-}
-
-#[derive(Debug, Default, Clone, Copy, Serialize)]
-pub enum ItemStatus {
-    #[default]
-    Pending,
-    Processing,
-    Finish,
-}
-
-#[derive(Debug, Default, Clone, Serialize)]
-pub struct ItemList {
-    list: HashMap<String, ItemStatus>,
-}
-
-pub type SharedItemList = Arc<RwLock<ItemList>>;
+mod render_task;
+mod status_types;
 
 #[tokio::main]
 async fn main() {
@@ -56,7 +34,7 @@ async fn main() {
 
     tokio::spawn({
         let shared_list = Arc::clone(&shared_item_list);
-        move || async move { renderer::renderer(rx, shared_list).await }
+        move || async move { render_task::renderer(rx, shared_list).await }
     }());
 
     let app = Router::new()

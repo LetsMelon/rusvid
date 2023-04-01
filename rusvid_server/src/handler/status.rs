@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use axum::Json;
 use serde_json::{json, Value};
 
-use crate::{ItemList, SharedItemList};
+use crate::status_types::{ItemList, SharedItemList};
 
 pub async fn list_all_items(shared_list: SharedItemList) -> Json<ItemList> {
     let items = shared_list.read().unwrap().clone();

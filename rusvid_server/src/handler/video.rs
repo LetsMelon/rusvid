@@ -7,11 +7,12 @@ use rusvid_lib::core::holder::utils::random_id;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::io::ReaderStream;
 
-use crate::{ItemStatus, SharedData, SharedItemList};
+use crate::render_task::Message;
+use crate::status_types::{ItemStatus, SharedItemList};
 
 pub async fn upload_video(
     mut multipart: Multipart,
-    tx: UnboundedSender<SharedData>,
+    tx: UnboundedSender<Message>,
     list: SharedItemList,
 ) -> impl IntoResponse {
     let mut file = None;
@@ -28,7 +29,7 @@ pub async fn upload_video(
     let id = random_id();
 
     let out = serde_yaml::from_slice::<Composition>(&file.unwrap()).unwrap();
-    tx.send(SharedData {
+    tx.send(Message {
         composition: out,
         id: id.clone(),
     })
