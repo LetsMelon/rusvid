@@ -1740,24 +1740,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rusvid_file"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "axum",
- "fern",
- "log",
- "rusvid_lib",
- "serde",
- "serde_json",
- "serde_yaml",
- "tokio",
- "tokio-util",
- "tower",
- "tower-http",
-]
-
-[[package]]
 name = "rusvid_lib"
 version = "0.2.1"
 dependencies = [
@@ -1774,6 +1756,24 @@ dependencies = [
  "rusvid_video_encoder",
  "serde",
  "static_assertions",
+]
+
+[[package]]
+name = "rusvid_server"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "fern",
+ "log",
+ "rusvid_lib",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "tokio",
+ "tokio-util",
+ "tower",
+ "tower-http",
 ]
 
 [[package]]
