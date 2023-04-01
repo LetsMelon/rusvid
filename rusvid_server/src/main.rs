@@ -10,7 +10,7 @@ use fern::Dispatch;
 use log::LevelFilter;
 use rusvid_lib::composition::Composition;
 use serde::Serialize;
-use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
@@ -51,8 +51,7 @@ async fn main() {
         .apply()
         .unwrap();
 
-    let (tx, rx): (UnboundedSender<SharedData>, UnboundedReceiver<SharedData>) =
-        mpsc::unbounded_channel();
+    let (tx, rx) = mpsc::unbounded_channel();
     let shared_item_list = SharedItemList::default();
 
     tokio::spawn({
