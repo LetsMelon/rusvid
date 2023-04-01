@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::default;
 use std::net::SocketAddr;
 use std::sync::{Arc, RwLock};
 
@@ -17,7 +16,6 @@ use rusvid_lib::prelude::EmbeddedRenderer;
 use rusvid_lib::renderer::Renderer;
 use serde::Serialize;
 use serde_json::json;
-use serde_yaml::Value;
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use tokio_util::io::ReaderStream;
 use tower::ServiceBuilder;
