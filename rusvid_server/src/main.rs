@@ -2,36 +2,35 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::{Arc, RwLock};
 
-use axum::body::StreamBody;
-use axum::extract::{DefaultBodyLimit, Multipart, Path};
-use axum::http::{header, HeaderMap, HeaderValue, Method, StatusCode};
-use axum::response::IntoResponse;
+use axum::extract::DefaultBodyLimit;
+use axum::http::{HeaderValue, Method, StatusCode};
 use axum::routing::{any, get, post};
-use axum::{Json, Router};
+use axum::Router;
 use fern::Dispatch;
 use log::LevelFilter;
 use rusvid_lib::composition::Composition;
-use rusvid_lib::core::holder::utils::random_id;
 use rusvid_lib::renderer::embedded::EmbeddedRenderer;
 use rusvid_lib::renderer::Renderer;
 use serde::Serialize;
-use serde_json::json;
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
-use tokio_util::io::ReaderStream;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::trace::TraceLayer;
 
+use crate::handler::{status, video};
+
+mod handler;
+
 #[derive(Debug)]
-struct SharedData {
+pub struct SharedData {
     composition: Composition,
     id: String,
 }
 
 #[derive(Debug, Default, Clone, Copy, Serialize)]
-enum ItemStatus {
+pub enum ItemStatus {
     #[default]
     Pending,
     Processing,
@@ -39,11 +38,11 @@ enum ItemStatus {
 }
 
 #[derive(Debug, Default, Clone, Serialize)]
-struct ItemList {
+pub struct ItemList {
     list: HashMap<String, ItemStatus>,
 }
 
-type SharedItemList = Arc<RwLock<ItemList>>;
+pub type SharedItemList = Arc<RwLock<ItemList>>;
 
 #[tokio::main]
 async fn main() {
@@ -83,12 +82,30 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route("/health", any(|| async { StatusCode::OK }))
         .route(
-            "/upload",
+            "/status/all",
+            get({
+                let shared_list = shared_item_list.clone();
+
+                move || status::list_all_items(shared_list)
+            })
+            .layer(CompressionLayer::new()),
+        )
+        .route(
+            "/status/id/:id",
+            get({
+                let shared_list = shared_item_list.clone();
+
+                move |path| status::single_status(path, shared_list)
+            })
+            .layer(CompressionLayer::new()),
+        )
+        .route(
+            "/video/upload",
             post({
                 let shared_state = tx.clone();
                 let shared_list = shared_item_list.clone();
 
-                move |multipart| accept_form(multipart, shared_state, shared_list)
+                move |multipart| video::upload_video(multipart, shared_state, shared_list)
             })
             .layer(
                 ServiceBuilder::new()
@@ -98,28 +115,10 @@ async fn main() {
             ),
         )
         .route(
-            "/status/all",
-            get({
-                let shared_list = shared_item_list.clone();
-
-                move || get_all_videos(shared_list)
-            })
-            .layer(CompressionLayer::new()),
-        )
-        .route(
-            "/status/id/:id",
-            get({
-                let shared_list = shared_item_list.clone();
-
-                move |path| get_status_video(path, shared_list)
-            })
-            .layer(CompressionLayer::new()),
-        )
-        .route(
             "/video/id/:id",
             get({
                 let shared_list = shared_item_list.clone();
-                move |path| get_video(path, shared_list)
+                move |path| video::download_video(path, shared_list)
             })
             .layer(CompressionLayer::new()),
         )
@@ -139,99 +138,4 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
-}
-
-async fn accept_form(
-    mut multipart: Multipart,
-    tx: UnboundedSender<SharedData>,
-    list: SharedItemList,
-) -> impl IntoResponse {
-    let mut file = None;
-    while let Some(field) = multipart.next_field().await.unwrap() {
-        let name = field.name().unwrap().to_string();
-        let data = field.bytes().await.unwrap();
-
-        if name == "file" {
-            file = Some(data);
-            break;
-        }
-    }
-
-    let id = random_id();
-
-    let out = serde_yaml::from_slice::<Composition>(&file.unwrap()).unwrap();
-    tx.send(SharedData {
-        composition: out,
-        id: id.clone(),
-    })
-    .unwrap();
-
-    // let mut renderer = EmbeddedRenderer::new("out.mp4");
-    // renderer.render(out.unwrap()).unwrap();
-
-    let mut headers = HeaderMap::new();
-    headers.insert(header::ETAG, id.clone().parse().unwrap());
-
-    list.write().unwrap().list.insert(id, ItemStatus::default());
-
-    (StatusCode::CREATED, headers)
-}
-
-async fn get_video(Path(id): Path<String>, list: SharedItemList) -> impl IntoResponse {
-    let item = list.read().unwrap().list.get(&id).cloned();
-    match item {
-        Some(stat) => match stat {
-            ItemStatus::Finish => (),
-            _ => {
-                return Err((
-                    StatusCode::PROCESSING,
-                    "Video is still being processed".to_string(),
-                ))
-            }
-        },
-        None => {
-            return Err((
-                StatusCode::NOT_FOUND,
-                format!("File not found with id: {id}"),
-            ))
-        }
-    };
-
-    let file = match tokio::fs::File::open(format!("{id}.mp4")).await {
-        Ok(file) => file,
-        Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {err}"))),
-    };
-
-    let stream = ReaderStream::new(file);
-    let body = StreamBody::new(stream);
-
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        header::CONTENT_TYPE,
-        HeaderValue::from_str("video/mp4").unwrap(),
-    );
-    headers.insert(
-        header::CONTENT_DISPOSITION,
-        HeaderValue::from_str("attachment; filename=\"video.mp4\"").unwrap(),
-    );
-
-    Ok((headers, body))
-}
-
-async fn get_all_videos(list: SharedItemList) -> Json<ItemList> {
-    let items = list.read().unwrap().clone();
-
-    Json(items)
-}
-
-async fn get_status_video(
-    Path(id): Path<String>,
-    list: SharedItemList,
-) -> Result<Json<serde_json::Value>, StatusCode> {
-    let item = list.read().unwrap().list.get(&id).cloned();
-
-    match item {
-        Some(status) => Ok(Json(json!({ "id": id, "status": status}))),
-        None => Err(StatusCode::NOT_FOUND),
-    }
 }
