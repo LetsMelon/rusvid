@@ -9,8 +9,6 @@ use axum::Router;
 use fern::Dispatch;
 use log::LevelFilter;
 use rusvid_lib::composition::Composition;
-use rusvid_lib::renderer::embedded::EmbeddedRenderer;
-use rusvid_lib::renderer::Renderer;
 use serde::Serialize;
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use tower::ServiceBuilder;
@@ -22,6 +20,7 @@ use tower_http::trace::TraceLayer;
 use crate::handler::{status, video};
 
 mod handler;
+mod renderer;
 
 #[derive(Debug)]
 pub struct SharedData {
@@ -52,31 +51,14 @@ async fn main() {
         .apply()
         .unwrap();
 
-    let (tx, mut rx): (UnboundedSender<SharedData>, UnboundedReceiver<SharedData>) =
+    let (tx, rx): (UnboundedSender<SharedData>, UnboundedReceiver<SharedData>) =
         mpsc::unbounded_channel();
     let shared_item_list = SharedItemList::default();
 
-    let items = Arc::clone(&shared_item_list);
-    let _render_task = tokio::spawn(async move {
-        while let Some(message) = rx.recv().await {
-            println!("{}: {:?}", message.id, message.composition);
-
-            items
-                .write()
-                .unwrap()
-                .list
-                .insert(message.id.clone(), ItemStatus::Processing);
-
-            let mut renderer = EmbeddedRenderer::new(format!("{}.mp4", message.id));
-            renderer.render(message.composition).unwrap();
-
-            items
-                .write()
-                .unwrap()
-                .list
-                .insert(message.id.clone(), ItemStatus::Finish);
-        }
-    });
+    tokio::spawn({
+        let shared_list = Arc::clone(&shared_item_list);
+        move || async move { renderer::renderer(rx, shared_list).await }
+    }());
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
