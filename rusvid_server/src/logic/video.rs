@@ -9,6 +9,7 @@ use tokio_util::io::ReaderStream;
 
 use crate::render_task::Message;
 use crate::status_types::{ItemStatus, SharedItemList};
+use crate::util::format_file_path;
 
 pub async fn upload_video(
     mut multipart: Multipart,
@@ -69,7 +70,7 @@ pub async fn download_video(
         }
     };
 
-    let file = match tokio::fs::File::open(format!("{id}.mp4")).await {
+    let file = match tokio::fs::File::open(format_file_path(&id)).await {
         Ok(file) => file,
         Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {err}"))),
     };

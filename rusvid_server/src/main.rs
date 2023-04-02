@@ -17,6 +17,7 @@ mod logic;
 mod render_task;
 mod routes;
 mod status_types;
+mod util;
 
 #[tokio::main]
 async fn main() {

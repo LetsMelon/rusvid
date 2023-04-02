@@ -4,6 +4,7 @@ use rusvid_lib::renderer::Renderer;
 use tokio::sync::mpsc::UnboundedReceiver;
 
 use crate::status_types::{ItemStatus, SharedItemList};
+use crate::util::format_file_path;
 
 #[derive(Debug)]
 pub struct Message {
@@ -21,7 +22,7 @@ pub async fn renderer(mut rx: UnboundedReceiver<Message>, shared_list: SharedIte
             .list
             .insert(message.id.clone(), ItemStatus::Processing);
 
-        let mut renderer = EmbeddedRenderer::new(format!("{}.mp4", message.id));
+        let mut renderer = EmbeddedRenderer::new(format_file_path(&message.id));
         renderer.render(message.composition).unwrap();
 
         shared_list
