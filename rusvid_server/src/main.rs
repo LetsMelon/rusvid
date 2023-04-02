@@ -14,10 +14,10 @@ use tower_http::cors::CorsLayer;
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::trace::TraceLayer;
 
-use crate::handler::{status, video};
+use crate::logic::{status, video};
 use crate::status_types::SharedItemList;
 
-mod handler;
+mod logic;
 mod render_task;
 mod status_types;
 
@@ -69,8 +69,7 @@ async fn main() {
             .layer(
                 ServiceBuilder::new()
                     .layer(DefaultBodyLimit::disable())
-                    .layer(RequestBodyLimitLayer::new(1 * 1024 * 1024))
-                    .layer(CompressionLayer::new()),
+                    .layer(RequestBodyLimitLayer::new(1 * 1024 * 1024)),
             ),
         )
         .route(
