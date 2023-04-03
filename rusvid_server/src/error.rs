@@ -1,4 +1,4 @@
-use std::sync::{LockResult, RwLockReadGuard};
+use std::sync::PoisonError;
 
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -79,5 +79,11 @@ impl IntoResponse for ApiError {
         });
 
         (status, Json(body)).into_response()
+    }
+}
+
+impl<T> From<PoisonError<T>> for ApiError {
+    fn from(_: PoisonError<T>) -> Self {
+        ApiError::LockError
     }
 }

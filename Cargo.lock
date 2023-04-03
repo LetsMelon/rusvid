@@ -2292,7 +2292,6 @@ dependencies = [
 name = "rusvid_server"
 version = "0.0.0"
 dependencies = [
- "anyhow",
  "axum",
  "derive_more",
  "fern",

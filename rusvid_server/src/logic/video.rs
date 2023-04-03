@@ -45,10 +45,7 @@ pub async fn upload_video(
         let mut headers = HeaderMap::new();
         headers.insert(header::ETAG, id.clone().parse().unwrap());
 
-        match list.write() {
-            Ok(mut value) => value.list.insert(id, ItemStatus::default()),
-            Err(_) => return Err(ApiError::LockError),
-        };
+        list.write()?.list.insert(id, ItemStatus::default());
 
         Ok((StatusCode::CREATED, headers))
     } else {
@@ -61,12 +58,7 @@ pub async fn download_video(
     shared_list: SharedItemList,
     bucket: Bucket,
 ) -> Result<impl IntoResponse, ApiError> {
-    let item = shared_list
-        .read()
-        .map_err(|_| ApiError::LockError)?
-        .list
-        .get(&id)
-        .cloned();
+    let item = shared_list.read()?.list.get(&id).cloned();
 
     match item {
         Some(stat) => match stat {
@@ -117,8 +109,7 @@ pub async fn delete_video(
         Some(ItemStatus::Pending) => (),
         Some(ItemStatus::Processing) => {
             shared_list
-                .write()
-                .map_err(|_| ApiError::LockError)?
+                .write()?
                 .list
                 .insert(id.clone(), ItemStatus::InDeletion);
         }
