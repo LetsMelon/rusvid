@@ -2,12 +2,14 @@ use axum::body::StreamBody;
 use axum::extract::{Multipart, Path};
 use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
+use axum::Json;
 use r2d2_redis::r2d2::Pool;
 use r2d2_redis::redis::{Commands, ConnectionLike, FromRedisValue};
 use r2d2_redis::RedisConnectionManager;
 use rusvid_lib::composition::Composition;
 use rusvid_lib::core::holder::utils::random_id;
 use s3::Bucket;
+use serde_json::json;
 use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::io::ReaderStream;
@@ -45,13 +47,15 @@ pub async fn upload_video(
             id: id.clone(),
         })?;
 
-        let mut headers = HeaderMap::new();
-        headers.insert(header::ETAG, id.clone().parse().unwrap());
-
         let mut connection = redis_pool.get()?;
-        let _: () = connection.set(id, ItemStatus::default())?;
+        let _: () = connection.set(id.clone(), ItemStatus::default())?;
 
-        Ok((StatusCode::CREATED, headers))
+        let mut headers = HeaderMap::new();
+        headers.insert("x-video-id", id.clone().parse().unwrap());
+
+        let body = Json(json!({ "id": id, "status": ItemStatus::default() }));
+
+        Ok((StatusCode::CREATED, headers, body))
     } else {
         Err(ApiError::FileNotFound)
     }
