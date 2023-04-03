@@ -2,6 +2,9 @@ use axum::body::StreamBody;
 use axum::extract::{Multipart, Path};
 use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
+use r2d2_redis::r2d2::Pool;
+use r2d2_redis::redis::{Commands, ConnectionLike, FromRedisValue};
+use r2d2_redis::RedisConnectionManager;
 use rusvid_lib::composition::Composition;
 use rusvid_lib::core::holder::utils::random_id;
 use s3::Bucket;
@@ -11,13 +14,13 @@ use tokio_util::io::ReaderStream;
 
 use crate::error::ApiError;
 use crate::render_task::Message;
-use crate::status_types::{ItemStatus, SharedItemList};
+use crate::status_types::ItemStatus;
 use crate::util::{format_file_path, format_s3_file_path};
 
 pub async fn upload_video(
     mut multipart: Multipart,
     tx: UnboundedSender<Message>,
-    list: SharedItemList,
+    redis_pool: Pool<RedisConnectionManager>,
 ) -> Result<impl IntoResponse, ApiError> {
     let mut file = None;
     while let Some(field) = multipart.next_field().await? {
@@ -45,7 +48,8 @@ pub async fn upload_video(
         let mut headers = HeaderMap::new();
         headers.insert(header::ETAG, id.clone().parse().unwrap());
 
-        list.write()?.list.insert(id, ItemStatus::default());
+        let mut connection = redis_pool.get().unwrap();
+        let _: () = connection.set(id, ItemStatus::default()).unwrap();
 
         Ok((StatusCode::CREATED, headers))
     } else {
@@ -55,10 +59,15 @@ pub async fn upload_video(
 
 pub async fn download_video(
     Path(id): Path<String>,
-    shared_list: SharedItemList,
     bucket: Bucket,
+    redis_pool: Pool<RedisConnectionManager>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let item = shared_list.read()?.list.get(&id).cloned();
+    let mut connection = redis_pool.get().unwrap();
+    let item: Option<ItemStatus> = connection.get(id.clone()).unwrap();
+
+    // TODO remove them?
+    drop(connection);
+    drop(redis_pool);
 
     match item {
         Some(stat) => match stat {
@@ -101,25 +110,28 @@ pub async fn download_video(
 
 pub async fn delete_video(
     Path(id): Path<String>,
-    shared_list: SharedItemList,
     bucket: Bucket,
+    redis_pool: Pool<RedisConnectionManager>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let item = shared_list.write().unwrap().list.remove(&id);
+    let mut connection = redis_pool.get().unwrap();
+
+    let raw_item = connection
+        .req_command(r2d2_redis::redis::Cmd::new().arg("GETDEL").arg(id.clone()))
+        .unwrap();
+    let item = ItemStatus::from_redis_value(&raw_item);
+
     match item {
-        Some(ItemStatus::Pending) => (),
-        Some(ItemStatus::Processing) => {
-            shared_list
-                .write()?
-                .list
-                .insert(id.clone(), ItemStatus::InDeletion);
+        Ok(ItemStatus::Pending) => (),
+        Ok(ItemStatus::Processing) => {
+            let _: () = connection.set(id, ItemStatus::InDeletion).unwrap();
         }
-        Some(ItemStatus::Finish) => {
+        Ok(ItemStatus::Finish) => {
             bucket.delete_object(format_s3_file_path(&id)).await?;
         }
-        Some(ItemStatus::InDeletion) => {
+        Ok(ItemStatus::InDeletion) => {
             bucket.delete_object(format_s3_file_path(&id)).await?;
         }
-        None => (),
+        _ => (),
     };
 
     Ok(StatusCode::OK)

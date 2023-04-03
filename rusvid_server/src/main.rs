@@ -1,19 +1,17 @@
 use std::net::SocketAddr;
-use std::sync::Arc;
 
 use axum::http::{HeaderValue, Method, StatusCode};
 use axum::routing::{any, get};
 use axum::Router;
 use fern::Dispatch;
 use log::LevelFilter;
+use r2d2_redis::RedisConnectionManager;
 use s3::creds::Credentials;
 use s3::{Bucket, Region};
 use tokio::sync::mpsc;
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
-
-use crate::status_types::SharedItemList;
 
 mod error;
 mod logic;
@@ -33,6 +31,11 @@ async fn main() {
     let access_key = "access_key_123";
     let secret_key = "access_secrect_key_123";
 
+    // let client = Client::open("redis://127.0.0.1/").unwrap();
+    // let conn = client.get_multiplexed_tokio_connection().await.unwrap();
+    let client = RedisConnectionManager::new("redis://127.0.0.1/").unwrap();
+    let pool = r2d2_redis::r2d2::Pool::builder().build(client).unwrap();
+
     let bucket = Bucket::new(
         "test-from-rust",
         Region::Custom {
@@ -45,25 +48,20 @@ async fn main() {
     .with_path_style();
 
     let (tx, rx) = mpsc::unbounded_channel();
-    let shared_item_list = SharedItemList::default();
 
     tokio::spawn({
-        let shared_list = Arc::clone(&shared_item_list);
         let cloned_bucket = bucket.clone();
-        move || async move { render_task::renderer(rx, shared_list, cloned_bucket).await }
+        // let cloned_multi_redis = conn.clone();
+        let redis_pool = pool.clone();
+
+        move || async move { render_task::renderer(rx, cloned_bucket, redis_pool).await }
     }());
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/health", any(|| async { StatusCode::OK }))
-        .nest(
-            "/status",
-            routes::status::router(Arc::clone(&shared_item_list)),
-        )
-        .nest(
-            "/video",
-            routes::video::router(tx, Arc::clone(&shared_item_list), bucket),
-        )
+        .nest("/status", routes::status::router(pool.clone()))
+        .nest("/video", routes::video::router(tx, bucket, pool.clone()))
         .layer(
             ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())
