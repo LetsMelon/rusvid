@@ -1,6 +1,7 @@
 use axum::extract::DefaultBodyLimit;
 use axum::routing::{get, post};
 use axum::Router;
+use s3::Bucket;
 use tokio::sync::mpsc::UnboundedSender;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
@@ -13,7 +14,7 @@ use crate::status_types::SharedItemList;
 // 8MB
 const UPLOAD_LIMIT: usize = 8 * 1024 * 1024;
 
-pub fn router(tx: UnboundedSender<Message>, shared_list: SharedItemList) -> Router {
+pub fn router(tx: UnboundedSender<Message>, shared_list: SharedItemList, bucket: Bucket) -> Router {
     Router::new()
         .route(
             "/upload",
@@ -33,8 +34,16 @@ pub fn router(tx: UnboundedSender<Message>, shared_list: SharedItemList) -> Rout
             "/id/:id",
             get({
                 let cloned_shared_list = shared_list.clone();
-                move |path| video::download_video(path, cloned_shared_list)
+                let cloned_bucket = bucket.clone();
+
+                move |path| video::download_video(path, cloned_shared_list, cloned_bucket)
             })
-            .layer(CompressionLayer::new()),
+            .layer(CompressionLayer::new())
+            .delete({
+                let cloned_shared_list = shared_list.clone();
+                let cloned_bucket = bucket.clone();
+
+                move |path| video::delete_video(path, cloned_shared_list, cloned_bucket)
+            }),
         )
 }

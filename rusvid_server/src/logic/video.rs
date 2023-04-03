@@ -4,12 +4,14 @@ use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use rusvid_lib::composition::Composition;
 use rusvid_lib::core::holder::utils::random_id;
+use s3::Bucket;
+use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::io::ReaderStream;
 
 use crate::render_task::Message;
 use crate::status_types::{ItemStatus, SharedItemList};
-use crate::util::format_file_path;
+use crate::util::{format_file_path, format_s3_file_path};
 
 pub async fn upload_video(
     mut multipart: Multipart,
@@ -50,6 +52,7 @@ pub async fn upload_video(
 pub async fn download_video(
     Path(id): Path<String>,
     shared_list: SharedItemList,
+    bucket: Bucket,
 ) -> impl IntoResponse {
     let item = shared_list.read().unwrap().list.get(&id).cloned();
     match item {
@@ -70,13 +73,26 @@ pub async fn download_video(
         }
     };
 
-    let file = match tokio::fs::File::open(format_file_path(&id)).await {
-        Ok(file) => file,
-        Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {err}"))),
-    };
+    // TODO don't save the file to the local file system before sending it
+    let local_file_path = format_file_path(&id);
+    let mut async_output_file = tokio::fs::File::create(&local_file_path)
+        .await
+        .expect("Unable to create file");
+
+    bucket
+        .get_object_stream(format_s3_file_path(&id), &mut async_output_file)
+        .await
+        .unwrap();
+
+    async_output_file.flush().await.unwrap();
+    drop(async_output_file);
+
+    let file = tokio::fs::File::open(&local_file_path).await.unwrap();
 
     let stream = ReaderStream::new(file);
     let body = StreamBody::new(stream);
+
+    tokio::fs::remove_file(local_file_path).await.unwrap();
 
     let mut headers = HeaderMap::new();
     headers.insert(
@@ -89,4 +105,37 @@ pub async fn download_video(
     );
 
     Ok((headers, body))
+}
+
+pub async fn delete_video(
+    Path(id): Path<String>,
+    shared_list: SharedItemList,
+    bucket: Bucket,
+) -> impl IntoResponse {
+    let item = shared_list.write().unwrap().list.remove(&id);
+    match item {
+        Some(ItemStatus::Pending) => (),
+        Some(ItemStatus::Processing) => {
+            shared_list
+                .write()
+                .unwrap()
+                .list
+                .insert(id.clone(), ItemStatus::InDeletion);
+        }
+        Some(ItemStatus::Finish) => {
+            bucket
+                .delete_object(format_s3_file_path(&id))
+                .await
+                .unwrap();
+        }
+        Some(ItemStatus::InDeletion) => {
+            bucket
+                .delete_object(format_s3_file_path(&id))
+                .await
+                .unwrap();
+        }
+        None => (),
+    };
+
+    StatusCode::OK
 }
