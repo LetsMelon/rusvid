@@ -7,7 +7,7 @@ use axum::Router;
 use fern::Dispatch;
 use log::LevelFilter;
 use s3::creds::Credentials;
-use s3::{Bucket, BucketConfiguration, Region};
+use s3::{Bucket, Region};
 use tokio::sync::mpsc;
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
@@ -42,11 +42,6 @@ async fn main() {
     )
     .unwrap()
     .with_path_style();
-
-    // let s3_path = "test.file";
-    // let test = b"I'm going to S3!";
-    // let response_data = bucket.put_object(s3_path, test).await.unwrap();
-    // assert_eq!(response_data.status_code(), 200);
 
     let (tx, rx) = mpsc::unbounded_channel();
     let shared_item_list = SharedItemList::default();
