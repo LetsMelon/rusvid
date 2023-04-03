@@ -15,6 +15,7 @@ use tower_http::trace::TraceLayer;
 
 use crate::status_types::SharedItemList;
 
+mod error;
 mod logic;
 mod render_task;
 mod routes;
