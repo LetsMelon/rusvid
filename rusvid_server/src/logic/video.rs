@@ -48,8 +48,8 @@ pub async fn upload_video(
         let mut headers = HeaderMap::new();
         headers.insert(header::ETAG, id.clone().parse().unwrap());
 
-        let mut connection = redis_pool.get().unwrap();
-        let _: () = connection.set(id, ItemStatus::default()).unwrap();
+        let mut connection = redis_pool.get()?;
+        let _: () = connection.set(id, ItemStatus::default())?;
 
         Ok((StatusCode::CREATED, headers))
     } else {
@@ -62,8 +62,8 @@ pub async fn download_video(
     bucket: Bucket,
     redis_pool: Pool<RedisConnectionManager>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let mut connection = redis_pool.get().unwrap();
-    let item: Option<ItemStatus> = connection.get(id.clone()).unwrap();
+    let mut connection = redis_pool.get()?;
+    let item: Option<ItemStatus> = connection.get(id.clone())?;
 
     // TODO remove them?
     drop(connection);
@@ -113,17 +113,16 @@ pub async fn delete_video(
     bucket: Bucket,
     redis_pool: Pool<RedisConnectionManager>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let mut connection = redis_pool.get().unwrap();
+    let mut connection = redis_pool.get()?;
 
-    let raw_item = connection
-        .req_command(r2d2_redis::redis::Cmd::new().arg("GETDEL").arg(id.clone()))
-        .unwrap();
+    let raw_item =
+        connection.req_command(r2d2_redis::redis::Cmd::new().arg("GETDEL").arg(id.clone()))?;
     let item = ItemStatus::from_redis_value(&raw_item);
 
     match item {
         Ok(ItemStatus::Pending) => (),
         Ok(ItemStatus::Processing) => {
-            let _: () = connection.set(id, ItemStatus::InDeletion).unwrap();
+            let _: () = connection.set(id, ItemStatus::InDeletion)?;
         }
         Ok(ItemStatus::Finish) => {
             bucket.delete_object(format_s3_file_path(&id)).await?;

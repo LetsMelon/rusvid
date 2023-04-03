@@ -11,18 +11,18 @@ use crate::status_types::{ItemList, ItemStatus};
 pub async fn list_all_items(
     redis_pool: Pool<RedisConnectionManager>,
 ) -> Result<Json<ItemList>, ApiError> {
-    let mut connection = redis_pool.get().unwrap();
-    let keys: Vec<String> = connection.keys("*").unwrap();
+    let mut connection = redis_pool.get()?;
+    let keys: Vec<String> = connection.keys("*")?;
 
     let mut new_list = ItemList::default();
 
-    let out = connection
-        .req_command(r2d2_redis::redis::Cmd::new().arg("MGET").arg(keys.clone()))
-        .unwrap();
+    let out =
+        connection.req_command(r2d2_redis::redis::Cmd::new().arg("MGET").arg(keys.clone()))?;
 
     let key_parsed_values_pairs = out
         .as_sequence()
-        .unwrap()
+        // TODO prober error handling
+        .ok_or(ApiError::UnknownError)?
         .iter()
         .zip(keys)
         .map(|(value, key)| (key, ItemStatus::from_redis_value(value)));
@@ -42,9 +42,11 @@ pub async fn single_status(
     Path(id): Path<String>,
     redis_pool: Pool<RedisConnectionManager>,
 ) -> Result<Json<Value>, ApiError> {
-    let mut connection = redis_pool.get().unwrap();
+    let mut connection = redis_pool
+        .get()
+        .map_err(|err| ApiError::RedisR2D2Error(err))?;
 
-    let item: Option<ItemStatus> = connection.get(&id).unwrap();
+    let item: Option<ItemStatus> = connection.get(&id)?;
 
     match item {
         Some(status) => Ok(Json(json!({ "id": id, "status": status}))),
