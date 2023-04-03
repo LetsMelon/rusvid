@@ -1,0 +1,19 @@
+version: '3.1'
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      - MINIO_ROOT_USER=myAdmin
+      - MINIO_ROOT_PASSWORD=myAdminPassword
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
