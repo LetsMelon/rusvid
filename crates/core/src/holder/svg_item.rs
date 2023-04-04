@@ -1,7 +1,5 @@
 use std::rc::Rc;
 
-use serde::{Deserialize, Serialize};
-
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
@@ -12,7 +10,9 @@ use crate::point::Point;
 
 const BOUNDING_BOX_STEPS: i32 = 10;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct SvgItem {
     pub(crate) id: String,
     pub(crate) path: Vec<PathLike>,

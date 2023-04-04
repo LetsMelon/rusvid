@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use resvg::tiny_skia::Pixmap;
 use resvg::usvg::{AspectRatio, NodeExt, Size, Tree, ViewBox};
-use serde::{Deserialize, Serialize};
 
 use crate::holder::likes::types_like::TypesLike;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
@@ -10,7 +9,9 @@ use crate::holder::utils;
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::plane::{Plane, PlaneError, SIZE};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct Object {
     data: TypesLike,
     id: String,

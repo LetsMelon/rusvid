@@ -18,13 +18,13 @@ concat-idents = "1.1.4"
 # TODO Maybe replace flo_curve with 'kurbo'
 flo_curves = "0.6.1"
 geo = "0.24.0"
-glam = { version = "0.22.0", features = ["approx", "serde"] }
+glam = { version = "0.22.0", features = ["approx"] }
 image = { version = "0.24", features = ["bmp", "jpeg"] }
 paste = "1.0.12"
 png = "0.17.7"
 resvg = { version = "0.29.0", default-features = false }
 rhai = { version = "1.12.0", optional = true }
-serde = "1.0.159"
+serde = { version = "1.0.159", optional = true }
 static_assertions = "1.1.0"
 thiserror = { workspace = true }
 uuid = { version = "1.2.2", default-features = false, features = [
@@ -39,4 +39,8 @@ image-compare = "0.2.3"
 itertools = "0.10.5"
 
 [features]
+default = ["serde"]
 scripting = ["dep:rhai"]
+serde = ["serialize", "deserialize"]
+serialize = ["dep:serde", "glam/serde"]
+deserialize = ["dep:serde", "glam/serde"]

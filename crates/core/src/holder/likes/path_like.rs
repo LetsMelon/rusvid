@@ -1,7 +1,6 @@
 use approx::AbsDiffEq;
 use geo::{Centroid, LineString, Polygon};
 use resvg::usvg::{PathData, PathSegment};
-use serde::{Deserialize, Serialize};
 
 use crate::holder::likes::utils::{coord2_to_point, point_to_coord2};
 use crate::holder::utils::TranslateIntoResvgGeneric;
@@ -12,7 +11,9 @@ const DELTA: f64 = 0.0001;
 const BOUNDING_BOX_STEPS: u32 = 10;
 
 // TODO write custom `Deserialize`r and uncomment custom `Serialize`r
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub enum PathLike {
     /// Svg path: `M x y`
     Move(Point),
@@ -25,6 +26,7 @@ pub enum PathLike {
     Close,
 }
 
+// TODO custom serde
 /*
 impl Serialize for PathLike {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

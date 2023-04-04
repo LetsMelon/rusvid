@@ -4,7 +4,6 @@ use std::path::{Path, PathBuf};
 
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
 use resvg::tiny_skia::Pixmap;
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::frame_image_format::FrameImageFormat;
@@ -34,7 +33,9 @@ pub enum PlaneError {
 /// Used as resolution and coordinates
 pub type SIZE = u32;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 /// Structure to hold pixels for e.g.: a video-frame, an image, ... .
 ///
 /// Can only store pixels as `RGBA` with a bit-depth of `8`, for more info see [`Pixel`]

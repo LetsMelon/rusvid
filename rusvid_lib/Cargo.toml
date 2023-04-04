@@ -31,5 +31,5 @@ approx = "0.5.1"
 
 [features]
 serde = ["serialize", "deserialize"]
-serialize = ["dep:serde"]
-deserialize = ["dep:serde"]
+serialize = ["dep:serde", "rusvid_core/serialize"]
+deserialize = ["dep:serde", "rusvid_core/deserialize"]

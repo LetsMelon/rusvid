@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
-
 use crate::plane::Plane;
 use crate::point::Point;
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub enum ImageMode {
     // TODO's
     // Crop,
@@ -18,7 +18,9 @@ impl Default for ImageMode {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct ImageHolder {
     pub(crate) coordinates: Point,
     pub(crate) size: Point,

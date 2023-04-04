@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
-
 use crate::holder::svg_item::SvgItem;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct SvgHolder {
     pub(crate) items: HashMap<String, SvgItem>,
 }

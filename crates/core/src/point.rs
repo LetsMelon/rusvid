@@ -1,9 +1,10 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use glam::DVec2;
-use serde::{Deserialize, Serialize};
 
 /// A 2-dimensional vector.
-#[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct Point(DVec2);
 
 impl Point {

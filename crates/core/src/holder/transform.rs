@@ -1,6 +1,5 @@
 use std::fmt::Debug;
 
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::holder::likes::color_like::ColorLike;
@@ -32,7 +31,9 @@ pub trait TransformLogic: Debug {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 /// Visual guide: [Link](https://css-tricks.com/transforms-on-svg-elements/)
 pub enum Transform {
     /// Change visibility of the object; `true` = visible, `false` = hidden
