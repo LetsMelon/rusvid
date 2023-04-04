@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 use axum::body::StreamBody;
 use axum::extract::{Multipart, Path};
 use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
@@ -19,6 +21,9 @@ use crate::redis::key_for_video_status;
 use crate::render_task::Message;
 use crate::status_types::ItemStatus;
 use crate::util::{format_file_path, format_s3_file_path};
+
+static HEADER_VALUE_CONTENT_TYPE: OnceLock<HeaderValue> = OnceLock::new();
+static HEADER_VALUE_CONTENT_DISPOSITION: OnceLock<HeaderValue> = OnceLock::new();
 
 pub async fn upload_video(
     mut multipart: Multipart,
@@ -52,7 +57,7 @@ pub async fn upload_video(
         let _: () = connection.set(key_for_video_status(&id), ItemStatus::default())?;
 
         let mut headers = HeaderMap::new();
-        headers.insert("x-video-id", id.clone().parse().unwrap());
+        headers.insert("x-video-id", id.clone().parse()?);
 
         let body = Json(json!({ "id": id, "status": ItemStatus::default() }));
 
@@ -103,11 +108,15 @@ pub async fn download_video(
     let mut headers = HeaderMap::new();
     headers.insert(
         header::CONTENT_TYPE,
-        HeaderValue::from_str("video/mp4").unwrap(),
+        HEADER_VALUE_CONTENT_TYPE
+            .get_or_try_init(|| HeaderValue::from_str("video/mp4"))
+            .cloned()?,
     );
     headers.insert(
         header::CONTENT_DISPOSITION,
-        HeaderValue::from_str("attachment; filename=\"video.mp4\"").unwrap(),
+        HEADER_VALUE_CONTENT_DISPOSITION
+            .get_or_try_init(|| HeaderValue::from_str("attachment; filename=\"video.mp4\""))
+            .cloned()?,
     );
 
     Ok((headers, body))

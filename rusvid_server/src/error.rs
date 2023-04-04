@@ -4,7 +4,6 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use derive_more::Display;
-use r2d2_redis::redis::{RedisError, RedisResult};
 use serde_json::json;
 use thiserror::Error;
 
@@ -23,7 +22,8 @@ pub enum ApiError {
     IoError(#[from] std::io::Error),
     ObjectStorageError(#[from] s3::error::S3Error),
     RedisR2D2Error(#[from] r2d2_redis::r2d2::Error),
-    RedisError(r2d2_redis::redis::RedisError),
+    RedisError(#[from] r2d2_redis::redis::RedisError),
+    HeaderParseError(#[from] axum::http::header::InvalidHeaderValue),
 }
 
 impl ApiError {
@@ -41,6 +41,7 @@ impl ApiError {
             ApiError::ObjectStorageError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::RedisR2D2Error(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::RedisError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::HeaderParseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 
@@ -77,6 +78,10 @@ impl ApiError {
                 println!("{err:?}");
                 "An internal server error occurred. (RedisError)".to_string()
             }
+            ApiError::HeaderParseError(err) => {
+                println!("{err:?}");
+                "An internal server error occurred. (HeaderParseError)".to_string()
+            }
         }
     }
 }
@@ -98,11 +103,5 @@ impl IntoResponse for ApiError {
 impl<T> From<PoisonError<T>> for ApiError {
     fn from(_: PoisonError<T>) -> Self {
         ApiError::LockError
-    }
-}
-
-impl From<RedisError> for ApiError {
-    fn from(value: RedisError) -> Self {
-        Self::RedisError(value)
     }
 }

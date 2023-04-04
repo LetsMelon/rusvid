@@ -1,3 +1,5 @@
+#![feature(once_cell_try)]
+
 use std::net::SocketAddr;
 
 use axum::http::{HeaderValue, Method, StatusCode};
