@@ -6,7 +6,6 @@ use rusvid_core::holder::svg_item::SvgItem;
 use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::holder::utils::random_id;
 use rusvid_effect::EffectLogic;
-use serde::{Deserialize, Serialize};
 use static_assertions::const_assert_eq;
 
 use crate::animation::position_animation::PositionAnimation;
@@ -25,7 +24,9 @@ const_assert_eq!(
     std::mem::variant_count::<LayerType>()
 );
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct Layer {
     _name: String,
 
@@ -34,7 +35,7 @@ pub struct Layer {
 
     animations: Vec<AnimationType>,
 
-    #[serde(skip)]
+    #[cfg_attr(any(feature = "serialize", feature = "deserialize"), serde(skip))]
     pub(crate) effects: Vec<Box<dyn EffectLogic>>,
 }
 

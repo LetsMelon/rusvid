@@ -1,10 +1,11 @@
 use rusvid_core::prelude::Point;
-use serde::{Deserialize, Serialize};
 
 use super::Animation;
 use crate::prelude::{EaseType, FunctionType};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct PositionAnimation {
     object_id: String,
 

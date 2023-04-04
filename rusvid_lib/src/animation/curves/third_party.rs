@@ -7,7 +7,9 @@ macro_rules! as_item {
 macro_rules! generate_ease_struct {
     ($struct_name:ident) => {
         #[doc = concat!("Wrapper struct around [easer::functions::", stringify!($struct_name), "]. See <https://easings.net/> for graphs.")]
-        #[derive(std::fmt::Debug, serde::Serialize, serde::Deserialize)]
+        #[derive(std::fmt::Debug)]
+        #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+        #[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
         pub struct $struct_name;
 
         impl $struct_name {
@@ -38,7 +40,9 @@ macro_rules! generate_ease_struct {
     };
     ($($x:ident),+ $(,)?) => (
         as_item! {
-            #[derive(std::fmt::Debug, serde::Serialize, serde::Deserialize)]
+            #[derive(std::fmt::Debug)]
+            #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+            #[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
             pub enum FunctionType { $($x),* }
         }
 

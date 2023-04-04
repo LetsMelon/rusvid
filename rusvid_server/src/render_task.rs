@@ -16,6 +16,7 @@ pub struct Message {
     pub id: String,
 }
 
+// TODO this function should have no `.unwrap()` or etc, if a video fails to render then the status should be set to `ItemStatus::EncounteredError`
 pub async fn renderer(
     mut rx: UnboundedReceiver<Message>,
     bucket: Bucket,

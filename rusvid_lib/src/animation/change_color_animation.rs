@@ -1,11 +1,12 @@
 use rusvid_core::holder::likes::ColorLike;
 use rusvid_core::prelude::Pixel;
-use serde::{Deserialize, Serialize};
 
 use super::Animation;
 use crate::prelude::{EaseType, FunctionType};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct ChangeColorAnimation {
     object_id: String,
 
