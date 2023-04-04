@@ -7,6 +7,7 @@ use s3::Bucket;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio_util::io::{ReaderStream, StreamReader};
 
+use crate::redis::key_for_video_status;
 use crate::status_types::ItemStatus;
 use crate::util::{format_file_path, format_s3_file_path};
 
@@ -28,7 +29,7 @@ pub async fn renderer(
         println!("{}: {:?}", message.id, message.composition);
 
         let _: () = connection
-            .set(message.id.clone(), ItemStatus::Processing)
+            .set(key_for_video_status(&message.id), ItemStatus::Processing)
             .unwrap();
 
         let local_file_path = format_file_path(&message.id);
@@ -37,7 +38,7 @@ pub async fn renderer(
         let mut renderer = EmbeddedRenderer::new(&local_file_path);
         renderer.render(message.composition).unwrap();
 
-        let status: RedisResult<ItemStatus> = connection.get(message.id.clone());
+        let status: RedisResult<ItemStatus> = connection.get(key_for_video_status(&message.id));
         if let Ok(status) = status {
             if status != ItemStatus::InDeletion {
                 let file = tokio::fs::File::open(&local_file_path).await.unwrap();
@@ -51,7 +52,7 @@ pub async fn renderer(
                 assert_eq!(response_data, 200);
 
                 let _: () = connection
-                    .set(message.id.clone(), ItemStatus::Finish)
+                    .set(key_for_video_status(&message.id), ItemStatus::Finish)
                     .unwrap();
             }
         }

@@ -6,13 +6,14 @@ use r2d2_redis::RedisConnectionManager;
 use serde_json::{json, Value};
 
 use crate::error::ApiError;
+use crate::redis::{key_for_video_status, video_status_prefix};
 use crate::status_types::{ItemList, ItemStatus};
 
 pub async fn list_all_items(
     redis_pool: Pool<RedisConnectionManager>,
 ) -> Result<Json<ItemList>, ApiError> {
     let mut connection = redis_pool.get()?;
-    let keys: Vec<String> = connection.keys("*")?;
+    let keys: Vec<String> = connection.keys(format!("{}*", video_status_prefix()))?;
 
     let mut new_list = ItemList::default();
 
@@ -29,6 +30,8 @@ pub async fn list_all_items(
 
     for (key, value) in key_parsed_values_pairs {
         if let Ok(value) = value {
+            let key = key.replace(video_status_prefix(), "");
+
             new_list.list.insert(key, value);
         } else {
             println!("error with key: {key}, value: {value:?}");
@@ -46,7 +49,7 @@ pub async fn single_status(
         .get()
         .map_err(|err| ApiError::RedisR2D2Error(err))?;
 
-    let item: Option<ItemStatus> = connection.get(&id)?;
+    let item: Option<ItemStatus> = connection.get(key_for_video_status(&id))?;
 
     match item {
         Some(status) => Ok(Json(json!({ "id": id, "status": status}))),

@@ -15,6 +15,7 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::io::ReaderStream;
 
 use crate::error::ApiError;
+use crate::redis::key_for_video_status;
 use crate::render_task::Message;
 use crate::status_types::ItemStatus;
 use crate::util::{format_file_path, format_s3_file_path};
@@ -48,7 +49,7 @@ pub async fn upload_video(
         })?;
 
         let mut connection = redis_pool.get()?;
-        let _: () = connection.set(id.clone(), ItemStatus::default())?;
+        let _: () = connection.set(key_for_video_status(&id), ItemStatus::default())?;
 
         let mut headers = HeaderMap::new();
         headers.insert("x-video-id", id.clone().parse().unwrap());
@@ -67,7 +68,7 @@ pub async fn download_video(
     redis_pool: Pool<RedisConnectionManager>,
 ) -> Result<impl IntoResponse, ApiError> {
     let mut connection = redis_pool.get()?;
-    let item: Option<ItemStatus> = connection.get(id.clone())?;
+    let item: Option<ItemStatus> = connection.get(key_for_video_status(&id))?;
 
     // TODO remove them?
     drop(connection);
@@ -119,14 +120,17 @@ pub async fn delete_video(
 ) -> Result<impl IntoResponse, ApiError> {
     let mut connection = redis_pool.get()?;
 
-    let raw_item =
-        connection.req_command(r2d2_redis::redis::Cmd::new().arg("GETDEL").arg(id.clone()))?;
+    let raw_item = connection.req_command(
+        r2d2_redis::redis::Cmd::new()
+            .arg("GETDEL")
+            .arg(key_for_video_status(&id)),
+    )?;
     let item = ItemStatus::from_redis_value(&raw_item);
 
     match item {
         Ok(ItemStatus::Pending) => (),
         Ok(ItemStatus::Processing) => {
-            let _: () = connection.set(id, ItemStatus::InDeletion)?;
+            let _: () = connection.set(key_for_video_status(&id), ItemStatus::InDeletion)?;
         }
         Ok(ItemStatus::Finish) => {
             bucket.delete_object(format_s3_file_path(&id)).await?;
