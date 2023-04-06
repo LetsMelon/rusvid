@@ -30,33 +30,40 @@ pub async fn renderer(
 
         let _: () = connection
             .set(key_for_video_status(&message.id), ItemStatus::Processing)
-            .unwrap();
+            .expect("Not able to update value in redis to ItemStatus::Processing");
 
         let local_file_path = format_file_path(&message.id);
         let s3_file_path = format_s3_file_path(&message.id);
 
         let mut renderer = EmbeddedRenderer::new(&local_file_path);
-        renderer.render(message.composition).unwrap();
+        renderer
+            .render(message.composition)
+            .expect("Error while rendering");
 
         let status: RedisResult<ItemStatus> = connection.get(key_for_video_status(&message.id));
         if let Ok(status) = status {
             if status != ItemStatus::InDeletion {
-                let file = tokio::fs::File::open(&local_file_path).await.unwrap();
+                let file = tokio::fs::File::open(&local_file_path)
+                    .await
+                    .expect("Error in File::open");
+
                 let stream = ReaderStream::new(file);
                 let mut stream_reader = StreamReader::new(stream);
 
                 let response_data = bucket
                     .put_object_stream(&mut stream_reader, s3_file_path)
                     .await
-                    .unwrap();
+                    .expect("Error in uploading to object storage");
                 assert_eq!(response_data, 200);
 
                 let _: () = connection
                     .set(key_for_video_status(&message.id), ItemStatus::Finish)
-                    .unwrap();
+                    .expect("Not able to update value in redis to ItemStatus::Processing");
             }
         }
 
-        tokio::fs::remove_file(local_file_path).await.unwrap();
+        tokio::fs::remove_file(local_file_path)
+            .await
+            .expect("Error in removing file");
     }
 }
