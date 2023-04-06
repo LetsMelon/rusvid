@@ -5,6 +5,7 @@ use std::net::SocketAddr;
 use axum::http::{HeaderValue, Method, StatusCode};
 use axum::routing::{any, get};
 use axum::Router;
+use error::ApiError;
 use fern::Dispatch;
 use log::LevelFilter;
 use r2d2_redis::RedisConnectionManager;
@@ -32,7 +33,7 @@ async fn main() {
         .unwrap();
 
     let access_key = "access_key_123";
-    let secret_key = "access_secrect_key_123";
+    let secret_key = "access_secret_key_123";
 
     // let client = Client::open("redis://127.0.0.1/").unwrap();
     // let conn = client.get_multiplexed_tokio_connection().await.unwrap();
@@ -74,7 +75,7 @@ async fn main() {
                         .allow_methods([Method::GET, Method::POST]),
                 ),
         )
-        .fallback(|| async { StatusCode::NOT_FOUND });
+        .fallback(|| async { ApiError::NotFound });
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     axum::Server::bind(&addr)
