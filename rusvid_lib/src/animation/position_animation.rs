@@ -1,7 +1,7 @@
 use rusvid_core::prelude::Point;
 
 use super::Animation;
-use crate::prelude::{EaseType, FunctionType};
+use crate::animation::curves::{EaseType, FunctionType};
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
