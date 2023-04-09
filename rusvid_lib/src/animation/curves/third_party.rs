@@ -55,14 +55,13 @@ macro_rules! generate_ease_struct {
             }
 
             #[inline(always)]
-            fn get_struct(&self) -> Box<&'static dyn crate::animation::Function> {
+            fn get_struct(&self) -> &'static dyn crate::animation::Function {
                 match self {
                     $(
-                        Self::$x => Box::new(
+                        Self::$x =>
                             paste::paste! {
                                 & Self::[<CONST_ $x>]
-                            }
-                        ),
+                            },
                     )*
                 }
             }
