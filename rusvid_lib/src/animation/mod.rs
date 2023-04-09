@@ -4,6 +4,7 @@ pub mod position_animation;
 pub mod set_color_animation;
 
 use self::change_color_animation::ChangeColorAnimation;
+pub use self::curves::FunctionType;
 use self::position_animation::PositionAnimation;
 use self::set_color_animation::SetColorAnimation;
 
@@ -58,6 +59,21 @@ impl Animation for AnimationType {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
+pub enum EaseType {
+    In,
+    Out,
+    InOut,
+}
+
+impl Default for EaseType {
+    fn default() -> Self {
+        EaseType::In
+    }
+}
+
 pub trait Animation: std::fmt::Debug {
     fn object_id(&self) -> &str;
 
@@ -94,11 +110,4 @@ pub trait Function: std::fmt::Debug {
     fn delta_ease_in(&self, delta: f32) -> f32;
     fn delta_ease_out(&self, delta: f32) -> f32;
     fn delta_ease_in_out(&self, delta: f32) -> f32;
-}
-
-// TODO remove prelude
-pub mod prelude {
-    pub use super::curves::*;
-    pub use super::position_animation::PositionAnimation;
-    pub use super::{Animation, Function};
 }

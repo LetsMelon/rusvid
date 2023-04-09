@@ -6,7 +6,7 @@ use fern::{log_file, Dispatch};
 use log::{debug, LevelFilter};
 use rusvid_lib::animation::change_color_animation::ChangeColorAnimation;
 use rusvid_lib::animation::position_animation::PositionAnimation;
-use rusvid_lib::animation::AnimationType;
+use rusvid_lib::animation::{AnimationType, EaseType, FunctionType};
 use rusvid_lib::figures::prelude::circle;
 use rusvid_lib::figures::rect::rect;
 use rusvid_lib::figures::triangle::equilateral_triangle;
@@ -142,8 +142,8 @@ fn main() {
         EaseType::InOut,
     )));
 
-    // let mut renderer = EmbeddedRenderer::new("out.mp4");
+    let mut renderer = EmbeddedRenderer::new("out.mp4");
     // let mut renderer = FrameRenderer::new_with_file_type("./out", FrameImageFormat::Bmp);
-    let mut renderer = RemoteRenderer::new("server_out.mp4", "http://127.0.0.1:8080").unwrap();
+    // let mut renderer = RemoteRenderer::new("server_out.mp4", "http://127.0.0.1:8080").unwrap();
     renderer.render(composition).unwrap();
 }

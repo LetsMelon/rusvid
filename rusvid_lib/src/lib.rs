@@ -13,7 +13,10 @@ pub mod utils;
 pub use {rusvid_core as core, rusvid_effect as effect};
 
 pub mod prelude {
-    pub use crate::animation::prelude::*;
+    pub use crate::animation::change_color_animation::ChangeColorAnimation;
+    pub use crate::animation::position_animation::PositionAnimation;
+    pub use crate::animation::set_color_animation::SetColorAnimation;
+    pub use crate::animation::{Animation, AnimationType};
     pub use crate::composition::{Composition, CompositionBuilder};
     pub use crate::core::prelude::*;
     pub use crate::effect::library::*;

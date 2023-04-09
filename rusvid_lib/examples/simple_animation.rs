@@ -1,7 +1,6 @@
 use rusvid_core::holder::likes::{ColorLike, TypesLike};
 use rusvid_core::holder::svg_item::SvgItem;
-use rusvid_lib::animation::prelude::*;
-use rusvid_lib::animation::AnimationType;
+use rusvid_lib::animation::{AnimationType, EaseType, FunctionType};
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 
