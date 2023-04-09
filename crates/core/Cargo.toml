@@ -43,7 +43,7 @@ image-compare = "0.2.3"
 itertools = "0.10.5"
 
 [features]
-default = ["serde"]
+default = []
 scripting = ["dep:rhai"]
 serde = ["serialize", "deserialize"]
 serialize = ["dep:serde", "glam/serde"]
