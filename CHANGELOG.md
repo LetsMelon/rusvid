@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented animation `PositionAnimation` ([#64])
 - Implemented animation `SetColorAnimation` ([#64])
 - Implemented enum `AnimationType` to hold the animations ([#64])
+- Implemented features `serde`, `serialize` and `deserialize` to enable `serde` for all structs and enums ([#94])
+- Implemented unsafe features `Send` and `Sync` for `Composition` ([#94])
 
 ### Fixed
 
