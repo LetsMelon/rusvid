@@ -48,7 +48,6 @@ impl Renderer for RemoteRenderer {
         let form = reqwest::blocking::multipart::Form::new().part("file", file_part);
 
         let res = client
-            // .post(format!("{}/video/upload", self.server_uri))
             .post(self.server_uri.join("/video/upload")?)
             .multipart(form)
             .send()?;
@@ -72,18 +71,16 @@ impl Renderer for RemoteRenderer {
             let res = client
                 .get(
                     self.server_uri
-                        .join("/status/id")?
+                        .join("/status/id/")?
                         .join(&self.id.clone().unwrap())?,
                 )
                 .send()?;
 
-            println!("{res:?}");
-
             let body: ItemStatusResponse = res.json()?;
             let status = body.status;
 
-            if status == ItemStatus::InDeletion {
-                bail!("Error")
+            if status.is_not_ok() {
+                bail!("Unhandled error: {:?}", status)
             }
 
             status != ItemStatus::Finish
@@ -92,14 +89,9 @@ impl Renderer for RemoteRenderer {
         }
 
         let res = client
-            // .get(format!(
-            //     "{}/video/id/{}",
-            //     self.server_uri,
-            //     self.id.clone().unwrap()
-            // ))
             .get(
                 self.server_uri
-                    .join("/video/id")?
+                    .join("/video/id/")?
                     .join(&self.id.clone().unwrap())?,
             )
             .send()?;

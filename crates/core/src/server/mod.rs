@@ -11,6 +11,25 @@ pub enum ItemStatus {
     InDeletion,
 }
 
+impl ItemStatus {
+    /// Returns `true` if the resource is ok otherwise the functions returns `false`.
+    ///
+    /// But for example this does not mean that the resource is finish rendered to be downloaded.
+    pub fn is_ok(&self) -> bool {
+        match self {
+            ItemStatus::Pending | ItemStatus::Processing | ItemStatus::Finish => true,
+            ItemStatus::InDeletion => false,
+        }
+    }
+
+    /// Wrapper around [`.is_ok()`](ItemStatus::is_ok) but the output is negated.
+    ///
+    /// For more infos see [`.is_ok()`](ItemStatus::is_ok).
+    pub fn is_not_ok(&self) -> bool {
+        !self.is_ok()
+    }
+}
+
 impl Default for ItemStatus {
     fn default() -> Self {
         ItemStatus::Pending
