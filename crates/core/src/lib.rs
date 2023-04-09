@@ -10,6 +10,8 @@ pub mod holder;
 pub mod pixel;
 pub mod plane;
 pub mod point;
+#[cfg(feature = "server")]
+pub mod server;
 
 pub mod prelude {
     pub use crate::frame_image_format::FrameImageFormat;

@@ -23,6 +23,8 @@ pub mod prelude {
     pub use crate::renderer::embedded::EmbeddedRenderer;
     pub use crate::renderer::ffmpeg::FfmpegRenderer;
     pub use crate::renderer::frame::FrameRenderer;
+    #[cfg(feature = "remote_renderer")]
+    pub use crate::renderer::remote::RemoteRenderer;
     pub use crate::renderer::Renderer;
     pub use crate::resolution::Resolution;
     pub use crate::types::*;

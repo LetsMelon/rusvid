@@ -143,6 +143,7 @@ fn main() {
     )));
 
     // let mut renderer = EmbeddedRenderer::new("out.mp4");
-    let mut renderer = FrameRenderer::new_with_file_type("./out", FrameImageFormat::Bmp);
+    // let mut renderer = FrameRenderer::new_with_file_type("./out", FrameImageFormat::Bmp);
+    let mut renderer = RemoteRenderer::new("server_out.mp4", "http://127.0.0.1:8080").unwrap();
     renderer.render(composition).unwrap();
 }

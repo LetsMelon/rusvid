@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `EmbeddedRenderer` to create a `mp4`-video which needs ffmpeg installed and findable via path, for more info see the `Dockerfile` ([#64])
 - Added `FrameRenderer` to store the individual frames on the disk ([#90])
+- Added `RemoteRenderer` to render composition on remote server ([#94])
 - Implemented animation `ChangeColorAnimation` ([#64])
 - Implemented animation `PositionAnimation` ([#64])
 - Implemented animation `SetColorAnimation` ([#64])
@@ -44,3 +45,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#80]: https://github.com/LetsMelon/rusvid/pull/80
 [#82]: https://github.com/LetsMelon/rusvid/pull/82
 [#90]: https://github.com/LetsMelon/rusvid/pull/90
+[#94]: https://github.com/LetsMelon/rusvid/pull/94

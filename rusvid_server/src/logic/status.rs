@@ -3,7 +3,7 @@ use axum::Json;
 use r2d2_redis::r2d2::Pool;
 use r2d2_redis::redis::{Commands, ConnectionLike, FromRedisValue};
 use r2d2_redis::RedisConnectionManager;
-use serde_json::{json, Value};
+use rusvid_core::server::ItemStatusResponse;
 
 use crate::error::ApiError;
 use crate::redis::{key_for_video_status, video_status_prefix};
@@ -44,7 +44,7 @@ pub async fn list_all_items(
 pub async fn single_status(
     Path(id): Path<String>,
     redis_pool: Pool<RedisConnectionManager>,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<ItemStatusResponse>, ApiError> {
     let mut connection = redis_pool
         .get()
         .map_err(|err| ApiError::RedisR2D2Error(err))?;
@@ -52,7 +52,11 @@ pub async fn single_status(
     let item: Option<ItemStatus> = connection.get(key_for_video_status(&id))?;
 
     match item {
-        Some(status) => Ok(Json(json!({ "id": id, "status": status}))),
+        Some(status) => {
+            let response = ItemStatusResponse { id, status };
+
+            Ok(Json(response))
+        }
         None => Err(ApiError::NotFound),
     }
 }
