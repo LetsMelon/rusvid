@@ -1,9 +1,13 @@
-use num_derive::FromPrimitive;
+use std::mem::variant_count;
+
 use r2d2_redis::redis::{FromRedisValue, ToRedisArgs};
-use serde::{Deserialize, Serialize};
 
 // TODO add 'Errored(err?)' state
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, FromPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
+#[cfg_attr(test, derive(strum::EnumIter))]
+#[repr(u8)]
 pub enum ItemStatus {
     Pending = 1,
     Processing,
@@ -28,6 +32,34 @@ impl ItemStatus {
     pub fn is_not_ok(&self) -> bool {
         !self.is_ok()
     }
+
+    /// Parses an `ItemStatus`-variant as an `u32`. Can be parsed back into an `ItemStatus` via [`.from_u32(value)`](ItemStatus::from_u32)
+    ///
+    /// ```rust
+    /// let status = ItemStatus::Pending;
+    /// assert_eq!(status.as_u32(), 1);
+    /// ```
+    #[inline(always)]
+    pub fn as_u32(&self) -> u32 {
+        *self as u32
+    }
+
+    /// Parses an u32 as an `Option<ItemStatus>`. Can be parsed back into an `u32` via [`.as_u32()`](ItemStatus::as_u32)
+    ///
+    /// ```rust
+    /// let status = 2;
+    /// assert_eq!(ItemStatus::from_u32(status), Some(ItemStatus::Processing));
+    /// ```
+    pub fn from_u32(value: u32) -> Option<Self> {
+        const_assert_eq!(variant_count::<ItemStatus>(), 4);
+        match value {
+            1 => Some(ItemStatus::Pending),
+            2 => Some(ItemStatus::Processing),
+            3 => Some(ItemStatus::Finish),
+            4 => Some(ItemStatus::InDeletion),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ItemStatus {
@@ -41,7 +73,7 @@ impl ToRedisArgs for ItemStatus {
     where
         W: ?Sized + r2d2_redis::redis::RedisWrite,
     {
-        let number = *self as usize;
+        let number = self.as_u32();
 
         number.write_redis_args(out)
     }
@@ -49,20 +81,58 @@ impl ToRedisArgs for ItemStatus {
 
 impl FromRedisValue for ItemStatus {
     fn from_redis_value(v: &r2d2_redis::redis::Value) -> r2d2_redis::redis::RedisResult<Self> {
-        let number = usize::from_redis_value(v)?;
+        let number = u32::from_redis_value(v)?;
 
-        let element =
-            num::FromPrimitive::from_usize(number).ok_or(r2d2_redis::redis::RedisError::from((
-                r2d2_redis::redis::ErrorKind::TypeError,
-                "Serialization Error with num",
-            )))?;
-
-        Ok(element)
+        ItemStatus::from_u32(number).ok_or(r2d2_redis::redis::RedisError::from((
+            r2d2_redis::redis::ErrorKind::TypeError,
+            "Serialization Error",
+            format!("Number: '{number}'"),
+        )))
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct ItemStatusResponse {
     pub id: String,
     pub status: ItemStatus,
+}
+
+impl ItemStatusResponse {
+    #[inline]
+    pub fn new(id: String) -> Self {
+        Self::new_with_status(id, ItemStatus::default())
+    }
+
+    #[inline]
+    pub fn new_with_status(id: String, status: ItemStatus) -> Self {
+        ItemStatusResponse { id, status }
+    }
+
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn status(&self) -> ItemStatus {
+        self.status
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::server::ItemStatus;
+
+    #[test]
+    fn as_and_from() {
+        use strum::IntoEnumIterator;
+
+        for status in ItemStatus::iter() {
+            let as_u32 = status.as_u32();
+            let from_u32 = ItemStatus::from_u32(as_u32);
+
+            assert!(from_u32.is_some());
+            assert_eq!(from_u32, Some(status));
+        }
+    }
 }
