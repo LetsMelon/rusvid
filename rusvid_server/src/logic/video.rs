@@ -46,15 +46,13 @@ pub async fn upload_video(
     if let Some(file) = file {
         let id = random_id();
 
-        let out = serde_yaml::from_slice::<Composition>(&file)?;
-
-        tx.send(Message {
-            composition: out,
-            id: id.clone(),
-        })?;
-
         let mut connection = redis_pool.get()?;
         let _: () = connection.set(key_for_video_status(&id), ItemStatus::default())?;
+
+        tx.send(Message {
+            composition: serde_yaml::from_slice::<Composition>(&file)?,
+            id: id.clone(),
+        })?;
 
         let mut headers = HeaderMap::new();
         headers.insert("x-video-id", id.clone().parse()?);
