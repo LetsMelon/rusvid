@@ -11,37 +11,39 @@ use crate::render_task::Message;
 
 #[derive(Debug, Error, Display)]
 pub enum ApiError {
-    UnknownError,
-    LockError,
-    NotFound,
     FileNotFound,
-    SendError(#[from] tokio::sync::mpsc::error::SendError<Message>),
-    YamlDeserializeError(#[from] serde_yaml::Error),
-    MultipartError(#[from] axum::extract::multipart::MultipartError),
-    VideoInProcess,
-    IoError(#[from] std::io::Error),
-    ObjectStorageError(#[from] s3::error::S3Error),
-    RedisR2D2Error(#[from] r2d2_redis::r2d2::Error),
-    RedisError(#[from] r2d2_redis::redis::RedisError),
     HeaderParseError(#[from] axum::http::header::InvalidHeaderValue),
+    IoError(#[from] std::io::Error),
+    LockError,
+    MultipartError(#[from] axum::extract::multipart::MultipartError),
+    NotFound,
+    ObjectStorageError(#[from] s3::error::S3Error),
+    RedisError(#[from] r2d2_redis::redis::RedisError),
+    RedisR2D2Error(#[from] r2d2_redis::r2d2::Error),
+    SendError(#[from] tokio::sync::mpsc::error::SendError<Message>),
+    UnknownError,
+    VideoEncounteredError,
+    VideoInProcess,
+    YamlDeserializeError(#[from] serde_yaml::Error),
 }
 
 impl ApiError {
     fn to_status_code(&self) -> StatusCode {
         match self {
-            ApiError::UnknownError => StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError::LockError => StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError::NotFound => StatusCode::NOT_FOUND,
             ApiError::FileNotFound => StatusCode::UNPROCESSABLE_ENTITY,
-            ApiError::SendError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError::YamlDeserializeError(_) => StatusCode::BAD_REQUEST,
-            ApiError::MultipartError(err) => err.status(),
-            ApiError::VideoInProcess => StatusCode::PROCESSING,
-            ApiError::IoError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError::ObjectStorageError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError::RedisR2D2Error(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError::RedisError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::HeaderParseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::IoError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::LockError => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::MultipartError(err) => err.status(),
+            ApiError::NotFound => StatusCode::NOT_FOUND,
+            ApiError::ObjectStorageError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::RedisError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::RedisR2D2Error(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::SendError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::UnknownError => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::VideoEncounteredError => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::VideoInProcess => StatusCode::PROCESSING,
+            ApiError::YamlDeserializeError(_) => StatusCode::BAD_REQUEST,
         }
     }
 
@@ -82,6 +84,7 @@ impl ApiError {
                 println!("{err:?}");
                 "An internal server error occurred. (HeaderParseError)".to_string()
             }
+            ApiError::VideoEncounteredError => "Composition encountered an error".to_string(),
         }
     }
 }
