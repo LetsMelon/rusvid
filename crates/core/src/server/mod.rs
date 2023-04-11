@@ -13,6 +13,7 @@ pub enum ItemStatus {
     Processing,
     Finish,
     InDeletion,
+    EncounteredError,
 }
 
 impl ItemStatus {
@@ -22,7 +23,7 @@ impl ItemStatus {
     pub fn is_ok(&self) -> bool {
         match self {
             ItemStatus::Pending | ItemStatus::Processing | ItemStatus::Finish => true,
-            ItemStatus::InDeletion => false,
+            ItemStatus::InDeletion | ItemStatus::EncounteredError => false,
         }
     }
 
@@ -51,12 +52,13 @@ impl ItemStatus {
     /// assert_eq!(ItemStatus::from_u32(status), Some(ItemStatus::Processing));
     /// ```
     pub fn from_u32(value: u32) -> Option<Self> {
-        const_assert_eq!(variant_count::<ItemStatus>(), 4);
+        const_assert_eq!(variant_count::<ItemStatus>(), 5);
         match value {
             1 => Some(ItemStatus::Pending),
             2 => Some(ItemStatus::Processing),
             3 => Some(ItemStatus::Finish),
             4 => Some(ItemStatus::InDeletion),
+            5 => Some(ItemStatus::EncounteredError),
             _ => None,
         }
     }

@@ -79,11 +79,11 @@ impl Renderer for RemoteRenderer {
             let body: ItemStatusResponse = res.json()?;
             let status = body.status();
 
-            if status.is_not_ok() {
-                bail!("Unhandled error: {:?}", status)
+            match status {
+                ItemStatus::InDeletion => bail!("Composition is in deletion"),
+                ItemStatus::EncounteredError => bail!("Encountered an error with the composition"),
+                status => status != ItemStatus::Finish,
             }
-
-            status != ItemStatus::Finish
         } {
             thread::sleep(Duration::from_millis(750));
         }
