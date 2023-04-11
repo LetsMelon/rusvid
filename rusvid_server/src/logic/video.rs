@@ -80,7 +80,9 @@ pub async fn download_video(
     match item {
         Some(stat) => match stat {
             ItemStatus::Finish => (),
-            _ => return Err(ApiError::VideoInProcess),
+            ItemStatus::Pending | ItemStatus::Processing => return Err(ApiError::VideoInProcess),
+            ItemStatus::InDeletion => return Err(ApiError::FileNotFound),
+            ItemStatus::EncounteredError => return Err(ApiError::VideoEncounteredError),
         },
         None => return Err(ApiError::FileNotFound),
     };
@@ -120,6 +122,7 @@ pub async fn download_video(
     Ok((headers, body))
 }
 
+// TODO check if this function really deletes a resource from the server
 pub async fn delete_video(
     Path(id): Path<String>,
     bucket: Bucket,
@@ -135,17 +138,13 @@ pub async fn delete_video(
     let item = ItemStatus::from_redis_value(&raw_item);
 
     match item {
-        Ok(ItemStatus::Pending) => (),
         Ok(ItemStatus::Processing) => {
             let _: () = connection.set(key_for_video_status(&id), ItemStatus::InDeletion)?;
         }
-        Ok(ItemStatus::Finish) => {
+        Ok(ItemStatus::Finish) | Ok(ItemStatus::InDeletion) => {
             bucket.delete_object(format_s3_file_path(&id)).await?;
         }
-        Ok(ItemStatus::InDeletion) => {
-            bucket.delete_object(format_s3_file_path(&id)).await?;
-        }
-        _ => (),
+        Ok(ItemStatus::Pending) | Ok(ItemStatus::EncounteredError) | Err(_) => (),
     };
 
     Ok(StatusCode::OK)
