@@ -77,7 +77,7 @@ impl Renderer for RemoteRenderer {
                 .send()?;
 
             let body: ItemStatusResponse = res.json()?;
-            let status = body.status;
+            let status = body.status();
 
             if status.is_not_ok() {
                 bail!("Unhandled error: {:?}", status)

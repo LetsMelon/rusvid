@@ -53,7 +53,7 @@ pub async fn single_status(
 
     match item {
         Some(status) => {
-            let response = ItemStatusResponse { id, status };
+            let response = ItemStatusResponse::new_with_status(id, status);
 
             Ok(Json(response))
         }

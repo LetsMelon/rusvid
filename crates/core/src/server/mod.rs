@@ -95,8 +95,8 @@ impl FromRedisValue for ItemStatus {
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
 #[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct ItemStatusResponse {
-    pub id: String,
-    pub status: ItemStatus,
+    id: String,
+    status: ItemStatus,
 }
 
 impl ItemStatusResponse {
