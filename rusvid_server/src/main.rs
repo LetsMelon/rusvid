@@ -18,6 +18,7 @@ use tower_http::trace::TraceLayer;
 
 mod error;
 mod logic;
+mod macros;
 mod redis;
 mod render_task;
 mod routes;
