@@ -10,9 +10,6 @@ axum = { version = "0.6.12", features = ["multipart"] }
 derive_more = "0.99.17"
 fern = "0.6.2"
 log = "0.4.17"
-num = "0.4.0"
-num-derive = "0.3.3"
-num-traits = "0.2.15"
 # redis = { version = "0.22.3", features = ["tokio-comp"] }
 r2d2_redis = "0.14.0"
 rust-s3 = "0.32.3"
@@ -39,3 +36,6 @@ tower-http = { version = "0.4.0", features = [
     "limit",
     "trace",
 ] }
+
+[profile.release]
+lto = true
