@@ -1,7 +1,7 @@
 use axum::extract::Path;
 use axum::Json;
 use r2d2::Pool;
-use redis::{Client, Cmd, Commands, ConnectionLike, FromRedisValue};
+use redis::{Client, Commands, FromRedisValue, Value};
 use rusvid_core::server::ItemStatusResponse;
 
 use crate::error::ApiError;
@@ -14,7 +14,7 @@ pub async fn list_all_items(redis_pool: Pool<Client>) -> Result<Json<ItemList>, 
 
     let mut new_list = ItemList::default();
 
-    let out = connection.req_command(Cmd::new().arg("MGET").arg(keys.clone()))?;
+    let out: Value = connection.mget(keys.clone())?;
 
     let key_parsed_values_pairs = out
         .as_sequence()

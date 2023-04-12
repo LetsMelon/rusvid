@@ -6,7 +6,7 @@ use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use axum::Json;
 use r2d2::Pool;
-use redis::{Client, Cmd, Commands, ConnectionLike, FromRedisValue};
+use redis::{Client, Commands, RedisError};
 use rusvid_lib::composition::Composition;
 use rusvid_lib::core::holder::utils::random_id;
 use s3::Bucket;
@@ -129,9 +129,7 @@ pub async fn delete_video(
 ) -> Result<impl IntoResponse, ApiError> {
     let mut connection = redis_pool.get()?;
 
-    let raw_item =
-        connection.req_command(Cmd::new().arg("GETDEL").arg(key_for_video_status(&id)))?;
-    let item = ItemStatus::from_redis_value(&raw_item);
+    let item: Result<ItemStatus, RedisError> = connection.get_del(key_for_video_status(&id));
 
     match item {
         Ok(ItemStatus::Processing) => {
