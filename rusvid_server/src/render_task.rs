@@ -1,6 +1,5 @@
-use r2d2_redis::r2d2::PooledConnection;
-use r2d2_redis::redis::{Commands, RedisError, RedisResult};
-use r2d2_redis::RedisConnectionManager;
+use r2d2::{Pool, PooledConnection};
+use redis::{Client, Commands, RedisError};
 use rusvid_lib::prelude::Composition;
 use rusvid_lib::renderer::embedded::EmbeddedRenderer;
 use rusvid_lib::renderer::Renderer;
@@ -23,7 +22,7 @@ async fn render_task(
     id: String,
     composition: Composition,
     bucket: &Bucket,
-    connection: &mut PooledConnection<RedisConnectionManager>,
+    connection: &mut PooledConnection<Client>,
 ) -> Result<String, String> {
     let local_file_path = format_file_path(&id);
     let s3_file_path = format_s3_file_path(&id);
@@ -75,11 +74,7 @@ async fn render_task(
     Ok(local_file_path)
 }
 
-pub async fn renderer(
-    mut rx: UnboundedReceiver<Message>,
-    bucket: Bucket,
-    pool: r2d2_redis::r2d2::Pool<RedisConnectionManager>,
-) {
+pub async fn renderer(mut rx: UnboundedReceiver<Message>, bucket: Bucket, pool: Pool<Client>) {
     let mut connection = pool.get().unwrap();
 
     while let Some(message) = rx.recv().await {

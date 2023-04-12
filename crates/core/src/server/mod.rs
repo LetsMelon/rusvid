@@ -1,13 +1,10 @@
 use std::mem::variant_count;
 
-use r2d2_redis::redis::{FromRedisValue, ToRedisArgs};
-
 // TODO add 'Errored(err?)' state
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
 #[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 #[cfg_attr(test, derive(strum::EnumIter))]
-#[repr(u8)]
 pub enum ItemStatus {
     Pending = 1,
     Processing,
@@ -70,10 +67,11 @@ impl Default for ItemStatus {
     }
 }
 
-impl ToRedisArgs for ItemStatus {
+#[cfg(feature = "redis")]
+impl redis::ToRedisArgs for ItemStatus {
     fn write_redis_args<W>(&self, out: &mut W)
     where
-        W: ?Sized + r2d2_redis::redis::RedisWrite,
+        W: ?Sized + redis::RedisWrite,
     {
         let number = self.as_u32();
 
@@ -81,12 +79,13 @@ impl ToRedisArgs for ItemStatus {
     }
 }
 
-impl FromRedisValue for ItemStatus {
-    fn from_redis_value(v: &r2d2_redis::redis::Value) -> r2d2_redis::redis::RedisResult<Self> {
+#[cfg(feature = "redis")]
+impl redis::FromRedisValue for ItemStatus {
+    fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
         let number = u32::from_redis_value(v)?;
 
-        ItemStatus::from_u32(number).ok_or(r2d2_redis::redis::RedisError::from((
-            r2d2_redis::redis::ErrorKind::TypeError,
+        ItemStatus::from_u32(number).ok_or(redis::RedisError::from((
+            redis::ErrorKind::TypeError,
             "Serialization Error",
             format!("Number: '{number}'"),
         )))

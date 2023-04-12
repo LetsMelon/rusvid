@@ -1,11 +1,11 @@
 use axum::routing::get;
 use axum::Router;
-use r2d2_redis::r2d2::Pool;
-use r2d2_redis::RedisConnectionManager;
+use r2d2::Pool;
+use redis::Client;
 
 use crate::logic::status;
 
-pub fn router(redis_pool: Pool<RedisConnectionManager>) -> Router {
+pub fn router(redis_pool: Pool<Client>) -> Router {
     Router::new()
         .route(
             "/all",
