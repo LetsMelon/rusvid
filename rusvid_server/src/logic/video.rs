@@ -5,9 +5,8 @@ use axum::extract::{Multipart, Path};
 use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use axum::Json;
-use r2d2_redis::r2d2::Pool;
-use r2d2_redis::redis::{Commands, ConnectionLike, FromRedisValue};
-use r2d2_redis::RedisConnectionManager;
+use r2d2::Pool;
+use redis::{Client, Cmd, Commands, ConnectionLike, FromRedisValue};
 use rusvid_lib::composition::Composition;
 use rusvid_lib::core::holder::utils::random_id;
 use s3::Bucket;
@@ -28,7 +27,7 @@ static HEADER_VALUE_CONTENT_DISPOSITION: OnceLock<HeaderValue> = OnceLock::new()
 pub async fn upload_video(
     mut multipart: Multipart,
     tx: UnboundedSender<Message>,
-    redis_pool: Pool<RedisConnectionManager>,
+    redis_pool: Pool<Client>,
 ) -> Result<impl IntoResponse, ApiError> {
     let mut file = None;
     while let Some(field) = multipart.next_field().await? {
@@ -68,7 +67,7 @@ pub async fn upload_video(
 pub async fn download_video(
     Path(id): Path<String>,
     bucket: Bucket,
-    redis_pool: Pool<RedisConnectionManager>,
+    redis_pool: Pool<Client>,
 ) -> Result<impl IntoResponse, ApiError> {
     let mut connection = redis_pool.get()?;
     let item: Option<ItemStatus> = connection.get(key_for_video_status(&id))?;
@@ -126,15 +125,12 @@ pub async fn download_video(
 pub async fn delete_video(
     Path(id): Path<String>,
     bucket: Bucket,
-    redis_pool: Pool<RedisConnectionManager>,
+    redis_pool: Pool<Client>,
 ) -> Result<impl IntoResponse, ApiError> {
     let mut connection = redis_pool.get()?;
 
-    let raw_item = connection.req_command(
-        r2d2_redis::redis::Cmd::new()
-            .arg("GETDEL")
-            .arg(key_for_video_status(&id)),
-    )?;
+    let raw_item =
+        connection.req_command(Cmd::new().arg("GETDEL").arg(key_for_video_status(&id)))?;
     let item = ItemStatus::from_redis_value(&raw_item);
 
     match item {

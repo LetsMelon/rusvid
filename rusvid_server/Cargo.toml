@@ -10,11 +10,12 @@ axum = { version = "0.6.12", features = ["multipart"] }
 derive_more = "0.99.17"
 fern = "0.6.2"
 log = "0.4.17"
-# redis = { version = "0.22.3", features = ["tokio-comp"] }
-r2d2_redis = "0.14.0"
+r2d2 = "0.8.10"
+redis = { version = "0.23.0", features = ["tokio-comp", "r2d2"] }
 rust-s3 = "0.32.3"
 rusvid_core = { path = "../crates/core", version = "0.2.1", features = [
     "server",
+    "redis",
 ] }
 rusvid_lib = { path = "../rusvid_lib", version = "0.2.1", features = ["serde"] }
 serde = "1.0.158"

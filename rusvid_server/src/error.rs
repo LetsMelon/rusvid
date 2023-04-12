@@ -18,8 +18,8 @@ pub enum ApiError {
     MultipartError(#[from] axum::extract::multipart::MultipartError),
     NotFound,
     ObjectStorageError(#[from] s3::error::S3Error),
-    RedisError(#[from] r2d2_redis::redis::RedisError),
-    RedisR2D2Error(#[from] r2d2_redis::r2d2::Error),
+    RedisError(#[from] redis::RedisError),
+    R2D2Error(#[from] r2d2::Error),
     SendError(#[from] tokio::sync::mpsc::error::SendError<Message>),
     UnknownError,
     VideoEncounteredError,
@@ -38,7 +38,7 @@ impl ApiError {
             ApiError::NotFound => StatusCode::NOT_FOUND,
             ApiError::ObjectStorageError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::RedisError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError::RedisR2D2Error(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::R2D2Error(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::SendError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::UnknownError => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::VideoEncounteredError => StatusCode::INTERNAL_SERVER_ERROR,
@@ -72,7 +72,7 @@ impl ApiError {
                 println!("{err:?}");
                 "An internal server error occurred. (ObjectStorageError)".to_string()
             }
-            ApiError::RedisR2D2Error(err) => {
+            ApiError::R2D2Error(err) => {
                 println!("{err:?}");
                 "An internal server error occurred. (RedisR2D2Error)".to_string()
             }

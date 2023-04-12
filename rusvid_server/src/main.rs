@@ -2,13 +2,14 @@
 
 use std::net::SocketAddr;
 
+use ::redis::Client;
 use axum::http::{HeaderValue, Method, StatusCode};
 use axum::routing::{any, get};
 use axum::Router;
 use error::ApiError;
 use fern::Dispatch;
 use log::LevelFilter;
-use r2d2_redis::RedisConnectionManager;
+use r2d2::Pool;
 use s3::creds::Credentials;
 use s3::{Bucket, Region};
 use tokio::sync::mpsc;
@@ -35,11 +36,10 @@ async fn main() {
 
     let access_key = "access_key_123";
     let secret_key = "access_secret_key_123";
+    let redis_url = "redis://127.0.0.1/";
 
-    // let client = Client::open("redis://127.0.0.1/").unwrap();
-    // let conn = client.get_multiplexed_tokio_connection().await.unwrap();
-    let client = RedisConnectionManager::new("redis://127.0.0.1/").unwrap();
-    let pool = r2d2_redis::r2d2::Pool::builder().build(client).unwrap();
+    let client = Client::open(redis_url).unwrap();
+    let pool = Pool::builder().build(client).unwrap();
 
     let bucket = Bucket::new(
         "test-from-rust",

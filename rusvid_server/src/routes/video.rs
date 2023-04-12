@@ -1,8 +1,8 @@
 use axum::extract::DefaultBodyLimit;
 use axum::routing::{get, post};
 use axum::Router;
-use r2d2_redis::r2d2::Pool;
-use r2d2_redis::RedisConnectionManager;
+use r2d2::Pool;
+use redis::Client;
 use s3::Bucket;
 use tokio::sync::mpsc::UnboundedSender;
 use tower::ServiceBuilder;
@@ -15,11 +15,7 @@ use crate::render_task::Message;
 // 8MB
 const UPLOAD_LIMIT: usize = 8 * 1024 * 1024;
 
-pub fn router(
-    tx: UnboundedSender<Message>,
-    bucket: Bucket,
-    redis_pool: Pool<RedisConnectionManager>,
-) -> Router {
+pub fn router(tx: UnboundedSender<Message>, bucket: Bucket, redis_pool: Pool<Client>) -> Router {
     Router::new()
         .route(
             "/upload",
