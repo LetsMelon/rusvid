@@ -75,7 +75,6 @@ async fn render_task(
     Ok(local_file_path)
 }
 
-// TODO this function should have no `.unwrap()` or etc, if a video fails to render then the status should be set to `ItemStatus::EncounteredError`
 pub async fn renderer(
     mut rx: UnboundedReceiver<Message>,
     bucket: Bucket,

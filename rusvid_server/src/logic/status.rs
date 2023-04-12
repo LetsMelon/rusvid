@@ -22,7 +22,6 @@ pub async fn list_all_items(
 
     let key_parsed_values_pairs = out
         .as_sequence()
-        // TODO prober error handling
         .ok_or(ApiError::UnknownError)?
         .iter()
         .zip(keys)
