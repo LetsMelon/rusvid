@@ -34,6 +34,8 @@ impl ItemStatus {
     /// Parses an `ItemStatus`-variant as an `u32`. Can be parsed back into an `ItemStatus` via [`.from_u32(value)`](ItemStatus::from_u32)
     ///
     /// ```rust
+    /// use rusvid_core::server::ItemStatus;
+    ///
     /// let status = ItemStatus::Pending;
     /// assert_eq!(status.as_u32(), 1);
     /// ```
@@ -45,6 +47,8 @@ impl ItemStatus {
     /// Parses an u32 as an `Option<ItemStatus>`. Can be parsed back into an `u32` via [`.as_u32()`](ItemStatus::as_u32)
     ///
     /// ```rust
+    /// use rusvid_core::server::ItemStatus;
+    ///
     /// let status = 2;
     /// assert_eq!(ItemStatus::from_u32(status), Some(ItemStatus::Processing));
     /// ```
