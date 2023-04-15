@@ -1,14 +1,15 @@
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::thread;
 use std::time::Duration;
 
 use anyhow::{bail, Result};
 use log::info;
-use reqwest::Url;
+use multipart::client::lazy::Multipart;
 use rusvid_core::server::{ItemStatus, ItemStatusResponse};
-use tempfile::NamedTempFile;
+use ureq::AgentBuilder;
+use url::Url;
 
 use crate::composition::Composition;
 use crate::renderer::Renderer;
@@ -38,29 +39,33 @@ impl Renderer for RemoteRenderer {
     fn render(&mut self, composition: Composition) -> Result<()> {
         info!("Using renderer: {:?}", self);
 
-        let yaml_file = NamedTempFile::new()?;
-        serde_yaml::to_writer(&yaml_file, &composition)?;
+        let agent = AgentBuilder::new().build();
 
-        let client = reqwest::blocking::Client::new();
+        let yaml_string = serde_yaml::to_string(&composition)?;
 
-        let file_part =
-            reqwest::blocking::multipart::Part::file(yaml_file.path())?.mime_str("text/x-yaml")?;
-        let form = reqwest::blocking::multipart::Form::new().part("file", file_part);
+        let mut m = Multipart::new();
+        m.add_stream(
+            "file",
+            yaml_string.as_bytes(),
+            Some("composition.yml"),
+            "text/yaml".parse().ok(),
+        );
 
-        let res = client
-            .post(self.server_uri.join("/video/upload")?)
-            .multipart(form)
-            .send()?;
+        let mdata = m.prepare()?;
+
+        let res = agent
+            .post(self.server_uri.join("/video/upload")?.as_str())
+            .set(
+                "Content-Type",
+                &format!("multipart/form-data; boundary={}", mdata.boundary()),
+            )
+            .send(mdata)?;
 
         if res.status() != 201 {
             bail!("Error in uploading composition to server");
         }
 
-        self.id = res
-            .headers()
-            .get("x-video-id")
-            .map(|h| h.to_str().map(|hs| hs.to_string()))
-            .transpose()?;
+        self.id = res.header("x-video-id").map(|h| h.to_string());
 
         if self.id.is_none() {
             bail!("Error in uploading composition to server");
@@ -68,16 +73,12 @@ impl Renderer for RemoteRenderer {
 
         // Wait until the video is finish
         while {
-            let res = client
-                .get(
-                    self.server_uri
-                        .join("/status/id/")?
-                        .join(&self.id.clone().unwrap())?,
-                )
-                .send()?;
-
-            let body: ItemStatusResponse = res.json()?;
-            let status = body.status();
+            let url = self
+                .server_uri
+                .join("/status/id/")?
+                .join(&self.id.clone().unwrap())?;
+            let response: ItemStatusResponse = agent.get(url.as_str()).call()?.into_json()?;
+            let status = response.status();
 
             match status {
                 ItemStatus::InDeletion => bail!("Composition is in deletion"),
@@ -88,17 +89,20 @@ impl Renderer for RemoteRenderer {
             thread::sleep(Duration::from_millis(750));
         }
 
-        let res = client
-            .get(
-                self.server_uri
-                    .join("/video/id/")?
-                    .join(&self.id.clone().unwrap())?,
-            )
-            .send()?;
+        let url = self
+            .server_uri
+            .join("/video/id/")?
+            .join(&self.id.clone().unwrap())?;
 
-        let bytes = res.bytes()?;
+        let res = agent.get(url.as_str()).call()?;
+
+        // TODO don't store file in memory, write it somehow directly to the file
+        let mut reader = res.into_reader();
+        let mut buffer = Vec::new();
+        reader.read_to_end(&mut buffer)?;
+
         let mut file = File::create(&self.out_path)?;
-        file.write_all(&bytes)?;
+        file.write_all(&buffer)?;
 
         Ok(())
     }
