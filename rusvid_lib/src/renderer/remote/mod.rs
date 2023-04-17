@@ -39,7 +39,12 @@ impl Renderer for RemoteRenderer {
     fn render(&mut self, composition: Composition) -> Result<()> {
         info!("Using renderer: {:?}", self);
 
-        let agent = AgentBuilder::new().build();
+        let agent = AgentBuilder::new()
+            .user_agent(&format!(
+                "rusvid_remote_renderer/{}",
+                env!("CARGO_PKG_VERSION")
+            ))
+            .build();
 
         let yaml_string = serde_yaml::to_string(&composition)?;
 
