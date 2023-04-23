@@ -1,6 +1,6 @@
 use rusvid_core::prelude::Point;
 
-use super::{Animation, EaseType, FunctionType};
+use super::{Animation, EaseType, FunctionType, Range};
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
@@ -11,10 +11,7 @@ pub struct PositionAnimation {
     curve: FunctionType,
     ease: EaseType,
 
-    /// Range `[start_frame, end_frame)`
-    start_frame: usize,
-    /// Range `[start_frame, end_frame)`
-    end_frame: usize,
+    frame_range: Range,
 
     start_position: Point,
     end_position: Point,
@@ -23,7 +20,7 @@ pub struct PositionAnimation {
 impl PositionAnimation {
     pub fn new<I: Into<String> + Clone>(
         id: &I,
-        frames: (usize, usize),
+        frames: impl Into<Range>,
         positions: (Point, Point),
         curve: FunctionType,
         ease: EaseType,
@@ -32,8 +29,7 @@ impl PositionAnimation {
             curve,
             ease,
             object_id: id.clone().into(),
-            start_frame: frames.0,
-            end_frame: frames.1,
+            frame_range: frames.into(),
             start_position: positions.0,
             end_position: positions.1,
         }
@@ -47,12 +43,7 @@ impl Animation for PositionAnimation {
 
     type OUTPUT = Point;
     fn get_value(&self, frame: usize) -> Self::OUTPUT {
-        let frame_delta = (self.end_frame() - self.start_frame() - 1) as f32;
-        let my_frame = (frame - self.start_frame()) as f32;
-
-        let percentage = my_frame / frame_delta;
-
-        // println!("\t\t{frame}: {percentage:.3}");
+        let percentage = self.frame_range.percentage(frame);
 
         let distance_delta = self.end_position - self.start_position;
 
@@ -60,10 +51,10 @@ impl Animation for PositionAnimation {
     }
 
     fn start_frame(&self) -> usize {
-        self.start_frame
+        self.frame_range.start()
     }
 
     fn end_frame(&self) -> usize {
-        self.end_frame
+        self.frame_range.end_bound()
     }
 }

@@ -80,6 +80,10 @@ impl Pixel {
         self.0
     }
 
+    pub fn to_raw_float(&self) -> impl Iterator<Item = f32> + '_ {
+        self.0.iter().map(|value| *value as f32)
+    }
+
     /// `0xAARRGGBB`
     pub fn to_raw_packed(&self) -> u32 {
         let mut result = 0;

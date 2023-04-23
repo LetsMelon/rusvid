@@ -112,7 +112,7 @@ fn main() {
 
     layer.add_position_animation(PositionAnimation::new(
         &rect_id,
-        (0, 200),
+        0..200,
         (Point::new_symmetric(20.0), Point::new(1250.0, 500.0)),
         FunctionType::Linear,
         EaseType::default(),
@@ -120,7 +120,7 @@ fn main() {
 
     layer.add_position_animation(PositionAnimation::new(
         &rect_id,
-        (220, 290),
+        220..290,
         (Point::new(1250.0, 500.0), Point::ZERO),
         FunctionType::Linear,
         EaseType::default(),
@@ -128,7 +128,7 @@ fn main() {
 
     layer.add_animation(AnimationType::Position(PositionAnimation::new(
         &circle_id,
-        (0, 90),
+        0..90,
         (circle_position, resolution.as_point() / 2.0),
         FunctionType::Sine,
         EaseType::default(),
