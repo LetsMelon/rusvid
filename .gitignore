@@ -11,6 +11,7 @@ out/
 **.png
 **.svg
 **.yaml
+**.rusvid
 
 profile.json
 .env

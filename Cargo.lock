@@ -246,6 +246,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a4a4ddaa51a5bc52a6948f74c06d20aaaddb71924eab79b8c97a8c556e942d6a"
 
 [[package]]
+name = "bincode"
+version = "1.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "bindgen"
 version = "0.64.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2372,11 +2381,13 @@ version = "0.2.1"
 dependencies = [
  "anyhow",
  "approx",
+ "bincode",
  "easer",
  "glam",
  "itertools",
  "log",
  "mime",
+ "miniz_oxide 0.7.1",
  "multipart",
  "paste",
  "rayon",

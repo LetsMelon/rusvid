@@ -142,6 +142,9 @@ fn main() {
         EaseType::InOut,
     )));
 
+    // composition.save_as_file("out.rusvid").unwrap();
+    // let composition = Composition::load_from_file("out.rusvid").unwrap();
+
     let mut renderer = EmbeddedRenderer::new("out.mp4");
     // let mut renderer = FrameRenderer::new_with_file_type("./out", FrameImageFormat::Bmp);
     // let mut renderer = RemoteRenderer::new("server_out.mp4", "http://127.0.0.1:8080").unwrap();

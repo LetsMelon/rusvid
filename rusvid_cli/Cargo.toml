@@ -15,4 +15,5 @@ fern = "0.6.1"
 log = "0.4"
 rusvid_lib = { path = "../rusvid_lib", version = "0.2.0", features = [
     "remote_renderer",
+    "save_load",
 ] }

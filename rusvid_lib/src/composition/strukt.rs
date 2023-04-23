@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::Result;
 use log::debug;
 
@@ -69,6 +71,36 @@ impl Composition {
         self.layers.push(layer);
 
         self.layers.last_mut()
+    }
+
+    #[cfg(feature = "save_load")]
+    pub fn save_as_file(&self, path: impl Into<PathBuf>) -> Result<()> {
+        use std::fs::File;
+        use std::io::Write;
+
+        use bincode::serialize;
+        use miniz_oxide::deflate::compress_to_vec;
+
+        let encoded = serialize(&self)?;
+        let compressed = compress_to_vec(&encoded, 6);
+
+        let mut file = File::create(path.into())?;
+        file.write_all(&compressed)?;
+
+        Ok(())
+    }
+
+    #[cfg(feature = "save_load")]
+    pub fn load_from_file(path: impl Into<PathBuf>) -> Result<Self> {
+        use bincode::deserialize;
+        use miniz_oxide::inflate::decompress_to_vec;
+
+        let buffer = std::fs::read(path.into())?;
+
+        let decompressed = decompress_to_vec(&buffer)?;
+        let item = deserialize(&decompressed)?;
+
+        Ok(item)
     }
 }
 
