@@ -426,6 +426,7 @@ impl Plane {
         Ok(())
     }
 
+    /// Reads the [`Plane`] as a `png` binary from the given reader.
     pub fn reader_as_png<R: Read>(raw_reader: R) -> PlaneResult<Self> {
         use png::Decoder;
 
@@ -838,7 +839,7 @@ mod tests {
         use crate::plane::Plane;
 
         #[test]
-        fn write_and_read_as_png() {
+        fn png() {
             let mut buf = Vec::new();
 
             let plane = Plane::new_with_fill(64, 64, Pixel::new(255, 0, 0, 255)).unwrap();
