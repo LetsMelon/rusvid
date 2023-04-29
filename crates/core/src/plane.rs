@@ -205,7 +205,7 @@ impl Plane {
             .flat_map(|v| [v[0], v[1], v[2]])
             .collect::<Vec<u8>>();
 
-        if self.width() * self.height() * 3 == buf.len() as SIZE {
+        if self.width() * self.height() * 3 != buf.len() as SIZE {
             return Err(PlaneError::ArrayCapacityError);
         }
 
@@ -221,7 +221,7 @@ impl Plane {
     pub fn as_rgba_image(self) -> PlaneResult<RgbaImage> {
         let buf = self.as_data_flatten();
 
-        if self.width() * self.height() * 4 == buf.len() as SIZE {
+        if self.width() * self.height() * 4 != buf.len() as SIZE {
             return Err(PlaneError::ArrayCapacityError);
         }
 
