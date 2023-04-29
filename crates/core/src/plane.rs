@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
@@ -71,7 +71,7 @@ pub type PlaneResult<T> = Result<T, PlaneError>;
 /// Used as resolution and coordinates
 pub type SIZE = u32;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
 #[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 /// Structure to hold pixels for e.g.: a video-frame, an image, ... .
@@ -424,6 +424,31 @@ impl Plane {
         writer.write_image_data(&data)?;
 
         Ok(())
+    }
+
+    pub fn reader_as_png<R: Read>(raw_reader: R) -> PlaneResult<Self> {
+        use png::Decoder;
+
+        let decoder = Decoder::new(raw_reader);
+        let mut reader = decoder.read_info().unwrap();
+
+        let mut buf = vec![0; reader.output_buffer_size()];
+        let info = reader.next_frame(&mut buf).unwrap();
+        let bytes = &buf[..info.buffer_size()];
+
+        let info = reader.info();
+
+        let width = info.width;
+        let height = info.height;
+
+        Plane::from_data(
+            width,
+            height,
+            bytes
+                .chunks(4)
+                .map(|raw| Pixel::new(raw[0], raw[1], raw[2], raw[3]))
+                .collect(),
+        )
     }
 
     // TODO implement first citizen `Plane-to-JPG` function
@@ -807,4 +832,23 @@ mod tests {
         }
     }
      */
+
+    mod reader_writer {
+        use crate::pixel::Pixel;
+        use crate::plane::Plane;
+
+        #[test]
+        fn write_and_read_as_png() {
+            let mut buf = Vec::new();
+
+            let plane = Plane::new_with_fill(64, 64, Pixel::new(255, 0, 0, 255)).unwrap();
+            plane.writer_as_png(&mut buf).unwrap();
+
+            assert!(buf.len() > 0);
+
+            let decoded_plane = Plane::reader_as_png(buf.as_slice()).unwrap();
+
+            assert_eq!(plane, decoded_plane);
+        }
+    }
 }
