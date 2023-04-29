@@ -59,7 +59,7 @@ impl Object {
 
                 resvg::render(
                     &tree,
-                    resvg::usvg::FitTo::Original,
+                    resvg::FitTo::Original,
                     resvg::tiny_skia::Transform::default(),
                     pixmap.as_mut(),
                 );
