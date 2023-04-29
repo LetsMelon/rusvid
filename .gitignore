@@ -1,12 +1,17 @@
 /target
 /.idea
 /.vscode
+
 out/
+
 **.DS_Store
 **.jpg
 **.log
 **.mp4
 **.png
 **.svg
+**.yaml
+**.rusvid
+
 profile.json
 .env

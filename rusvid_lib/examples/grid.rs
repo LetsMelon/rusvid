@@ -2,8 +2,7 @@ use rusvid_core::holder::gradient::base::BaseGradient;
 use rusvid_core::holder::gradient::linear::LinearGradient;
 use rusvid_core::holder::likes::{ColorLike, TypesLike};
 use rusvid_core::holder::svg_item::SvgItem;
-use rusvid_lib::animation::prelude::*;
-use rusvid_lib::animation::AnimationType;
+use rusvid_lib::animation::{AnimationType, EaseType, FunctionType};
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 
@@ -40,7 +39,8 @@ fn main() {
         &bg_id,
         (0, frames),
         (start_pos, Point::ZERO),
-        Linear::new(),
+        FunctionType::Linear,
+        EaseType::default(),
     )));
 
     let grid_layer = composition.create_layer(LayerType::Svg).unwrap();

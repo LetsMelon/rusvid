@@ -3,11 +3,17 @@ pub mod curves;
 pub mod position_animation;
 pub mod set_color_animation;
 
+mod range;
+
 use self::change_color_animation::ChangeColorAnimation;
+pub use self::curves::FunctionType;
 use self::position_animation::PositionAnimation;
+pub use self::range::{Range, RangeType};
 use self::set_color_animation::SetColorAnimation;
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub enum AnimationType {
     Position(PositionAnimation),
     SetColor(SetColorAnimation),
@@ -56,6 +62,21 @@ impl Animation for AnimationType {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
+pub enum EaseType {
+    In,
+    Out,
+    InOut,
+}
+
+impl Default for EaseType {
+    fn default() -> Self {
+        EaseType::In
+    }
+}
+
 pub trait Animation: std::fmt::Debug {
     fn object_id(&self) -> &str;
 
@@ -89,38 +110,7 @@ pub trait Animation: std::fmt::Debug {
 }
 
 pub trait Function: std::fmt::Debug {
-    fn new() -> Self
-    where
-        Self: Sized,
-    {
-        Self::new_with_ease_type(Default::default())
-    }
-
-    fn new_with_ease_type(ease_type: crate::animation::curves::EaseType) -> Self
-    where
-        Self: Sized;
-
-    fn get_ease_type(&self) -> &crate::animation::curves::EaseType;
-
     fn delta_ease_in(&self, delta: f32) -> f32;
     fn delta_ease_out(&self, delta: f32) -> f32;
     fn delta_ease_in_out(&self, delta: f32) -> f32;
-
-    fn delta(&self, delta: f32) -> f32 {
-        assert!(delta >= 0.0);
-        assert!(delta <= 1.0);
-
-        match self.get_ease_type() {
-            crate::animation::curves::EaseType::In => self.delta_ease_in(delta),
-            crate::animation::curves::EaseType::Out => self.delta_ease_out(delta),
-            crate::animation::curves::EaseType::InOut => self.delta_ease_in_out(delta),
-        }
-    }
-}
-
-// TODO remove prelude
-pub mod prelude {
-    pub use super::curves::*;
-    pub use super::position_animation::PositionAnimation;
-    pub use super::{Animation, Function};
 }

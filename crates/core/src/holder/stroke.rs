@@ -4,6 +4,8 @@ use crate::holder::likes::color_like::ColorLike;
 use crate::holder::utils::TranslateIntoResvgGeneric;
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct Stroke {
     pub paint: ColorLike,
     pub dasharray: Option<Vec<f64>>,

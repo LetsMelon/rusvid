@@ -25,6 +25,8 @@ const_assert_eq!(
 );
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct Layer {
     _name: String,
 
@@ -32,6 +34,8 @@ pub struct Layer {
     pub object: Object,
 
     animations: Vec<AnimationType>,
+
+    #[cfg_attr(any(feature = "serialize", feature = "deserialize"), serde(skip))]
     pub(crate) effects: Vec<Box<dyn EffectLogic>>,
 }
 

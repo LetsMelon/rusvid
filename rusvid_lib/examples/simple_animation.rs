@@ -1,7 +1,6 @@
 use rusvid_core::holder::likes::{ColorLike, TypesLike};
 use rusvid_core::holder::svg_item::SvgItem;
-use rusvid_lib::animation::prelude::*;
-use rusvid_lib::animation::AnimationType;
+use rusvid_lib::animation::{AnimationType, EaseType, FunctionType};
 use rusvid_lib::figures::prelude::*;
 use rusvid_lib::prelude::*;
 
@@ -33,7 +32,8 @@ fn main() {
         &rect_id,
         (0, frames),
         (rect_pos, resolution.as_point() - rect_pos),
-        Cubic::new_with_ease_type(EaseType::InOut),
+        FunctionType::Cubic,
+        EaseType::InOut,
     )));
 
     let mut renderer = EmbeddedRenderer::new("simple_animation.mp4");

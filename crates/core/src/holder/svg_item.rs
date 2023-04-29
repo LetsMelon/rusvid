@@ -11,6 +11,8 @@ use crate::point::Point;
 const BOUNDING_BOX_STEPS: i32 = 10;
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct SvgItem {
     pub(crate) id: String,
     pub(crate) path: Vec<PathLike>,

@@ -1,33 +1,35 @@
 use rusvid_core::prelude::Point;
 
-use super::{Animation, Function};
+use super::{Animation, EaseType, FunctionType, Range};
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct PositionAnimation {
-    curve: Box<dyn Function>,
     object_id: String,
 
-    /// Range `[start_frame, end_frame)`
-    start_frame: usize,
-    /// Range `[start_frame, end_frame)`
-    end_frame: usize,
+    curve: FunctionType,
+    ease: EaseType,
+
+    frame_range: Range,
 
     start_position: Point,
     end_position: Point,
 }
 
 impl PositionAnimation {
-    pub fn new<T: Function + 'static, I: Into<String> + Clone>(
+    pub fn new<I: Into<String> + Clone>(
         id: &I,
-        frames: (usize, usize),
+        frames: impl Into<Range>,
         positions: (Point, Point),
-        curve: T,
+        curve: FunctionType,
+        ease: EaseType,
     ) -> Self {
         Self {
-            curve: Box::new(curve),
+            curve,
+            ease,
             object_id: id.clone().into(),
-            start_frame: frames.0,
-            end_frame: frames.1,
+            frame_range: frames.into(),
             start_position: positions.0,
             end_position: positions.1,
         }
@@ -41,23 +43,18 @@ impl Animation for PositionAnimation {
 
     type OUTPUT = Point;
     fn get_value(&self, frame: usize) -> Self::OUTPUT {
-        let frame_delta = (self.end_frame() - self.start_frame() - 1) as f32;
-        let my_frame = (frame - self.start_frame()) as f32;
-
-        let percentage = my_frame / frame_delta;
-
-        // println!("\t\t{frame}: {percentage:.3}");
+        let percentage = self.frame_range.percentage(frame);
 
         let distance_delta = self.end_position - self.start_position;
 
-        self.start_position + distance_delta * (self.curve.delta(percentage) as f64)
+        self.start_position + distance_delta * (self.curve.delta(self.ease, percentage) as f64)
     }
 
     fn start_frame(&self) -> usize {
-        self.start_frame
+        self.frame_range.start()
     }
 
     fn end_frame(&self) -> usize {
-        self.end_frame
+        self.frame_range.end_bound()
     }
 }

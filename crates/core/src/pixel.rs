@@ -1,6 +1,8 @@
 use std::ops::{Index, IndexMut};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct Pixel([u8; 4]);
 
 impl std::fmt::Debug for Pixel {
@@ -76,6 +78,10 @@ impl Pixel {
 
     pub fn to_raw(&self) -> [u8; 4] {
         self.0
+    }
+
+    pub fn to_raw_float(&self) -> impl Iterator<Item = f32> + '_ {
+        self.0.iter().map(|value| *value as f32)
     }
 
     /// `0xAARRGGBB`

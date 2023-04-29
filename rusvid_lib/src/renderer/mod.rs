@@ -10,6 +10,8 @@ use crate::composition::Composition;
 pub mod embedded;
 pub mod ffmpeg;
 pub mod frame;
+#[cfg(feature = "remote_renderer")]
+pub mod remote;
 mod util;
 
 use util::combine_renders;

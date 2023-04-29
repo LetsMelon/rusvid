@@ -4,7 +4,9 @@ use crate::holder::gradient::base::BaseGradient;
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::point::Point;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct RadialGradient {
     end_circle: Point,
     start_circle_radius: f64,

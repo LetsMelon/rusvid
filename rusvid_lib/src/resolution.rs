@@ -5,6 +5,8 @@ use crate::types::ResolutionType;
 
 // TODO implement sth to create a `Resolution` from 'forms'/'sizes' like 'A4' and the combination of DPI
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 /// Enum for common resolutions and custom ones
 ///
 /// Currently only has presets for resolutions with 16:9 format. For other formats use `Resolution::Custom(width, height)`.

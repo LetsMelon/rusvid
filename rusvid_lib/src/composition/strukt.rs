@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::Result;
 use log::debug;
 
@@ -10,6 +12,8 @@ use crate::types::FPS;
 
 // TODO remove pub's
 #[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct Composition {
     /// The resolution of the composition
     pub(crate) resolution: Resolution,
@@ -24,8 +28,13 @@ pub struct Composition {
 
     pub layers: Vec<Layer>,
 
+    // TODO remove serde skip
+    #[cfg_attr(any(feature = "serialize", feature = "deserialize"), serde(skip))]
     pub(crate) effects: Vec<Box<dyn EffectLogic>>,
 }
+
+unsafe impl Send for Composition {}
+unsafe impl Sync for Composition {}
 
 impl Composition {
     pub fn builder() -> CompositionBuilder {
@@ -62,6 +71,36 @@ impl Composition {
         self.layers.push(layer);
 
         self.layers.last_mut()
+    }
+
+    #[cfg(feature = "save_load")]
+    pub fn save_as_file(&self, path: impl Into<PathBuf>) -> Result<()> {
+        use std::fs::File;
+        use std::io::Write;
+
+        use bincode::serialize;
+        use miniz_oxide::deflate::compress_to_vec;
+
+        let encoded = serialize(&self)?;
+        let compressed = compress_to_vec(&encoded, 6);
+
+        let mut file = File::create(path.into())?;
+        file.write_all(&compressed)?;
+
+        Ok(())
+    }
+
+    #[cfg(feature = "save_load")]
+    pub fn load_from_file(path: impl Into<PathBuf>) -> Result<Self> {
+        use bincode::deserialize;
+        use miniz_oxide::inflate::decompress_to_vec;
+
+        let buffer = std::fs::read(path.into())?;
+
+        let decompressed = decompress_to_vec(&buffer)?;
+        let item = deserialize(&decompressed)?;
+
+        Ok(item)
     }
 }
 

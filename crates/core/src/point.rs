@@ -3,6 +3,8 @@ use glam::DVec2;
 
 /// A 2-dimensional vector.
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct Point(DVec2);
 
 impl Point {

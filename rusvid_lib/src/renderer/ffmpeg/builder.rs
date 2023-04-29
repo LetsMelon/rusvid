@@ -2,10 +2,11 @@ use std::path::PathBuf;
 
 use rusvid_core::frame_image_format::FrameImageFormat;
 
-use crate::prelude::{Composition, FPS};
+use crate::composition::Composition;
 use crate::renderer::ffmpeg::codec::VideoCodec;
 use crate::renderer::ffmpeg::pixel_formats::PixelFormats;
 use crate::renderer::ffmpeg::FfmpegRenderer;
+use crate::types::FPS;
 
 #[derive(Debug)]
 pub struct FfmpegRendererBuilder {

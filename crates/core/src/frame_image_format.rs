@@ -1,6 +1,8 @@
 use image::ImageFormat;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub enum FrameImageFormat {
     Png,
     Bmp,

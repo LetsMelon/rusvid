@@ -10,6 +10,8 @@ use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::plane::{Plane, PlaneError, SIZE};
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct Object {
     data: TypesLike,
     id: String,
@@ -57,7 +59,7 @@ impl Object {
 
                 resvg::render(
                     &tree,
-                    resvg::usvg::FitTo::Original,
+                    resvg::FitTo::Original,
                     resvg::tiny_skia::Transform::default(),
                     pixmap.as_mut(),
                 );

@@ -22,8 +22,10 @@ glam = { version = "0.22.0", features = ["approx"] }
 image = { version = "0.24", features = ["bmp", "jpeg"] }
 paste = "1.0.12"
 png = "0.17.7"
-resvg = { version = "0.29.0", default-features = false }
+redis = { version = "0.23.0", optional = true }
+resvg = { version = "0.32.0", default-features = false }
 rhai = { version = "1.12.0", optional = true }
+serde = { version = "1.0.159", optional = true }
 static_assertions = "1.1.0"
 thiserror = { workspace = true }
 uuid = { version = "1.2.2", default-features = false, features = [
@@ -36,6 +38,16 @@ uuid = { version = "1.2.2", default-features = false, features = [
 anyhow = { workspace = true }
 image-compare = "0.2.3"
 itertools = "0.10.5"
+strum = { version = "0.24", features = ["derive"] }
 
 [features]
+default = []
+
+serde = ["serialize", "deserialize"]
+serialize = ["dep:serde", "glam/serde"]
+deserialize = ["dep:serde", "glam/serde"]
+
 scripting = ["dep:rhai"]
+
+server = ["serde"]
+redis = ["dep:redis"]
