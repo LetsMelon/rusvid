@@ -11,9 +11,8 @@ on:
       # - "**.rs"
       - "**Cargo.**"
       - ".github/workflows/ci.yml"
-  on:
-    schedule:
-      - cron: "15 6 * * *"
+  schedule:
+    - cron: "15 6 * * *"
 
 env:
   CARGO_TERM_COLOR: always
