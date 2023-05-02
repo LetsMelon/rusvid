@@ -1,4 +1,5 @@
 use crate::holder::likes::ColorLike;
+#[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::pixel::Pixel;
 
@@ -16,6 +17,7 @@ impl Stop {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::Stop> for Stop {
     fn translate(&self) -> resvg::usvg::Stop {
         let color = resvg::usvg::Color {

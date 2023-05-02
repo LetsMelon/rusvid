@@ -1,11 +1,14 @@
 use std::collections::HashMap;
 
+#[cfg(feature = "resvg")]
 use resvg::tiny_skia::Pixmap;
+#[cfg(feature = "resvg")]
 use resvg::usvg::{AspectRatio, NodeExt, Size, Tree, ViewBox};
 
 use crate::holder::likes::types_like::TypesLike;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
+#[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::plane::{Plane, PlaneError, SIZE};
 
@@ -33,6 +36,7 @@ impl Object {
         &self.id
     }
 
+    #[cfg(feature = "resvg")]
     pub fn render(&self, width: SIZE, height: SIZE) -> Result<Plane, PlaneError> {
         match &self.data {
             TypesLike::Svg(svg) => {

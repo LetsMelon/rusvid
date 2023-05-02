@@ -20,3 +20,11 @@ pub mod prelude {
     pub use crate::plane::*;
     pub use crate::point::*;
 }
+
+#[cfg(not(any(feature = "resvg", feature = "cairo")))]
+compile_error!("Either feature \"resvg\" or \"cairo\" must be enabled for this crate.");
+
+#[cfg(all(feature = "resvg", feature = "cairo"))]
+compile_error!(
+    "Only one feature of \"resvg\" or \"cairo\" can be enabled for this crate at the same time."
+);

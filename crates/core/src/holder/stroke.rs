@@ -1,6 +1,8 @@
+#[cfg(feature = "resvg")]
 use resvg::usvg::{NonZeroPositiveF64, NormalizedF64};
 
 use crate::holder::likes::color_like::ColorLike;
+#[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 
 #[derive(Debug, Clone)]
@@ -18,13 +20,21 @@ pub struct Stroke {
 }
 
 impl Default for Stroke {
+    #[cfg(feature = "resvg")]
+    // TODO remove the call to resvg for the default `Stroke`
     fn default() -> Self {
         let default = resvg::usvg::Stroke::default();
         Self::from_resvg_stroke(default)
     }
+
+    #[cfg(not(feature = "resvg"))]
+    fn default() -> Self {
+        todo!()
+    }
 }
 
 impl Stroke {
+    #[cfg(feature = "resvg")]
     pub fn from_resvg_stroke(stroke: resvg::usvg::Stroke) -> Stroke {
         // should fail when something changes in `resvg::usvg::Stroke` struct
         debug_assert_eq!(std::mem::size_of::<resvg::usvg::Stroke>(), 72);
@@ -41,6 +51,7 @@ impl Stroke {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::Stroke> for Stroke {
     fn translate(&self) -> resvg::usvg::Stroke {
         resvg::usvg::Stroke {

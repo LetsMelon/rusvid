@@ -1,5 +1,6 @@
 use crate::holder::gradient::linear::LinearGradient;
 use crate::holder::gradient::radial::RadialGradient;
+#[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::pixel::Pixel;
 
@@ -13,6 +14,7 @@ pub enum ColorLike {
 }
 
 impl ColorLike {
+    #[cfg(feature = "resvg")]
     pub fn from_resvg_paint(paint: &resvg::usvg::Paint) -> Self {
         use resvg::usvg::Paint;
 
@@ -23,6 +25,7 @@ impl ColorLike {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::Paint> for ColorLike {
     fn translate(&self) -> resvg::usvg::Paint {
         match self {
@@ -37,6 +40,7 @@ impl TranslateIntoResvgGeneric<resvg::usvg::Paint> for ColorLike {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::Opacity> for ColorLike {
     fn translate(&self) -> resvg::usvg::Opacity {
         match self {
@@ -49,6 +53,7 @@ impl TranslateIntoResvgGeneric<resvg::usvg::Opacity> for ColorLike {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::Fill> for ColorLike {
     fn translate(&self) -> resvg::usvg::Fill {
         let paint = self.translate();

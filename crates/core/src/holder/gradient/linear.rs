@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use crate::holder::gradient::base::BaseGradient;
+#[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::point::Point;
 
@@ -24,6 +25,7 @@ impl LinearGradient {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::LinearGradient> for LinearGradient {
     fn translate(&self) -> resvg::usvg::LinearGradient {
         resvg::usvg::LinearGradient {
@@ -37,6 +39,7 @@ impl TranslateIntoResvgGeneric<resvg::usvg::LinearGradient> for LinearGradient {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::Paint> for LinearGradient {
     fn translate(&self) -> resvg::usvg::Paint {
         resvg::usvg::Paint::LinearGradient(Rc::new(self.translate()))

@@ -1,8 +1,10 @@
 use approx::AbsDiffEq;
 use geo::{Centroid, LineString, Polygon};
+#[cfg(feature = "resvg")]
 use resvg::usvg::{PathData, PathSegment};
 
 use crate::holder::likes::utils::{coord2_to_point, point_to_coord2};
+#[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::point::Point;
 
@@ -229,6 +231,7 @@ impl PathLike {
         )
     }
 
+    #[cfg(feature = "resvg")]
     pub fn extend_path_from_self(&self, path: &mut PathData) {
         match self {
             PathLike::Move(point) => path.push_move_to(point.x(), point.y()),
@@ -240,12 +243,14 @@ impl PathLike {
         }
     }
 
+    #[cfg(feature = "resvg")]
     pub fn extend_path_from_slice(path: &mut PathData, slice: &[Self]) {
         slice
             .iter()
             .for_each(|item| item.extend_path_from_self(path))
     }
 
+    #[cfg(feature = "resvg")]
     pub fn from_path_segment(other: PathSegment) -> PathLike {
         match other {
             PathSegment::MoveTo { x, y } => PathLike::Move(Point::new(x, y)),
@@ -263,6 +268,7 @@ impl PathLike {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::PathSegment> for PathLike {
     fn translate(&self) -> resvg::usvg::PathSegment {
         match self {

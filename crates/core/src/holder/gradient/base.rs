@@ -1,4 +1,5 @@
 use crate::holder::gradient::stop::Stop;
+#[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::pixel::Pixel;
 
@@ -10,6 +11,7 @@ pub struct BaseGradient {
     stops: Vec<Stop>,
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::BaseGradient> for BaseGradient {
     fn translate(&self) -> resvg::usvg::BaseGradient {
         use resvg::usvg::{SpreadMethod, Transform, Units};

@@ -3,6 +3,7 @@ use std::io::{BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
+#[cfg(feature = "resvg")]
 use resvg::tiny_skia::Pixmap;
 use thiserror::Error;
 
@@ -247,6 +248,7 @@ impl Plane {
         Plane::from_data(width, height, data)
     }
 
+    #[cfg(feature = "resvg")]
     /// Create a [`Plane`] from [`tiny_skia::Pixmap`]
     pub fn from_pixmap(pixmap: Pixmap) -> Self {
         let data = pixmap
@@ -263,6 +265,7 @@ impl Plane {
         Plane::from_data_unchecked(pixmap.width(), pixmap.height(), data)
     }
 
+    #[cfg(feature = "resvg")]
     /// Consumes itself and tries to create an [`tiny_skia::Pixmap`] or returns a [`PlaneError`].
     pub fn as_pixmap(self) -> PlaneResult<Pixmap> {
         let mut pixmap =

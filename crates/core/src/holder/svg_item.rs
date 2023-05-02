@@ -4,7 +4,9 @@ use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
-use crate::holder::utils::{random_id, TranslateIntoResvgGeneric};
+use crate::holder::utils::random_id;
+#[cfg(feature = "resvg")]
+use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::pixel::Pixel;
 use crate::point::Point;
 
@@ -287,6 +289,7 @@ impl TransformLogic for SvgItem {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
     fn translate(&self) -> resvg::usvg::NodeKind {
         use resvg::usvg::*;
