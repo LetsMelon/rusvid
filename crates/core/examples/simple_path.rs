@@ -17,7 +17,7 @@ fn main() {
 
     let rect_size = Point::new_symmetric(150.0);
     let rect_pos = Point::new(100.0, 50.0);
-    let triangle = SvgItem::new(
+    let rect = SvgItem::new(
         vec![
             PathLike::Move(rect_pos),
             PathLike::Line(rect_size * Point::new(1.0, 0.0) + rect_pos),
@@ -35,7 +35,7 @@ fn main() {
     );
 
     // svg.add_item(rect.bounding_box_rect());
-    svg.add_item(triangle);
+    svg.add_item(rect);
 
     let heart = SvgItem::new(
         vec![
