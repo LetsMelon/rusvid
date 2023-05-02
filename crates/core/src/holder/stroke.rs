@@ -4,6 +4,7 @@ use resvg::usvg::{NonZeroPositiveF64, NormalizedF64};
 use crate::holder::likes::color_like::ColorLike;
 #[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
+use crate::pixel::Pixel;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
@@ -20,16 +21,14 @@ pub struct Stroke {
 }
 
 impl Default for Stroke {
-    #[cfg(feature = "resvg")]
-    // TODO remove the call to resvg for the default `Stroke`
     fn default() -> Self {
-        let default = resvg::usvg::Stroke::default();
-        Self::from_resvg_stroke(default)
-    }
-
-    #[cfg(not(feature = "resvg"))]
-    fn default() -> Self {
-        todo!()
+        Stroke {
+            paint: ColorLike::Color(Pixel::BLACK),
+            dasharray: None,
+            dashoffset: 0.0,
+            opacity: 1.0,
+            width: 1.0,
+        }
     }
 }
 
