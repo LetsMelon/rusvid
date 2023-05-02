@@ -22,9 +22,8 @@ pub mod prelude {
 }
 
 #[cfg(not(any(feature = "resvg", feature = "cairo")))]
-compile_error!("Either feature \"resvg\" or \"cairo\" must be enabled for this crate.");
+compile_error!("Either feature \"resvg\" and/or \"cairo\" must be enabled for rusvid_core.");
 
-#[cfg(all(feature = "resvg", feature = "cairo"))]
-compile_error!(
-    "Only one feature of \"resvg\" or \"cairo\" can be enabled for this crate at the same time."
-);
+// TODO is there something like `compile_warning!`
+// #[cfg(all(feature = "resvg", feature = "cairo"))]
+// compile_error!("Waring: Features \"resvg\" and \"cairo\" are enabled at the same time, the default backend is \"resvg\"");
