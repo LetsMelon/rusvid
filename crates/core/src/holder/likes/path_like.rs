@@ -4,7 +4,6 @@ use geo::{Centroid, LineString, Polygon};
 use resvg::usvg::{PathData, PathSegment};
 
 use crate::holder::likes::utils::{coord2_to_point, point_to_coord2};
-use crate::holder::utils::ApplyToCairoContext;
 #[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::point::Point;
@@ -294,7 +293,8 @@ impl TranslateIntoResvgGeneric<resvg::usvg::PathSegment> for PathLike {
     }
 }
 
-impl ApplyToCairoContext for PathLike {
+#[cfg(feature = "cairo")]
+impl crate::holder::utils::ApplyToCairoContext for PathLike {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
         match &self {
             PathLike::Move(p) => context.move_to(p.x(), p.y()),

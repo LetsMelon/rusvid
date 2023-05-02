@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use super::utils::ApplyToCairoContext;
 use crate::holder::backend::{Backend, FeatureBackend};
 use crate::holder::likes::types_like::TypesLike;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
@@ -77,7 +76,8 @@ impl TransformLogic for Object {
     }
 }
 
-impl ApplyToCairoContext for Object {
+#[cfg(feature = "cairo")]
+impl crate::holder::utils::ApplyToCairoContext for Object {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
         match &self.data {
             TypesLike::Svg(svg_holder) => svg_holder.apply(context),

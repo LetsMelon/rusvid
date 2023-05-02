@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use super::utils::ApplyToCairoContext;
 use crate::holder::svg_item::SvgItem;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 
@@ -64,9 +63,10 @@ impl TransformLogic for SvgHolder {
     }
 }
 
-impl ApplyToCairoContext for SvgHolder {
+#[cfg(feature = "cairo")]
+impl crate::holder::utils::ApplyToCairoContext for SvgHolder {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
-        for (key, item) in &self.items {
+        for (_, item) in &self.items {
             item.apply(context)?;
         }
 

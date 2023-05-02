@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use super::utils::ApplyToCairoContext;
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
@@ -319,10 +318,11 @@ impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
     }
 }
 
-impl ApplyToCairoContext for SvgItem {
+#[cfg(feature = "cairo")]
+impl crate::holder::utils::ApplyToCairoContext for SvgItem {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
-        // visibility = false
-        if !self.visibility {
+        // visibility = true
+        if self.visibility {
             // apply path
             if self.path[0].type_equal(&PathLike::Move(Point::ZERO)) {
                 context.new_path();

@@ -7,7 +7,7 @@ pub mod resvg;
 #[cfg(feature = "cairo")]
 pub mod cairo;
 
-#[cfg(all(feature = "resvg", feature = "cairo"))]
+#[cfg(any(feature = "resvg", all(feature = "resvg", feature = "cairo")))]
 pub type FeatureBackend = resvg::ResvgBackend;
 
 #[cfg(all(feature = "cairo", not(feature = "resvg")))]
