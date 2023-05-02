@@ -2495,6 +2495,7 @@ dependencies = [
  "itertools",
  "paste",
  "png",
+ "rand",
  "redis",
  "resvg",
  "rhai",

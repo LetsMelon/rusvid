@@ -11,11 +11,11 @@ use crate::plane::{Plane, PlaneError, PlaneResult, SIZE};
 pub struct ResvgBackend {}
 
 impl Backend for ResvgBackend {
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "resvg"
     }
 
-    fn render(object: &Object, width: SIZE, height: SIZE) -> PlaneResult<Plane> {
+    fn render(&self, object: &Object, width: SIZE, height: SIZE) -> PlaneResult<Plane> {
         match object.data() {
             TypesLike::Svg(svg) => {
                 let size = Size::new(width as f64, height as f64)

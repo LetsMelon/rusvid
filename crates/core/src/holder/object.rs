@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::holder::backend::{Backend, FeatureBackend};
+use crate::holder::backend::BackendType;
 use crate::holder::likes::types_like::TypesLike;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
@@ -12,6 +12,8 @@ use crate::plane::{Plane, PlaneError, SIZE};
 pub struct Object {
     data: TypesLike,
     id: String,
+
+    backend: BackendType,
 }
 
 impl Object {
@@ -19,7 +21,12 @@ impl Object {
         Object {
             data,
             id: id.into(),
+            backend: BackendType::default(),
         }
+    }
+
+    pub fn set_backend(&mut self, backend: BackendType) {
+        self.backend = backend;
     }
 
     pub fn new(data: TypesLike) -> Self {
@@ -31,7 +38,10 @@ impl Object {
     }
 
     pub fn render(&self, width: SIZE, height: SIZE) -> Result<Plane, PlaneError> {
-        FeatureBackend::render(self, width, height)
+        let backend = self.backend.get_type();
+
+        println!("Using backend: {}", backend.name());
+        backend.render(self, width, height)
     }
 
     pub fn transforms(&mut self, transformations: Vec<Transform>) -> Result<(), TransformError> {

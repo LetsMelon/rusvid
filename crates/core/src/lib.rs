@@ -20,10 +20,3 @@ pub mod prelude {
     pub use crate::plane::*;
     pub use crate::point::*;
 }
-
-#[cfg(not(any(feature = "resvg", feature = "cairo")))]
-compile_error!("Either feature \"resvg\" and/or \"cairo\" must be enabled for rusvid_core.");
-
-// TODO is there something like `compile_warning!`
-// #[cfg(all(feature = "resvg", feature = "cairo"))]
-// compile_error!("Waring: Features \"resvg\" and \"cairo\" are enabled at the same time, the default backend is \"resvg\"");

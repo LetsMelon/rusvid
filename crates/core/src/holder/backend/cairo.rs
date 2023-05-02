@@ -10,11 +10,11 @@ use crate::plane::{Plane, PlaneError, PlaneResult, SIZE};
 pub struct CairoBackend {}
 
 impl Backend for CairoBackend {
-    fn name() -> &'static str {
+    fn name(&self) -> &'static str {
         "cairo"
     }
 
-    fn render(object: &Object, width: SIZE, height: SIZE) -> PlaneResult<Plane> {
+    fn render(&self, object: &Object, width: SIZE, height: SIZE) -> PlaneResult<Plane> {
         let surface = ImageSurface::create(Format::ARgb32, width as i32, height as i32)
             .map_err(|err| PlaneError::Backend(format!("{err:?}")))?;
         let context =
