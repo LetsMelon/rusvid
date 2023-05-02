@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use super::utils::ApplyToCairoContext;
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
@@ -315,5 +316,64 @@ impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
             data: Rc::new(path),
             ..resvg::usvg::Path::default()
         })
+    }
+}
+
+impl ApplyToCairoContext for SvgItem {
+    fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
+        // visibility = false
+        if !self.visibility {
+            // apply path
+            if self.path[0].type_equal(&PathLike::Move(Point::ZERO)) {
+                context.new_path();
+            }
+            for path in &self.path {
+                path.apply(context)?;
+            }
+            if self.path[self.path.len() - 1].type_equal(&PathLike::Close) {
+                context.close_path();
+            }
+
+            // apply stroke
+            if let Some(stroke) = &self.stroke {
+                match &stroke.paint {
+                    ColorLike::Color(c) => context.set_source_rgba(
+                        c.get_r_float(),
+                        c.get_g_float(),
+                        c.get_b_float(),
+                        c.get_a_float() * stroke.opacity,
+                    ),
+                    ColorLike::LinearGradient(_) => todo!(),
+                    ColorLike::RadialGradient(_) => todo!(),
+                }
+
+                if let Some(dasharray) = &stroke.dasharray {
+                    context.set_dash(dasharray.as_slice(), stroke.dashoffset);
+                }
+
+                context.set_line_width(stroke.width);
+
+                context.stroke_preserve()?;
+            }
+
+            // apply fill_color
+            if let Some(color_like) = &self.fill_color {
+                match color_like {
+                    ColorLike::Color(c) => {
+                        context.set_source_rgba(
+                            c.get_r_float(),
+                            c.get_g_float(),
+                            c.get_b_float(),
+                            c.get_a_float(),
+                        );
+                        context.fill()?;
+                    }
+                    ColorLike::LinearGradient(_) => todo!(),
+                    ColorLike::RadialGradient(_) => todo!(),
+                }
+            }
+        }
+
+        Ok(())
     }
 }

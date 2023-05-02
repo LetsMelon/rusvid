@@ -35,10 +35,14 @@ pub enum PlaneError {
 
     #[error("Encoding error: {0:?}")]
     EncodingError(String),
+
+    #[error("Backend error: {0:?}")]
+    Backend(String),
 }
 
 impl PlaneError {
     pub fn same_variant(&self, other: &PlaneError) -> bool {
+        // TODO add compile time check for PlaneError::VARIANT
         match (self, other) {
             (PlaneError::ValueGreaterZero(_), PlaneError::ValueGreaterZero(_))
             | (PlaneError::ArrayCapacityError, PlaneError::ArrayCapacityError)
@@ -47,7 +51,8 @@ impl PlaneError {
             | (PlaneError::TinySkiaError, PlaneError::TinySkiaError)
             | (PlaneError::OutOfBound2d(_, _), PlaneError::OutOfBound2d(_, _))
             | (PlaneError::IoError(_), PlaneError::IoError(_))
-            | (PlaneError::EncodingError(_), PlaneError::EncodingError(_)) => true,
+            | (PlaneError::EncodingError(_), PlaneError::EncodingError(_))
+            | (PlaneError::Backend(_), PlaneError::Backend(_)) => true,
             _ => false,
         }
     }

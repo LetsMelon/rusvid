@@ -96,11 +96,16 @@ impl Pixel {
         result
     }
 
+    // TODO macro generate and replace (get|set)_(r|g|b|a)(|_mut|_float)
+
     pub fn get_r(&self) -> u8 {
         self[0]
     }
     pub fn get_r_mut(&mut self) -> &mut u8 {
         &mut self[0]
+    }
+    pub fn get_r_float(&self) -> f64 {
+        (self[0] as f64) / 255.0
     }
     pub fn set_r(&mut self, value: u8) {
         self[0] = value;
@@ -112,6 +117,9 @@ impl Pixel {
     pub fn get_g_mut(&mut self) -> &mut u8 {
         &mut self[1]
     }
+    pub fn get_g_float(&self) -> f64 {
+        (self[1] as f64) / 255.0
+    }
     pub fn set_g(&mut self, value: u8) {
         self[1] = value;
     }
@@ -122,6 +130,9 @@ impl Pixel {
     pub fn get_b_mut(&mut self) -> &mut u8 {
         &mut self[2]
     }
+    pub fn get_b_float(&self) -> f64 {
+        (self[2] as f64) / 255.0
+    }
     pub fn set_b(&mut self, value: u8) {
         self[2] = value;
     }
@@ -131,6 +142,9 @@ impl Pixel {
     }
     pub fn get_a_mut(&mut self) -> &mut u8 {
         &mut self[3]
+    }
+    pub fn get_a_float(&self) -> f64 {
+        (self[3] as f64) / 255.0
     }
     pub fn set_a(&mut self, value: u8) {
         self[3] = value;
