@@ -1,19 +1,16 @@
-name: CI - full + daily
+name: CI - core
 
 on:
   push:
     paths:
-      #  - "**.rs"
+      - "crates/core/**.rs"
       - "**Cargo.**"
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/rusvid_core_ci.yml"
   pull_request:
     paths:
-      # - "**.rs"
+      - "crates/core/**.rs"
       - "**Cargo.**"
-      - ".github/workflows/ci.yml"
-  on:
-    schedule:
-      - cron: "15 6 * * *"
+      - ".github/workflows/rusvid_core_ci.yml"
 
 env:
   CARGO_TERM_COLOR: always
@@ -36,11 +33,6 @@ jobs:
           crate: cargo-nextest
           locked: true
 
-      - name: Install ffmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg libavutil-dev libavformat-dev libswscale-dev
-
       - uses: actions/cache@v3
         with:
           path: |
@@ -52,11 +44,11 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build
-        run: cargo build --verbose --all-targets --all --all-features
+        run: cargo build --all-targets --all-features -p rusvid_core
         env:
           CARGO_REGISTRIES_CRATES_IO_PROTOCOL: "sparse"
 
       - name: Test
-        run: cargo nextest run --all-features --all
+        run: cargo nextest run --all-features -p rusvid_core
         env:
           CARGO_REGISTRIES_CRATES_IO_PROTOCOL: "sparse"
