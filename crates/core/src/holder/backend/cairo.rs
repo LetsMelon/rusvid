@@ -77,7 +77,5 @@ mod tests {
 
         let plane = object.render(300, 300).unwrap();
         plane.save_as_png("my_special_output.png").unwrap();
-
-        assert!(false);
     }
 }
