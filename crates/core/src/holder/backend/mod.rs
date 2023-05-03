@@ -40,7 +40,7 @@ impl Default for BackendType {
 
 impl BackendType {
     #[inline]
-    pub(crate) fn get_type(&self) -> Box<dyn Backend> {
+    pub fn get_type(&self) -> Box<dyn Backend> {
         match self {
             #[cfg(feature = "resvg")]
             BackendType::Resvg => Box::new(resvg::ResvgBackend {}),

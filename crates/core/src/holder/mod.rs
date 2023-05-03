@@ -1,4 +1,4 @@
-pub(crate) mod backend;
+pub mod backend;
 pub mod gradient;
 pub mod image_holder;
 pub mod likes;
