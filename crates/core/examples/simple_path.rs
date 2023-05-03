@@ -1,5 +1,7 @@
+use rusvid_core::holder::backend::BackendType;
 use rusvid_core::holder::gradient::base::BaseGradient;
 use rusvid_core::holder::gradient::linear::LinearGradient;
+use rusvid_core::holder::gradient::radial::RadialGradient;
 use rusvid_core::holder::gradient::stop::Stop;
 use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
@@ -35,7 +37,8 @@ fn main() {
     );
 
     // svg.add_item(rect.bounding_box_rect());
-    svg.add_item(rect);
+    let rect_id = svg.add_item(rect);
+    println!("rect: {rect_id}");
 
     let heart = SvgItem::new(
         vec![
@@ -59,11 +62,26 @@ fn main() {
                 Pixel::new(255, 100, 0, 255),
             ]),
         ))),
+        // Some(ColorLike::RadialGradient(RadialGradient::new(
+        //     Point::new(100.0, 100.0),
+        //     50.0,
+        //     Point::new(400.0, 400.0),
+        //     BaseGradient::new_from_colors(vec![
+        //         Pixel::new(255, 100, 0, 255),
+        //         Pixel::new(255, 10, 200, 255),
+        //     ]),
+        // ))),
     );
     // svg.add_item(heart.bounding_box_rect());
-    svg.add_item(heart);
+    let heart_id = svg.add_item(heart);
+    println!("heart: {heart_id}");
 
-    let object = Object::new(TypesLike::Svg(svg));
+    // custom depth
+    // svg.set_item_depth(rect_id, 1);
+    // svg.set_item_depth(heart_id, 0);
+
+    let mut object = Object::new(TypesLike::Svg(svg));
+    object.set_backend(BackendType::Cairo);
 
     let plane = object.render(SIZE, SIZE).unwrap();
     plane.save_as_png("output.png").unwrap();

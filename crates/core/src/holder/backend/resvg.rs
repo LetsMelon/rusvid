@@ -33,7 +33,7 @@ impl Backend for ResvgBackend {
                 };
 
                 for item in svg.items.values() {
-                    let node_kind = item.translate();
+                    let node_kind = item.data.translate();
                     tree.root.append_kind(node_kind);
                 }
 
