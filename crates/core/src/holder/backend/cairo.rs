@@ -20,8 +20,6 @@ impl Backend for CairoBackend {
         let context =
             Context::new(&surface).map_err(|err| PlaneError::Backend(format!("{err:?}")))?;
 
-        context.set_source_rgb(1.0, 1.0, 1.0);
-        context.paint().unwrap();
         context.set_antialias(Antialias::Best);
 
         object
