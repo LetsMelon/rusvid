@@ -1,5 +1,8 @@
 use std::rc::Rc;
 
+use cairo::{LinearGradient, Pattern};
+
+use super::utils::TranslateIntoCairoGeneric;
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::stroke::Stroke;
@@ -334,6 +337,8 @@ impl crate::holder::utils::ApplyToCairoContext for SvgItem {
                 context.close_path();
             }
 
+            let obj_size = self.bounding_box();
+
             // apply stroke
             if let Some(stroke) = &self.stroke {
                 match &stroke.paint {
@@ -368,7 +373,11 @@ impl crate::holder::utils::ApplyToCairoContext for SvgItem {
                         );
                         context.fill()?;
                     }
-                    ColorLike::LinearGradient(_) => todo!(),
+                    ColorLike::LinearGradient(lg) => {
+                        let gradient = lg.translate_cairo();
+                        context.set_source(gradient)?;
+                        context.fill()?;
+                    }
                     ColorLike::RadialGradient(_) => todo!(),
                 }
             }

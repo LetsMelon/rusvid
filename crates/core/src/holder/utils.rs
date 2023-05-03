@@ -14,3 +14,7 @@ pub(crate) trait TranslateIntoResvgGeneric<T> {
 pub(crate) trait ApplyToCairoContext {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>>;
 }
+
+pub(crate) trait TranslateIntoCairoGeneric<T> {
+    fn translate_cairo(&self) -> T;
+}

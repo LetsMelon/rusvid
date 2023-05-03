@@ -11,6 +11,31 @@ pub struct BaseGradient {
     stops: Vec<Stop>,
 }
 
+impl BaseGradient {
+    pub fn new(stops: Vec<Stop>) -> Self {
+        BaseGradient { stops }
+    }
+
+    pub fn new_from_colors(colors: Vec<Pixel>) -> Self {
+        assert!(colors.len() > 1);
+
+        let count = (colors.len() as f64) - 1.0;
+        let stops = colors
+            .iter()
+            .enumerate()
+            .map(|(i, c)| Stop {
+                offset: (i as f64) / count,
+                color: *c,
+            })
+            .collect();
+        Self::new(stops)
+    }
+
+    pub fn stops(&self) -> &Vec<Stop> {
+        &self.stops
+    }
+}
+
 #[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::BaseGradient> for BaseGradient {
     fn translate(&self) -> resvg::usvg::BaseGradient {
@@ -22,24 +47,5 @@ impl TranslateIntoResvgGeneric<resvg::usvg::BaseGradient> for BaseGradient {
             spread_method: SpreadMethod::Pad,
             stops: self.stops.iter().map(|s| s.translate()).collect(),
         }
-    }
-}
-
-impl BaseGradient {
-    pub fn new(stops: Vec<Stop>) -> Self {
-        BaseGradient { stops }
-    }
-
-    pub fn new_from_colors(colors: Vec<Pixel>) -> Self {
-        let count = (colors.len() as f64) - 1.0;
-        let stops = colors
-            .iter()
-            .enumerate()
-            .map(|(i, c)| Stop {
-                offset: (i as f64) / count,
-                color: *c,
-            })
-            .collect();
-        Self::new(stops)
     }
 }
