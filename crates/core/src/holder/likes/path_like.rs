@@ -91,7 +91,7 @@ impl PartialEq<PathLike> for PathLike {
 }
 
 impl PathLike {
-    pub(crate) fn to_geo_polygon(path: &[PathLike]) -> Polygon {
+    pub(crate) fn as_geo_polygon(path: &[PathLike]) -> Polygon {
         let mut last_move = Point::new_symmetric(0.0);
         let mut last_point = Point::new_symmetric(0.0);
         let exterior = path
@@ -141,7 +141,7 @@ impl PathLike {
     }
 
     pub(crate) fn get_center(path: &[PathLike]) -> Point {
-        let polygon = PathLike::to_geo_polygon(&path);
+        let polygon = PathLike::as_geo_polygon(&path);
         let center = polygon
             .centroid()
             .map(|cord| Point::new(cord.x(), cord.y()))
