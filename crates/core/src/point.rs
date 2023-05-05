@@ -44,6 +44,10 @@ impl Point {
     pub fn y_mut(&mut self) -> &mut f64 {
         &mut self.0.y
     }
+
+    pub fn as_tuple(&self) -> (f64, f64) {
+        (self.x(), self.y())
+    }
 }
 
 impl From<(f64, f64)> for Point {

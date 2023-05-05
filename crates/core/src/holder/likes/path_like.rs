@@ -100,11 +100,11 @@ impl PathLike {
                 PathLike::Move(p) => {
                     last_move = p.clone();
                     last_point = p.clone();
-                    vec![(p.x(), p.y())]
+                    vec![p.as_tuple()]
                 }
                 PathLike::Line(p) => {
                     last_point = p.clone();
-                    vec![(p.x(), p.y())]
+                    vec![p.as_tuple()]
                 }
                 PathLike::CurveTo(end, c_s, c_e) => {
                     use flo_curves::bezier::Curve;
@@ -122,7 +122,7 @@ impl PathLike {
                         let pos = curve.point_at_pos(t);
                         let as_point = coord2_to_point(&pos);
 
-                        lines_on_curve.push((as_point.x(), as_point.y()));
+                        lines_on_curve.push(as_point.as_tuple());
 
                         last_point = as_point.clone();
                     }
@@ -131,7 +131,7 @@ impl PathLike {
                 }
                 PathLike::Close => {
                     last_point = last_move.clone();
-                    vec![(last_move.x(), last_move.y())]
+                    vec![last_move.as_tuple()]
                 }
             })
             .flatten()
