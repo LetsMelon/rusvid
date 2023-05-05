@@ -3,6 +3,7 @@ To rebuild all snapshots run `cargo test` with the env variable `TEST_REBUILD`.
 To save temporary files from the tests for debugging run `cargo test` with the env variable `TEST_SAVE`.
 */
 
+use std::fmt::Debug;
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
 
@@ -14,6 +15,7 @@ use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
 use rusvid_core::holder::object::Object;
+use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::SvgHolder;
 use rusvid_core::holder::svg_item::SvgItem;
@@ -77,7 +79,13 @@ fn test_image(image: RgbImage, snapshot: &[u8], name: &str) -> Result<()> {
     Ok(())
 }
 
-fn rebuild_and_test<P: AsRef<Path> + Clone>(plane: Plane, name: P, snapshot: &[u8]) -> Result<()> {
+fn rebuild_and_test<P: AsRef<Path> + Clone + Debug>(
+    plane: Plane,
+    name: P,
+    snapshot: &[u8],
+) -> Result<()> {
+    println!("path: {:?}", name);
+
     let image = plane.as_rgb_image()?;
 
     let binding = name.clone();
@@ -94,18 +102,18 @@ fn rebuild_and_test<P: AsRef<Path> + Clone>(plane: Plane, name: P, snapshot: &[u
 fn simple_path() {
     let mut svg = SvgHolder::new();
     let triangle = SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 100.0)),
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color([0, 255, 100, 255].into())),
     );
     svg.add_item(triangle);
 
     let heart = SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 50.0)),
             PathLike::CurveTo(
@@ -119,7 +127,7 @@ fn simple_path() {
                 Point::new(30.0, 11.0),
             ),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color([255, 0, 0, 255].into())),
     );
     svg.add_item(heart);
@@ -134,17 +142,17 @@ fn simple_path() {
 fn simple_transform() {
     let mut svg = SvgHolder::new();
     let triangle_id = svg.add_item(SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 100.0)),
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color([0, 255, 120, 255].into())),
     ));
 
     let heart_id = svg.add_item(SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 50.0)),
             PathLike::CurveTo(
@@ -158,7 +166,7 @@ fn simple_transform() {
                 Point::new(30.0, 11.0),
             ),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color([200, 100, 20, 255].into())),
     ));
 

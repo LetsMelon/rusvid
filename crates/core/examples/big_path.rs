@@ -3,6 +3,7 @@ use std::time::{Duration, Instant};
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
 use rusvid_core::holder::object::Object;
+use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::holder::svg_holder::SvgHolder;
 use rusvid_core::holder::svg_item::SvgItem;
 use rusvid_core::point::Point;
@@ -25,7 +26,7 @@ fn main() {
 
     paths.push(PathLike::Close);
 
-    let item = SvgItem::new(paths, None);
+    let item = SvgItem::new(Polygon::new(&paths), None);
     svg.add_item(item);
 
     let object = Object::new(TypesLike::Svg(svg));

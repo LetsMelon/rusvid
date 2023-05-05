@@ -46,6 +46,7 @@ mod tests {
     use crate::holder::likes::path_like::PathLike;
     use crate::holder::likes::types_like::TypesLike;
     use crate::holder::object::Object;
+    use crate::holder::polygon::Polygon;
     use crate::holder::svg_holder::SvgHolder;
     use crate::holder::svg_item::SvgItem;
     use crate::pixel::Pixel;
@@ -58,13 +59,13 @@ mod tests {
         let rect_size = Point::new_symmetric(150.0);
         let rect_pos = Point::new(100.0, 50.0);
         let mut rect = SvgItem::new(
-            vec![
+            Polygon::new(&[
                 PathLike::Move(rect_pos),
                 PathLike::Line(rect_size * Point::new(1.0, 0.0) + rect_pos),
                 PathLike::Line(rect_size * Point::new(1.0, 1.0) + rect_pos),
                 PathLike::Line(rect_size * Point::new(0.0, 1.0) + rect_pos),
                 PathLike::Close,
-            ],
+            ]),
             Some(ColorLike::Color(Pixel::new(255, 100, 125, 255))),
         );
         rect.stroke = None;
