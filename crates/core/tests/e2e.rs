@@ -37,6 +37,12 @@ const SIMPLE_TRANSFORM_COLOR_NONE: &'static [u8] =
     include_bytes!("./data/simple_transform_color_none.bmp");
 const SIMPLE_TRANSFORM_VISIBILITY: &'static [u8] =
     include_bytes!("./data/simple_transform_visibility.bmp");
+const SIMPLE_TRANSFORM_ROTATION_CENTER: &'static [u8] =
+    include_bytes!("./data/simple_transform_rotation_center.bmp");
+const SIMPLE_TRANSFORM_ROTATION_CUSTOM: &'static [u8] =
+    include_bytes!("./data/simple_transform_rotation_custom.bmp");
+
+// TODO redo this file, and I think the matching is not working
 
 fn rebuild_snapshots<P: AsRef<Path>>(image: &RgbImage, name: P) -> Result<()> {
     if option_env!("TEST_REBUILD").is_some() {
@@ -242,9 +248,10 @@ fn simple_transform() {
         )
         .unwrap();
     let plane = object.render(300, 300).unwrap();
-    rebuild_snapshots(
-        &plane.as_rgb_image().unwrap(),
+    rebuild_and_test(
+        plane,
         "simple_transform_rotation_center",
+        SIMPLE_TRANSFORM_ROTATION_CENTER,
     )
     .unwrap();
 
@@ -258,9 +265,10 @@ fn simple_transform() {
         )
         .unwrap();
     let plane = object.render(300, 300).unwrap();
-    rebuild_snapshots(
-        &plane.as_rgb_image().unwrap(),
+    rebuild_and_test(
+        plane,
         "simple_transform_rotation_custom",
+        SIMPLE_TRANSFORM_ROTATION_CUSTOM,
     )
     .unwrap();
 }
