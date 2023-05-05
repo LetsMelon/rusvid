@@ -6,7 +6,7 @@ use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::SvgHolder;
 use rusvid_core::holder::svg_item::SvgItem;
-use rusvid_core::holder::transform::{Transform, TransformLogic};
+use rusvid_core::holder::transform::{RotationPoint, Transform, TransformLogic};
 use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 
@@ -86,7 +86,10 @@ fn main() {
     render_and_save(&object, "scale");
 
     object
-        .transform_by_id(&triangle_id, &Transform::Rotate(15.0_f64.to_radians()))
+        .transform_by_id(
+            &triangle_id,
+            &Transform::Rotate((15.0_f64.to_radians(), RotationPoint::Center)),
+        )
         .unwrap();
     render_and_save(&object, "rotate");
 

@@ -19,7 +19,7 @@ use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::SvgHolder;
 use rusvid_core::holder::svg_item::SvgItem;
-use rusvid_core::holder::transform::{Transform, TransformLogic};
+use rusvid_core::holder::transform::{RotationPoint, Transform, TransformLogic};
 use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 use rusvid_core::point::Point;
@@ -232,6 +232,35 @@ fn simple_transform() {
         plane,
         "simple_transform_visibility",
         SIMPLE_TRANSFORM_VISIBILITY,
+    )
+    .unwrap();
+
+    object
+        .transform_by_id(
+            &heart_id,
+            &Transform::Rotate((90.0_f64.to_radians(), RotationPoint::Center)),
+        )
+        .unwrap();
+    let plane = object.render(300, 300).unwrap();
+    rebuild_snapshots(
+        &plane.as_rgb_image().unwrap(),
+        "simple_transform_rotation_center",
+    )
+    .unwrap();
+
+    object
+        .transform_by_id(
+            &heart_id,
+            &Transform::Rotate((
+                10.0_f64.to_radians(),
+                RotationPoint::Custom(Point::new(150.0, 150.0)),
+            )),
+        )
+        .unwrap();
+    let plane = object.render(300, 300).unwrap();
+    rebuild_snapshots(
+        &plane.as_rgb_image().unwrap(),
+        "simple_transform_rotation_custom",
     )
     .unwrap();
 }
