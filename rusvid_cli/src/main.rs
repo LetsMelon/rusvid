@@ -15,7 +15,7 @@ use rusvid_lib::prelude::holder::gradient::base::BaseGradient;
 use rusvid_lib::prelude::holder::gradient::linear::LinearGradient;
 use rusvid_lib::prelude::holder::likes::ColorLike;
 use rusvid_lib::prelude::holder::svg_item::SvgItem;
-use rusvid_lib::prelude::holder::transform::{Transform, TransformLogic};
+use rusvid_lib::prelude::holder::transform::{RotationPoint, Transform, TransformLogic};
 use rusvid_lib::prelude::*;
 
 fn setup_logger() -> Result<String> {
@@ -67,7 +67,8 @@ fn main() {
             let mut item =
                 SvgItem::new(equilateral_triangle(Point::new(400.0, 400.0), 350.0), fill);
 
-            item.transform(&Transform::Rotate(2.5)).unwrap();
+            item.transform(&Transform::Rotate((2.5, RotationPoint::Center)))
+                .unwrap();
 
             item
         })

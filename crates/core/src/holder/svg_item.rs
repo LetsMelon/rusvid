@@ -92,10 +92,11 @@ impl TransformLogic for SvgItem {
 
                 self.last_scale = *factor;
             }
-            Transform::Rotate(angle) => {
+            Transform::Rotate((angle, rotation_point)) => {
                 let angle_diff = self.last_rotation - *angle;
 
-                self.polygon.transform(&Transform::Rotate(angle_diff))?;
+                self.polygon
+                    .transform(&Transform::Rotate((angle_diff, rotation_point.clone())))?;
 
                 self.last_rotation = *angle;
             }

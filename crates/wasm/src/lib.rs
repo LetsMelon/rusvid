@@ -9,7 +9,7 @@ use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::SvgHolder;
 use rusvid_core::holder::svg_item::SvgItem;
-use rusvid_core::holder::transform::{Transform, TransformLogic};
+use rusvid_core::holder::transform::{RotationPoint, Transform, TransformLogic};
 use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 use wasm_bindgen::prelude::*;
@@ -128,7 +128,10 @@ pub fn transform_visibility(value: bool) {
 pub fn transform_rotate(value: f64) {
     let mut object = OBJECT.lock().unwrap();
     object
-        .transform(&Transform::Rotate(value.to_radians()))
+        .transform(&Transform::Rotate((
+            value.to_radians(),
+            RotationPoint::Center,
+        )))
         .unwrap();
 }
 

@@ -2,7 +2,7 @@ use geo::Centroid;
 
 use crate::holder::likes::utils::{coord2_to_point, point_to_coord2};
 use crate::holder::likes::PathLike;
-use crate::holder::transform::{Transform, TransformError, TransformLogic};
+use crate::holder::transform::{RotationPoint, Transform, TransformError, TransformLogic};
 use crate::point::Point;
 
 const BOUNDING_BOX_STEPS: i32 = 10;
@@ -244,38 +244,41 @@ impl TransformLogic for Polygon {
                     PathLike::Close => (),
                 });
             }
-            Transform::Rotate(angle) => {
+            Transform::Rotate((angle, rot_point)) => {
                 let angle = *angle;
 
-                let center = self.center();
+                let rotation_point = match rot_point {
+                    RotationPoint::Center => self.center(),
+                    RotationPoint::Custom(p) => *p,
+                };
 
                 self.0.iter_mut().for_each(|p| match p {
                     PathLike::Move(value) | PathLike::Line(value) => {
-                        let v = *value - center;
+                        let v = *value - rotation_point;
 
                         let x = angle.cos() * v.x() - angle.sin() * v.y();
                         let y = angle.sin() * v.x() + angle.cos() * v.y();
 
-                        let pos = center + Point::new(x, y);
+                        let pos = rotation_point + Point::new(x, y);
 
                         *value = pos;
                     }
                     PathLike::CurveTo(end, c_s, c_e) => {
-                        let v_e = *end - center;
-                        let v_c_s = *c_s - center;
-                        let v_c_e = *c_e - center;
+                        let v_e = *end - rotation_point;
+                        let v_c_s = *c_s - rotation_point;
+                        let v_c_e = *c_e - rotation_point;
 
-                        *end = center
+                        *end = rotation_point
                             + Point::new(
                                 angle.cos() * v_e.x() - angle.sin() * v_e.y(),
                                 angle.sin() * v_e.x() + angle.cos() * v_e.y(),
                             );
-                        *c_s = center
+                        *c_s = rotation_point
                             + Point::new(
                                 angle.cos() * v_c_s.x() - angle.sin() * v_c_s.y(),
                                 angle.sin() * v_c_s.x() + angle.cos() * v_c_s.y(),
                             );
-                        *c_e = center
+                        *c_e = rotation_point
                             + Point::new(
                                 angle.cos() * v_c_e.x() - angle.sin() * v_c_e.y(),
                                 angle.sin() * v_c_e.x() + angle.cos() * v_c_e.y(),
