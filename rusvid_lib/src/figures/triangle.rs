@@ -1,4 +1,5 @@
 use rusvid_core::holder::likes::PathLike;
+use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::point::Point;
 
 // ? magic number ?
@@ -15,10 +16,10 @@ pub fn equilateral_triangle_raw(p: Point, side_length: f64) -> Vec<PathLike> {
     ]
 }
 
-pub fn equilateral_triangle(p: Point, side_length: f64) -> Vec<PathLike> {
+pub fn equilateral_triangle(p: Point, side_length: f64) -> Polygon {
     let mut path = equilateral_triangle_raw(p, side_length);
 
     path.push(PathLike::Close);
 
-    path
+    Polygon::new(&path)
 }

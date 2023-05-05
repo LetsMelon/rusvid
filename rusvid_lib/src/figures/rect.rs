@@ -1,4 +1,5 @@
 use rusvid_core::holder::likes::PathLike;
+use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::point::Point;
 
 pub fn rect_raw(position: Point, size: Point) -> Vec<PathLike> {
@@ -15,10 +16,10 @@ pub fn rect_raw(position: Point, size: Point) -> Vec<PathLike> {
     ]
 }
 
-pub fn rect(position: Point, size: Point) -> Vec<PathLike> {
+pub fn rect(position: Point, size: Point) -> Polygon {
     let mut path = rect_raw(position, size);
 
     path.push(PathLike::Close);
 
-    path
+    Polygon::new(&path)
 }
