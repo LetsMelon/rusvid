@@ -1,20 +1,15 @@
-use std::rc::Rc;
-
-use cairo::{LinearGradient, Pattern};
-
-use super::utils::TranslateIntoCairoGeneric;
 use crate::holder::likes::color_like::ColorLike;
 use crate::holder::likes::path_like::PathLike;
 use crate::holder::polygon::Polygon;
 use crate::holder::stroke::Stroke;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils::random_id;
+#[cfg(feature = "cairo")]
+use crate::holder::utils::TranslateIntoCairoGeneric;
 #[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::pixel::Pixel;
 use crate::point::Point;
-
-const BOUNDING_BOX_STEPS: i32 = 10;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
@@ -129,7 +124,7 @@ impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
             visibility,
             fill,
             stroke: self.stroke.clone().map(|s| s.translate()),
-            data: Rc::new(path),
+            data: std::rc::Rc::new(path),
             ..resvg::usvg::Path::default()
         })
     }
@@ -138,6 +133,8 @@ impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
 #[cfg(feature = "cairo")]
 impl crate::holder::utils::ApplyToCairoContext for SvgItem {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
+        use cairo::{LinearGradient, Pattern};
+
         // visibility = true
         if self.visibility {
             // apply path

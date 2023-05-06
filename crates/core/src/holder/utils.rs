@@ -15,6 +15,7 @@ pub(crate) trait ApplyToCairoContext {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>>;
 }
 
+#[cfg(feature = "cairo")]
 pub(crate) trait TranslateIntoCairoGeneric<T> {
     fn translate_cairo(&self) -> T;
 }
