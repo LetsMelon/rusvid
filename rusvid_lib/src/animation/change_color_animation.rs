@@ -1,7 +1,7 @@
 use rusvid_core::holder::likes::ColorLike;
 use rusvid_core::prelude::Pixel;
 
-use super::{Animation, EaseType, FunctionType, Range};
+use crate::animation::{Animation, EaseType, FunctionType, Range};
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]

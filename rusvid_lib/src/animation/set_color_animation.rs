@@ -1,6 +1,6 @@
 use rusvid_core::holder::likes::ColorLike;
 
-use super::Animation;
+use crate::animation::Animation;
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
