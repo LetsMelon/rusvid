@@ -44,7 +44,7 @@ itertools = "0.10.5"
 strum = { version = "0.24", features = ["derive"] }
 
 [features]
-default = ["resvg", "cairo"]
+default = ["resvg"]
 
 serde = ["serialize", "deserialize"]
 serialize = ["dep:serde", "glam/serde"]
