@@ -7,11 +7,11 @@ use ffmpeg_sys_next::{
     AVRational,
 };
 
-use super::codec::Codec;
-use super::format_context::FormatContext;
-use super::{Frame, Packet, WrapperType};
 use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
+use crate::wrapper::codec::Codec;
+use crate::wrapper::format_context::FormatContext;
+use crate::wrapper::{Frame, Packet, WrapperType};
 
 // See https://ffmpeg.org/ffmpeg-codecs.html#Options-34
 pub enum CodecContextOption<'a> {

@@ -3,6 +3,7 @@ To rebuild all snapshots run `cargo test` with the env variable `TEST_REBUILD`.
 To save temporary files from the tests for debugging run `cargo test` with the env variable `TEST_SAVE`.
 */
 
+use std::fmt::Debug;
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
 
@@ -14,10 +15,11 @@ use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
 use rusvid_core::holder::object::Object;
+use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::SvgHolder;
 use rusvid_core::holder::svg_item::SvgItem;
-use rusvid_core::holder::transform::{Transform, TransformLogic};
+use rusvid_core::holder::transform::{RotationPoint, Transform, TransformLogic};
 use rusvid_core::pixel::Pixel;
 use rusvid_core::plane::Plane;
 use rusvid_core::point::Point;
@@ -35,6 +37,12 @@ const SIMPLE_TRANSFORM_COLOR_NONE: &'static [u8] =
     include_bytes!("./data/simple_transform_color_none.bmp");
 const SIMPLE_TRANSFORM_VISIBILITY: &'static [u8] =
     include_bytes!("./data/simple_transform_visibility.bmp");
+const SIMPLE_TRANSFORM_ROTATION_CENTER: &'static [u8] =
+    include_bytes!("./data/simple_transform_rotation_center.bmp");
+const SIMPLE_TRANSFORM_ROTATION_CUSTOM: &'static [u8] =
+    include_bytes!("./data/simple_transform_rotation_custom.bmp");
+
+// TODO redo this file, and I think the matching is not working
 
 fn rebuild_snapshots<P: AsRef<Path>>(image: &RgbImage, name: P) -> Result<()> {
     if option_env!("TEST_REBUILD").is_some() {
@@ -77,7 +85,13 @@ fn test_image(image: RgbImage, snapshot: &[u8], name: &str) -> Result<()> {
     Ok(())
 }
 
-fn rebuild_and_test<P: AsRef<Path> + Clone>(plane: Plane, name: P, snapshot: &[u8]) -> Result<()> {
+fn rebuild_and_test<P: AsRef<Path> + Clone + Debug>(
+    plane: Plane,
+    name: P,
+    snapshot: &[u8],
+) -> Result<()> {
+    println!("path: {:?}", name);
+
     let image = plane.as_rgb_image()?;
 
     let binding = name.clone();
@@ -94,18 +108,18 @@ fn rebuild_and_test<P: AsRef<Path> + Clone>(plane: Plane, name: P, snapshot: &[u
 fn simple_path() {
     let mut svg = SvgHolder::new();
     let triangle = SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 100.0)),
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color([0, 255, 100, 255].into())),
     );
     svg.add_item(triangle);
 
     let heart = SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 50.0)),
             PathLike::CurveTo(
@@ -119,7 +133,7 @@ fn simple_path() {
                 Point::new(30.0, 11.0),
             ),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color([255, 0, 0, 255].into())),
     );
     svg.add_item(heart);
@@ -134,17 +148,17 @@ fn simple_path() {
 fn simple_transform() {
     let mut svg = SvgHolder::new();
     let triangle_id = svg.add_item(SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 100.0)),
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color([0, 255, 120, 255].into())),
     ));
 
     let heart_id = svg.add_item(SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 50.0)),
             PathLike::CurveTo(
@@ -158,7 +172,7 @@ fn simple_transform() {
                 Point::new(30.0, 11.0),
             ),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color([200, 100, 20, 255].into())),
     ));
 
@@ -224,6 +238,37 @@ fn simple_transform() {
         plane,
         "simple_transform_visibility",
         SIMPLE_TRANSFORM_VISIBILITY,
+    )
+    .unwrap();
+
+    object
+        .transform_by_id(
+            &heart_id,
+            &Transform::Rotate((90.0_f64.to_radians(), RotationPoint::Center)),
+        )
+        .unwrap();
+    let plane = object.render(300, 300).unwrap();
+    rebuild_and_test(
+        plane,
+        "simple_transform_rotation_center",
+        SIMPLE_TRANSFORM_ROTATION_CENTER,
+    )
+    .unwrap();
+
+    object
+        .transform_by_id(
+            &heart_id,
+            &Transform::Rotate((
+                10.0_f64.to_radians(),
+                RotationPoint::Custom(Point::new(150.0, 150.0)),
+            )),
+        )
+        .unwrap();
+    let plane = object.render(300, 300).unwrap();
+    rebuild_and_test(
+        plane,
+        "simple_transform_rotation_custom",
+        SIMPLE_TRANSFORM_ROTATION_CUSTOM,
     )
     .unwrap();
 }

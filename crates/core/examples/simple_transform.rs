@@ -2,10 +2,11 @@ use rusvid_core::holder::likes::color_like::ColorLike;
 use rusvid_core::holder::likes::path_like::PathLike;
 use rusvid_core::holder::likes::types_like::TypesLike;
 use rusvid_core::holder::object::Object;
+use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::holder::stroke::Stroke;
 use rusvid_core::holder::svg_holder::SvgHolder;
 use rusvid_core::holder::svg_item::SvgItem;
-use rusvid_core::holder::transform::{Transform, TransformLogic};
+use rusvid_core::holder::transform::{RotationPoint, Transform, TransformLogic};
 use rusvid_core::pixel::Pixel;
 use rusvid_core::point::Point;
 
@@ -18,17 +19,17 @@ fn render_and_save(object: &Object, name: &str) {
 fn main() {
     let mut svg = SvgHolder::new();
     let triangle_id = svg.add_item(SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 100.0)),
             PathLike::Line(Point::new(120.0, 150.0)),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color(Pixel::new(0, 255, 100, 255))),
     ));
 
     let heart_id = svg.add_item(SvgItem::new(
-        vec![
+        Polygon::new(&[
             PathLike::Move(Point::new(100.0, 100.0)),
             PathLike::Line(Point::new(150.0, 50.0)),
             PathLike::CurveTo(
@@ -42,7 +43,7 @@ fn main() {
                 Point::new(30.0, 11.0),
             ),
             PathLike::Close,
-        ],
+        ]),
         Some(ColorLike::Color(Pixel::new(255, 0, 0, 255))),
     ));
 
@@ -85,7 +86,10 @@ fn main() {
     render_and_save(&object, "scale");
 
     object
-        .transform_by_id(&triangle_id, &Transform::Rotate(15.0_f64.to_radians()))
+        .transform_by_id(
+            &triangle_id,
+            &Transform::Rotate((15.0_f64.to_radians(), RotationPoint::Center)),
+        )
         .unwrap();
     render_and_save(&object, "rotate");
 

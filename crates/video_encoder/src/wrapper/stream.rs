@@ -2,11 +2,11 @@ use std::ptr;
 
 use ffmpeg_sys_next::{avcodec_parameters_from_context, avformat_new_stream, AVRational, AVStream};
 
-use super::codec_context::CodecContext;
-use super::format_context::FormatContext;
-use super::WrapperType;
 use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
+use crate::wrapper::codec_context::CodecContext;
+use crate::wrapper::format_context::FormatContext;
+use crate::wrapper::WrapperType;
 
 pub struct Stream(*mut AVStream);
 

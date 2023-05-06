@@ -3,6 +3,7 @@ use std::io::{BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
+#[cfg(feature = "resvg")]
 use resvg::tiny_skia::Pixmap;
 use thiserror::Error;
 
@@ -34,10 +35,14 @@ pub enum PlaneError {
 
     #[error("Encoding error: {0:?}")]
     EncodingError(String),
+
+    #[error("Backend error: {0:?}")]
+    Backend(String),
 }
 
 impl PlaneError {
     pub fn same_variant(&self, other: &PlaneError) -> bool {
+        // TODO add compile time check for PlaneError::VARIANT
         match (self, other) {
             (PlaneError::ValueGreaterZero(_), PlaneError::ValueGreaterZero(_))
             | (PlaneError::ArrayCapacityError, PlaneError::ArrayCapacityError)
@@ -46,7 +51,8 @@ impl PlaneError {
             | (PlaneError::TinySkiaError, PlaneError::TinySkiaError)
             | (PlaneError::OutOfBound2d(_, _), PlaneError::OutOfBound2d(_, _))
             | (PlaneError::IoError(_), PlaneError::IoError(_))
-            | (PlaneError::EncodingError(_), PlaneError::EncodingError(_)) => true,
+            | (PlaneError::EncodingError(_), PlaneError::EncodingError(_))
+            | (PlaneError::Backend(_), PlaneError::Backend(_)) => true,
             _ => false,
         }
     }
@@ -247,6 +253,7 @@ impl Plane {
         Plane::from_data(width, height, data)
     }
 
+    #[cfg(feature = "resvg")]
     /// Create a [`Plane`] from [`tiny_skia::Pixmap`]
     pub fn from_pixmap(pixmap: Pixmap) -> Self {
         let data = pixmap
@@ -263,6 +270,7 @@ impl Plane {
         Plane::from_data_unchecked(pixmap.width(), pixmap.height(), data)
     }
 
+    #[cfg(feature = "resvg")]
     /// Consumes itself and tries to create an [`tiny_skia::Pixmap`] or returns a [`PlaneError`].
     pub fn as_pixmap(self) -> PlaneResult<Pixmap> {
         let mut pixmap =

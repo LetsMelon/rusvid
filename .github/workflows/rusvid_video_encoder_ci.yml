@@ -1,18 +1,16 @@
-name: CI - full + daily
+name: CI - video encoder
 
 on:
   push:
     paths:
-      #  - "**.rs"
+      - "crates/video_encoder/**.rs"
       - "**Cargo.**"
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/rusvid_video_encoder_ci.yml"
   pull_request:
     paths:
-      # - "**.rs"
+      - "crates/video_encoder/**.rs"
       - "**Cargo.**"
-      - ".github/workflows/ci.yml"
-  schedule:
-    - cron: "15 6 * * *"
+      - ".github/workflows/rusvid_video_encoder_ci.yml"
 
 env:
   CARGO_TERM_COLOR: always
@@ -30,15 +28,10 @@ jobs:
           override: true
 
       - name: Install cargo-nextest
-        uses: baptiste0928/cargo-install@v2
+        uses: baptiste0928/cargo-install@v1
         with:
           crate: cargo-nextest
           locked: true
-
-      - name: Install ffmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg libavutil-dev libavformat-dev libswscale-dev
 
       - uses: actions/cache@v3
         with:
@@ -50,12 +43,17 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libavutil-dev libavformat-dev libswscale-dev
+
       - name: Build
-        run: cargo build --verbose --all-targets --all --all-features
+        run: cargo build --all-targets --all-features -p rusvid_video_encoder
         env:
           CARGO_REGISTRIES_CRATES_IO_PROTOCOL: "sparse"
 
       - name: Test
-        run: cargo nextest run --all-features --all
+        run: cargo nextest run --all-features -p rusvid_video_encoder
         env:
           CARGO_REGISTRIES_CRATES_IO_PROTOCOL: "sparse"

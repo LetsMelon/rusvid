@@ -1,8 +1,10 @@
 use approx::AbsDiffEq;
 use geo::{Centroid, LineString, Polygon};
+#[cfg(feature = "resvg")]
 use resvg::usvg::{PathData, PathSegment};
 
 use crate::holder::likes::utils::{coord2_to_point, point_to_coord2};
+#[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::point::Point;
 
@@ -89,7 +91,7 @@ impl PartialEq<PathLike> for PathLike {
 }
 
 impl PathLike {
-    pub(crate) fn to_geo_polygon(path: &[PathLike]) -> Polygon {
+    pub(crate) fn as_geo_polygon(path: &[PathLike]) -> Polygon {
         let mut last_move = Point::new_symmetric(0.0);
         let mut last_point = Point::new_symmetric(0.0);
         let exterior = path
@@ -98,11 +100,11 @@ impl PathLike {
                 PathLike::Move(p) => {
                     last_move = p.clone();
                     last_point = p.clone();
-                    vec![(p.x(), p.y())]
+                    vec![p.as_tuple()]
                 }
                 PathLike::Line(p) => {
                     last_point = p.clone();
-                    vec![(p.x(), p.y())]
+                    vec![p.as_tuple()]
                 }
                 PathLike::CurveTo(end, c_s, c_e) => {
                     use flo_curves::bezier::Curve;
@@ -120,7 +122,7 @@ impl PathLike {
                         let pos = curve.point_at_pos(t);
                         let as_point = coord2_to_point(&pos);
 
-                        lines_on_curve.push((as_point.x(), as_point.y()));
+                        lines_on_curve.push(as_point.as_tuple());
 
                         last_point = as_point.clone();
                     }
@@ -129,7 +131,7 @@ impl PathLike {
                 }
                 PathLike::Close => {
                     last_point = last_move.clone();
-                    vec![(last_move.x(), last_move.y())]
+                    vec![last_move.as_tuple()]
                 }
             })
             .flatten()
@@ -139,7 +141,7 @@ impl PathLike {
     }
 
     pub(crate) fn get_center(path: &[PathLike]) -> Point {
-        let polygon = PathLike::to_geo_polygon(&path);
+        let polygon = PathLike::as_geo_polygon(&path);
         let center = polygon
             .centroid()
             .map(|cord| Point::new(cord.x(), cord.y()))
@@ -229,6 +231,7 @@ impl PathLike {
         )
     }
 
+    #[cfg(feature = "resvg")]
     pub fn extend_path_from_self(&self, path: &mut PathData) {
         match self {
             PathLike::Move(point) => path.push_move_to(point.x(), point.y()),
@@ -240,12 +243,14 @@ impl PathLike {
         }
     }
 
+    #[cfg(feature = "resvg")]
     pub fn extend_path_from_slice(path: &mut PathData, slice: &[Self]) {
         slice
             .iter()
             .for_each(|item| item.extend_path_from_self(path))
     }
 
+    #[cfg(feature = "resvg")]
     pub fn from_path_segment(other: PathSegment) -> PathLike {
         match other {
             PathSegment::MoveTo { x, y } => PathLike::Move(Point::new(x, y)),
@@ -263,6 +268,7 @@ impl PathLike {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::PathSegment> for PathLike {
     fn translate(&self) -> resvg::usvg::PathSegment {
         match self {
@@ -287,7 +293,24 @@ impl TranslateIntoResvgGeneric<resvg::usvg::PathSegment> for PathLike {
     }
 }
 
+#[cfg(feature = "cairo")]
+impl crate::holder::utils::ApplyToCairoContext for PathLike {
+    fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
+        match &self {
+            PathLike::Move(p) => context.move_to(p.x(), p.y()),
+            PathLike::Line(p) => context.line_to(p.x(), p.y()),
+            PathLike::CurveTo(p, s1, s2) => {
+                context.curve_to(s1.x(), s1.y(), s2.x(), s2.y(), p.x(), p.y())
+            }
+            PathLike::Close => context.close_path(),
+        }
+
+        Ok(())
+    }
+}
+
 #[cfg(test)]
+#[cfg(feature = "resvg")]
 mod tests {
     use super::*;
 
@@ -336,6 +359,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "resvg")]
     mod to_usvg_path_segment {
         use super::*;
 

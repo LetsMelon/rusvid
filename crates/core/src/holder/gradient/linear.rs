@@ -1,6 +1,7 @@
-use std::rc::Rc;
-
 use crate::holder::gradient::base::BaseGradient;
+#[cfg(feature = "cairo")]
+use crate::holder::utils::TranslateIntoCairoGeneric;
+#[cfg(feature = "resvg")]
 use crate::holder::utils::TranslateIntoResvgGeneric;
 use crate::point::Point;
 
@@ -24,6 +25,7 @@ impl LinearGradient {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::LinearGradient> for LinearGradient {
     fn translate(&self) -> resvg::usvg::LinearGradient {
         resvg::usvg::LinearGradient {
@@ -37,8 +39,29 @@ impl TranslateIntoResvgGeneric<resvg::usvg::LinearGradient> for LinearGradient {
     }
 }
 
+#[cfg(feature = "resvg")]
 impl TranslateIntoResvgGeneric<resvg::usvg::Paint> for LinearGradient {
     fn translate(&self) -> resvg::usvg::Paint {
-        resvg::usvg::Paint::LinearGradient(Rc::new(self.translate()))
+        resvg::usvg::Paint::LinearGradient(std::rc::Rc::new(self.translate()))
+    }
+}
+
+#[cfg(feature = "cairo")]
+impl TranslateIntoCairoGeneric<cairo::LinearGradient> for LinearGradient {
+    fn translate_cairo(&self) -> cairo::LinearGradient {
+        // TODO use real values
+        let gradient = cairo::LinearGradient::new(0.0, 0.0, 250.0, 250.0);
+
+        for stop in self.base.stops() {
+            gradient.add_color_stop_rgba(
+                stop.offset,
+                stop.color.get_r_float(),
+                stop.color.get_g_float(),
+                stop.color.get_b_float(),
+                stop.color.get_a_float(),
+            );
+        }
+
+        gradient
     }
 }

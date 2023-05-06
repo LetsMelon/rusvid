@@ -3,9 +3,9 @@ use ffmpeg_sys_next::{
     AVPixelFormat,
 };
 
-use super::WrapperType;
 use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
+use crate::wrapper::WrapperType;
 
 pub struct Frame(*mut AVFrame);
 

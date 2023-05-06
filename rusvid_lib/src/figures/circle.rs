@@ -3,9 +3,10 @@ use std::f64::consts::PI;
 const TWO_PI: f64 = PI * 2.0;
 
 use rusvid_core::holder::likes::PathLike;
+use rusvid_core::holder::polygon::Polygon;
 use rusvid_core::point::Point;
 
-pub fn circle(position: Point, radius: f64) -> Vec<PathLike> {
+pub fn circle_raw(position: Point, radius: f64) -> Vec<PathLike> {
     let circumference = radius * TWO_PI;
     let n = ((circumference / 32.0) as usize).max(32);
 
@@ -22,9 +23,15 @@ pub fn circle(position: Point, radius: f64) -> Vec<PathLike> {
         ));
     }
 
-    segments.push(PathLike::Close);
-
     segments
+}
+
+pub fn circle(position: Point, radius: f64) -> Polygon {
+    let mut path = circle_raw(position, radius);
+
+    path.push(PathLike::Close);
+
+    Polygon::new(&path)
 }
 
 /*

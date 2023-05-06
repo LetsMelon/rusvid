@@ -4,9 +4,9 @@ use ffmpeg_sys_next::{
     sws_freeContext, sws_getCachedContext, sws_getContext, sws_scale, AVPixelFormat, SwsContext,
 };
 
-use super::{Frame, WrapperType};
 use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
+use crate::wrapper::{Frame, WrapperType};
 use crate::{PIX_FMT, SCALE_FLAGS};
 
 pub struct ScaleContext {

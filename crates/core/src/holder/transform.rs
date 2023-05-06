@@ -7,6 +7,7 @@ use crate::holder::stroke::Stroke;
 use crate::point::Point;
 
 #[derive(Error, Debug)]
+// TODO better error
 pub enum TransformError {
     #[error("`{0}` is not implemented for {1}")]
     NotImplemented(&'static str, String),
@@ -34,6 +35,17 @@ pub trait TransformLogic: Debug {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
 #[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
+pub enum RotationPoint {
+    /// Rotate around the center of the polygon.
+    Center,
+
+    /// Rotate around a specify point.
+    Custom(Point),
+}
+
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+#[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 /// Visual guide: [Link](https://css-tricks.com/transforms-on-svg-elements/)
 pub enum Transform {
     /// Change visibility of the object; `true` = visible, `false` = hidden
@@ -54,8 +66,8 @@ pub enum Transform {
     /// Scale x and y by value
     Scale(Point),
 
-    /// Rotate by angle in radiant
-    Rotate(f64),
+    /// Rotate by angle in radiant and specify around which point
+    Rotate((f64, RotationPoint)),
     // TODO's
     // Opacity(f32), // Should change the alpha chanel in the color
 }

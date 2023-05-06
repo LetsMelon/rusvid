@@ -2,11 +2,11 @@ use std::ptr;
 
 use ffmpeg_sys_next::{avcodec_find_encoder, avcodec_open2, AVCodec, AVCodecID};
 
-use super::codec_context::CodecContext;
-use super::format_context::FormatContext;
-use super::WrapperType;
 use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
+use crate::wrapper::codec_context::CodecContext;
+use crate::wrapper::format_context::FormatContext;
+use crate::wrapper::WrapperType;
 
 pub struct Codec(*const AVCodec);
 

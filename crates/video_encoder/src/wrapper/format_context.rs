@@ -7,10 +7,10 @@ use ffmpeg_sys_next::{
     avformat_write_header, avio_open, AVFormatContext,
 };
 
-use super::WrapperType;
 use crate::error::VideoEncoderError;
 use crate::status::FfmpegSysStatus;
 use crate::util::path_to_cstring;
+use crate::wrapper::WrapperType;
 
 pub struct FormatContext {
     out_path: CString,

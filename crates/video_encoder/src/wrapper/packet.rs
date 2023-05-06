@@ -3,7 +3,7 @@ use std::ptr;
 
 use ffmpeg_sys_next::{av_init_packet, av_packet_unref, AVPacket};
 
-use super::WrapperType;
+use crate::wrapper::WrapperType;
 
 pub struct Packet(AVPacket);
 
