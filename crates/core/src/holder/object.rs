@@ -91,7 +91,7 @@ impl crate::holder::utils::ApplyToCairoContext for Object {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
         match &self.data {
             TypesLike::Svg(svg_holder) => svg_holder.apply(context),
-            TypesLike::Image(_) => todo!(),
+            TypesLike::Image(image_holder) => image_holder.apply(context),
         }
     }
 }
