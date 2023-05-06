@@ -23,6 +23,7 @@ impl Default for ImageMode {
 #[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct ImageHolder {
     pub(crate) coordinates: Point,
+    // TODO remove size
     pub(crate) size: Point,
     pub(crate) data: Plane,
     pub(crate) mode: ImageMode,

@@ -195,7 +195,7 @@ impl Polygon {
         geo::Polygon::new(geo::LineString::from(exterior), vec![])
     }
 
-    pub(crate) fn from_geo_polygon(polygon: geo::Polygon) -> Self {
+    pub(crate) fn from_geo_polygon(_polygon: geo::Polygon) -> Self {
         todo!()
     }
 }

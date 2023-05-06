@@ -133,7 +133,7 @@ impl TranslateIntoResvgGeneric<resvg::usvg::NodeKind> for SvgItem {
 #[cfg(feature = "cairo")]
 impl crate::holder::utils::ApplyToCairoContext for SvgItem {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
-        use cairo::{LinearGradient, Pattern};
+        // use cairo::{LinearGradient, Pattern};
 
         // visibility = true
         if self.visibility {
@@ -148,7 +148,7 @@ impl crate::holder::utils::ApplyToCairoContext for SvgItem {
                 context.close_path();
             }
 
-            let obj_size = self.bounding_box();
+            let _obj_size = self.bounding_box();
 
             // apply stroke
             if let Some(stroke) = &self.stroke {

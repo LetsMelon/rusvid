@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use itertools::Itertools;
-
 use crate::holder::svg_item::SvgItem;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 
@@ -131,6 +129,8 @@ impl TransformLogic for SvgHolder {
 #[cfg(feature = "cairo")]
 impl crate::holder::utils::ApplyToCairoContext for SvgHolder {
     fn apply(&self, context: &cairo::Context) -> Result<(), Box<dyn std::error::Error>> {
+        use itertools::Itertools;
+
         for item in self
             .items
             .iter()
