@@ -7,8 +7,8 @@ use axum::http::{HeaderValue, Method, StatusCode};
 use axum::routing::{any, get};
 use axum::Router;
 use error::ApiError;
-use fern::Dispatch;
-use log::LevelFilter;
+// use fern::Dispatch;
+// use log::LevelFilter;
 use r2d2::Pool;
 use s3::creds::Credentials;
 use s3::{Bucket, Region};
@@ -28,12 +28,6 @@ mod util;
 
 #[tokio::main]
 async fn main() {
-    Dispatch::new()
-        .level(LevelFilter::Debug)
-        .chain(std::io::stdout())
-        .apply()
-        .unwrap();
-
     let access_key = "access_key_123";
     let secret_key = "access_secret_key_123";
     let redis_url = "redis://127.0.0.1/";
