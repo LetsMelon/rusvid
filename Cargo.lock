@@ -214,6 +214,7 @@ dependencies = [
  "tower",
  "tower-layer",
  "tower-service",
+ "tracing",
 ]
 
 [[package]]
@@ -231,6 +232,7 @@ dependencies = [
  "rustversion",
  "tower-layer",
  "tower-service",
+ "tracing",
 ]
 
 [[package]]
@@ -1009,8 +1011,7 @@ dependencies = [
 [[package]]
 name = "geo"
 version = "0.24.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7d640a4dd1d1c98b45f4653c841a8ec15f461a71b86bc30533ae64c6f20f268"
+source = "git+https://github.com/georust/geo.git#c4ad568e88ffc90a46459e618712635bb77cadc4"
 dependencies = [
  "float_next_after",
  "geo-types",
