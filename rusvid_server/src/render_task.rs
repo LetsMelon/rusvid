@@ -18,60 +18,100 @@ pub struct Message {
     pub id: String,
 }
 
+enum TaskStatus {
+    Ok,
+    Err,
+}
+
+struct TaskReturn {
+    path: String,
+    status: TaskStatus,
+}
+
+impl TaskReturn {
+    fn new(path: String, status: TaskStatus) -> Self {
+        TaskReturn { path, status }
+    }
+
+    fn new_ok(path: String) -> Self {
+        TaskReturn::new(path, TaskStatus::Ok)
+    }
+
+    fn new_err(path: String) -> Self {
+        TaskReturn::new(path, TaskStatus::Err)
+    }
+
+    fn is_ok(&self) -> bool {
+        matches!(self.status, TaskStatus::Ok)
+    }
+
+    fn is_err(&self) -> bool {
+        !self.is_ok()
+    }
+
+    fn path(&self) -> &str {
+        &self.path
+    }
+}
+
+macro_rules! return_task_if_err {
+    ($r:expr, $p:ident) => {
+        match $r {
+            Ok(value) => value,
+            Err(err) => {
+                error!("err: {:?}", err);
+                return TaskReturn::new_err($p.clone());
+            }
+        }
+    };
+}
 async fn render_task(
     id: String,
     composition: Composition,
     bucket: &Bucket,
     connection: &mut PooledConnection<Client>,
-) -> Result<String, String> {
+) -> TaskReturn {
     let local_file_path = format_file_path(&id);
     let s3_file_path = format_s3_file_path(&id);
 
     let mut renderer = EmbeddedRenderer::new(&local_file_path);
-    renderer.render(composition).map_err(|err| {
-        println!("err: {err:?}");
-        local_file_path.clone()
-    })?;
+    return_task_if_err!(renderer.render(composition), local_file_path);
 
-    let status: ItemStatus = connection.get(key_for_video_status(&id)).map_err(|err| {
-        println!("err: {err:?}");
-        local_file_path.clone()
-    })?;
+    let status: ItemStatus =
+        return_task_if_err!(connection.get(key_for_video_status(&id)), local_file_path);
 
     match status {
         ItemStatus::Processing => {
-            let file = tokio::fs::File::open(&local_file_path)
-                .await
-                .map_err(|err| {
-                    println!("err: {err:?}");
-                    local_file_path.clone()
-                })?;
+            let file = return_task_if_err!(
+                tokio::fs::File::open(&local_file_path).await,
+                local_file_path
+            );
 
             let stream = ReaderStream::new(file);
             let mut stream_reader = StreamReader::new(stream);
 
-            let response_data = bucket
-                .put_object_stream(&mut stream_reader, s3_file_path)
-                .await
-                .map_err(|err| {
-                    println!("err: {err:?}");
-                    local_file_path.clone()
-                })?;
+            let response_data = return_task_if_err!(
+                bucket
+                    .put_object_stream(&mut stream_reader, s3_file_path)
+                    .await,
+                local_file_path
+            );
 
-            result_assert!(response_data == 200, local_file_path.clone())?;
+            return_task_if_err!(
+                result_assert!(response_data == 200, local_file_path.clone()),
+                local_file_path
+            );
 
-            let _: () = connection
-                .set(key_for_video_status(&id), ItemStatus::Finish)
-                .map_err(|err| {
-                    println!("err: {err:?}");
-                    local_file_path.clone()
-                })?;
+            let _: () = return_task_if_err!(
+                connection.set(key_for_video_status(&id), ItemStatus::Finish),
+                local_file_path
+            );
         }
         ItemStatus::Pending => unreachable!(),
         ItemStatus::Finish | ItemStatus::InDeletion | ItemStatus::EncounteredError => (),
     }
 
-    Ok(local_file_path)
+    TaskReturn::new_ok(local_file_path)
 }
 
 pub async fn renderer(mut rx: UnboundedReceiver<Message>, bucket: Bucket, pool: Pool<Client>) {
@@ -92,23 +132,19 @@ pub async fn renderer(mut rx: UnboundedReceiver<Message>, bucket: Bucket, pool: 
         )
         .await;
 
-        let local_file_path = match render_result {
-            Ok(path) => path,
-            Err(path) => {
-                let redis_result: Result<(), RedisError> = connection.set(
-                    key_for_video_status(&message.id),
-                    ItemStatus::EncounteredError,
+        let local_file_path = render_result.path();
+        if render_result.is_err() {
+            let redis_result: Result<(), RedisError> = connection.set(
+                key_for_video_status(&message.id),
+                ItemStatus::EncounteredError,
+            );
+            if redis_result.is_err() {
+                println!(
+                    "encountered error in render_task with the id '{}': {redis_result:?}",
+                    message.id
                 );
-                if redis_result.is_err() {
-                    println!(
-                        "encountered error in render_task with the id '{}': {redis_result:?}",
-                        message.id
-                    );
-                }
-
-                path
             }
-        };
+        }
 
         tokio::fs::remove_file(local_file_path)
             .await
