@@ -1,17 +1,18 @@
 #![feature(once_cell_try)]
 
-use std::net::SocketAddr;
-use std::time::Duration;
+use std::future::ready;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::time::{Duration, Instant};
 
 use ::redis::Client;
 use axum::extract::MatchedPath;
 use axum::http::{HeaderValue, Method, Request, StatusCode};
-use axum::response::Response;
+use axum::middleware::{self, Next};
+use axum::response::{IntoResponse, Response};
 use axum::routing::{any, get};
 use axum::Router;
 use error::ApiError;
-// use fern::Dispatch;
-// use log::LevelFilter;
+use metrics_exporter_prometheus::{Matcher, PrometheusBuilder, PrometheusHandle};
 use r2d2::Pool;
 use s3::creds::Credentials;
 use s3::{Bucket, Region};
@@ -20,8 +21,9 @@ use tower::ServiceBuilder;
 use tower_http::classify::ServerErrorsFailureClass;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
-use tracing::{debug, info_span, Span};
-use tracing_subscriber::fmt::format::FmtSpan;
+use tracing::{debug, info, info_span, Span};
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 mod error;
 mod logic;
@@ -34,14 +36,19 @@ mod util;
 
 #[tokio::main]
 async fn main() {
-    let log_filter = std::env::var("RUST_LOG")
-        .unwrap_or("rusvid_server=debug,axum::rejection=trace".to_string());
-
-    tracing_subscriber::fmt()
-        .with_env_filter(log_filter)
-        .with_span_events(FmtSpan::CLOSE)
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "rusvid_server=debug,tower_http=debug,rusvid_lib=info,rusvid_core=info,rusvid_video_encoder=info".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
         .init();
 
+    let (_main_server, _metrics_server) =
+        tokio::join!(start_main_server(8080), start_metrics_server(8085));
+}
+
+async fn start_main_server(port: u16) {
     let access_key = "access_key_123";
     let secret_key = "access_secret_key_123";
     let redis_url = "redis://127.0.0.1/";
@@ -110,11 +117,68 @@ async fn main() {
                         .allow_methods([Method::GET, Method::POST]),
                 ),
         )
+        .route_layer(middleware::from_fn(track_metrics))
         .fallback(|| async { ApiError::NotFound });
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let addr: SocketAddr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port);
+    info!("main server listening on {}", addr);
+
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+async fn start_metrics_server(port: u16) {
+    let recorder_handle = setup_metrics_recorder();
+    let app = Router::new().route("/metrics", get(move || ready(recorder_handle.render())));
+
+    let addr: SocketAddr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port);
+    info!("metrics server listening on {}", addr);
+
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
+}
+
+fn setup_metrics_recorder() -> PrometheusHandle {
+    const EXPONENTIAL_SECONDS: &[f64] = &[
+        0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0,
+    ];
+
+    PrometheusBuilder::new()
+        .set_buckets_for_metric(
+            Matcher::Full("http_requests_duration_seconds".to_string()),
+            EXPONENTIAL_SECONDS,
+        )
+        .unwrap()
+        .install_recorder()
+        .unwrap()
+}
+
+async fn track_metrics<B>(req: Request<B>, next: Next<B>) -> impl IntoResponse {
+    let start = Instant::now();
+    let path = if let Some(matched_path) = req.extensions().get::<MatchedPath>() {
+        matched_path.as_str().to_owned()
+    } else {
+        req.uri().path().to_owned()
+    };
+    let method = req.method().clone();
+
+    let response = next.run(req).await;
+
+    let latency = start.elapsed().as_secs_f64();
+    let status = response.status().as_u16().to_string();
+
+    let labels = [
+        ("method", method.to_string()),
+        ("path", path),
+        ("status", status),
+    ];
+
+    metrics::increment_counter!("http_requests_total", &labels);
+    metrics::histogram!("http_requests_duration_seconds", latency, &labels);
+
+    response
 }
