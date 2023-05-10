@@ -4,8 +4,8 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use anyhow::Result;
-use log::{debug, info};
 use rusvid_core::frame_image_format::FrameImageFormat;
+use tracing::{debug, info};
 
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;

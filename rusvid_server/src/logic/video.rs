@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use axum::body::StreamBody;
 use axum::extract::{Multipart, Path};
 use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
-use axum::response::IntoResponse;
+use axum::response::{IntoResponse, Response};
 use axum::Json;
 use r2d2::Pool;
 use redis::{Client, Commands, RedisError};
@@ -14,6 +14,7 @@ use serde_json::json;
 use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::io::ReaderStream;
+use tracing::instrument;
 
 use crate::error::ApiError;
 use crate::redis::key_for_video_status;
@@ -24,6 +25,7 @@ use crate::util::{format_file_path, format_s3_file_path};
 static HEADER_VALUE_CONTENT_TYPE: OnceLock<HeaderValue> = OnceLock::new();
 static HEADER_VALUE_CONTENT_DISPOSITION: OnceLock<HeaderValue> = OnceLock::new();
 
+#[instrument(skip_all)]
 pub async fn upload_video(
     mut multipart: Multipart,
     tx: UnboundedSender<Message>,
@@ -60,12 +62,25 @@ pub async fn upload_video(
 
         Ok((StatusCode::CREATED, headers, body))
     } else {
-        Err(ApiError::FileNotFound)
+        Err(ApiError::UploadError("file".to_string()))
     }
 }
 
 pub async fn download_video(
     Path(id): Path<String>,
+    bucket: Bucket,
+    redis_pool: Pool<Client>,
+) -> Response {
+    let result = download_video_function(id, bucket, redis_pool).await;
+
+    match result {
+        Ok(ok) => ok.into_response(),
+        Err(err) => err.into_response(),
+    }
+}
+
+async fn download_video_function(
+    id: String,
     bucket: Bucket,
     redis_pool: Pool<Client>,
 ) -> Result<impl IntoResponse, ApiError> {
@@ -80,10 +95,10 @@ pub async fn download_video(
         Some(stat) => match stat {
             ItemStatus::Finish => (),
             ItemStatus::Pending | ItemStatus::Processing => return Err(ApiError::VideoInProcess),
-            ItemStatus::InDeletion => return Err(ApiError::FileNotFound),
+            ItemStatus::InDeletion => return Err(ApiError::ResourceNotFound(id)),
             ItemStatus::EncounteredError => return Err(ApiError::VideoEncounteredError),
         },
-        None => return Err(ApiError::FileNotFound),
+        None => return Err(ApiError::ResourceNotFound(id)),
     };
 
     // TODO don't save the file to the local file system before sending it
@@ -122,6 +137,7 @@ pub async fn download_video(
 }
 
 // TODO check if this function really deletes a resource from the server
+#[instrument(skip(bucket, redis_pool))]
 pub async fn delete_video(
     Path(id): Path<String>,
     bucket: Bucket,

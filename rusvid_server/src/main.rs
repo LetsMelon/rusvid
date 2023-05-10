@@ -1,9 +1,12 @@
 #![feature(once_cell_try)]
 
 use std::net::SocketAddr;
+use std::time::Duration;
 
 use ::redis::Client;
-use axum::http::{HeaderValue, Method, StatusCode};
+use axum::extract::MatchedPath;
+use axum::http::{HeaderValue, Method, Request, StatusCode};
+use axum::response::Response;
 use axum::routing::{any, get};
 use axum::Router;
 use error::ApiError;
@@ -14,8 +17,11 @@ use s3::creds::Credentials;
 use s3::{Bucket, Region};
 use tokio::sync::mpsc;
 use tower::ServiceBuilder;
+use tower_http::classify::ServerErrorsFailureClass;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
+use tracing::{debug, info_span, Span};
+use tracing_subscriber::fmt::format::FmtSpan;
 
 mod error;
 mod logic;
@@ -28,6 +34,14 @@ mod util;
 
 #[tokio::main]
 async fn main() {
+    let log_filter = std::env::var("RUST_LOG")
+        .unwrap_or("rusvid_server=debug,axum::rejection=trace".to_string());
+
+    tracing_subscriber::fmt()
+        .with_env_filter(log_filter)
+        .with_span_events(FmtSpan::CLOSE)
+        .init();
+
     let access_key = "access_key_123";
     let secret_key = "access_secret_key_123";
     let redis_url = "redis://127.0.0.1/";
@@ -63,7 +77,33 @@ async fn main() {
         .nest("/video", routes::video::router(tx, bucket, pool.clone()))
         .layer(
             ServiceBuilder::new()
-                .layer(TraceLayer::new_for_http())
+                .layer(
+                    TraceLayer::new_for_http()
+                        .make_span_with(|request: &Request<_>| {
+                            let matched_path = request
+                                .extensions()
+                                .get::<MatchedPath>()
+                                .map(MatchedPath::as_str);
+
+                            info_span!(
+                                "http_request",
+                                method = ?request.method(),
+                                matched_path,
+                            )
+                        })
+                        .on_response(|response: &Response, _latency: Duration, span: &Span| {
+                            let _enter = span.enter();
+
+                            debug!("response.status: {:?}", response.status());
+                        })
+                        .on_failure(
+                            |error: ServerErrorsFailureClass, _latency: Duration, span: &Span| {
+                                let _enter = span.enter();
+
+                                tracing::error!("err: {:?}", error);
+                            },
+                        ),
+                )
                 .layer(
                     CorsLayer::new()
                         .allow_origin("*".parse::<HeaderValue>().unwrap())

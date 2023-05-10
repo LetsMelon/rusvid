@@ -2411,7 +2411,6 @@ dependencies = [
  "easer",
  "glam",
  "itertools",
- "log",
  "mime",
  "miniz_oxide 0.7.1",
  "multipart",
@@ -2423,6 +2422,7 @@ dependencies = [
  "serde",
  "serde_yaml",
  "static_assertions",
+ "tracing",
  "ureq",
  "url",
 ]

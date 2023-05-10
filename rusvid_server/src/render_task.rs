@@ -6,6 +6,7 @@ use rusvid_lib::renderer::Renderer;
 use s3::Bucket;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio_util::io::{ReaderStream, StreamReader};
+use tracing::{debug, error, info, instrument};
 
 use crate::redis::key_for_video_status;
 use crate::result_assert;
@@ -18,11 +19,13 @@ pub struct Message {
     pub id: String,
 }
 
+#[derive(Debug)]
 enum TaskStatus {
     Ok,
-    Err,
+    Err(String),
 }
 
+#[derive(Debug)]
 struct TaskReturn {
     path: String,
     status: TaskStatus,
@@ -37,8 +40,8 @@ impl TaskReturn {
         TaskReturn::new(path, TaskStatus::Ok)
     }
 
-    fn new_err(path: String) -> Self {
-        TaskReturn::new(path, TaskStatus::Err)
+    fn new_err(path: String, error_msg: String) -> Self {
+        TaskReturn::new(path, TaskStatus::Err(error_msg))
     }
 
     fn is_ok(&self) -> bool {
@@ -60,11 +63,13 @@ macro_rules! return_task_if_err {
             Ok(value) => value,
             Err(err) => {
                 error!("err: {:?}", err);
-                return TaskReturn::new_err($p.clone());
+                return TaskReturn::new_err($p.clone(), format!("{}", err));
             }
         }
     };
 }
+
+#[instrument(skip(composition, bucket, connection))]
 async fn render_task(
     id: String,
     composition: Composition,
@@ -115,15 +120,19 @@ async fn render_task(
 }
 
 pub async fn renderer(mut rx: UnboundedReceiver<Message>, bucket: Bucket, pool: Pool<Client>) {
+    info!("Started renderer");
+
     let mut connection = pool.get().unwrap();
 
     while let Some(message) = rx.recv().await {
-        println!("{}: {:?}", message.id, message.composition);
+        info!("Worker got id: {}", message.id);
 
         let _: () = connection
             .set(key_for_video_status(&message.id), ItemStatus::Processing)
             .expect("Not able to update value in redis to ItemStatus::Processing");
+        debug!("Updated resource status");
 
+        info!("Start rendering");
         let render_result = render_task(
             message.id.clone(),
             message.composition,
@@ -131,6 +140,8 @@ pub async fn renderer(mut rx: UnboundedReceiver<Message>, bucket: Bucket, pool: 
             &mut connection,
         )
         .await;
+
+        info!("Finished rendering with status: {:?}", render_result);
 
         let local_file_path = render_result.path();
         if render_result.is_err() {

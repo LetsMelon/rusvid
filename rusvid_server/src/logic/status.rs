@@ -3,11 +3,13 @@ use axum::Json;
 use r2d2::Pool;
 use redis::{Client, Commands, FromRedisValue, Value};
 use rusvid_core::server::ItemStatusResponse;
+use tracing::instrument;
 
 use crate::error::ApiError;
 use crate::redis::{key_for_video_status, video_status_prefix};
 use crate::status_types::{ItemList, ItemStatus};
 
+#[instrument(skip_all)]
 pub async fn list_all_items(redis_pool: Pool<Client>) -> Result<Json<ItemList>, ApiError> {
     let mut connection = redis_pool.get()?;
     let keys: Vec<String> = connection.keys(format!("{}*", video_status_prefix()))?;
@@ -36,6 +38,7 @@ pub async fn list_all_items(redis_pool: Pool<Client>) -> Result<Json<ItemList>, 
     Ok(Json(new_list))
 }
 
+#[instrument(skip(redis_pool))]
 pub async fn single_status(
     Path(id): Path<String>,
     redis_pool: Pool<Client>,

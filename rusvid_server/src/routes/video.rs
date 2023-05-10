@@ -1,6 +1,8 @@
+use axum::error_handling::{HandleError, HandleErrorLayer};
 use axum::extract::DefaultBodyLimit;
+use axum::http::StatusCode;
 use axum::routing::{get, post};
-use axum::Router;
+use axum::{BoxError, Router};
 use r2d2::Pool;
 use redis::Client;
 use s3::Bucket;
@@ -9,6 +11,7 @@ use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::limit::RequestBodyLimitLayer;
 
+use crate::error::ApiError;
 use crate::logic::video;
 use crate::render_task::Message;
 
