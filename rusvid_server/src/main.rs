@@ -7,10 +7,10 @@ use std::time::{Duration, Instant};
 use ::redis::Client;
 use axum::extract::MatchedPath;
 use axum::http::{HeaderValue, Method, Request, StatusCode};
-use axum::middleware::{self, Next};
+use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use axum::routing::{any, get};
-use axum::Router;
+use axum::{middleware, Router};
 use error::ApiError;
 use metrics_exporter_prometheus::{Matcher, PrometheusBuilder, PrometheusHandle};
 use r2d2::Pool;
@@ -25,6 +25,7 @@ use tracing::{debug, info, info_span, Span};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
+mod env_helper;
 mod error;
 mod logic;
 mod macros;
@@ -39,30 +40,35 @@ async fn main() {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "rusvid_server=debug,tower_http=debug,rusvid_lib=info,rusvid_core=info,rusvid_video_encoder=info".into()),
+                .unwrap_or_else(|_| "rusvid_server=debug,tower_http=debug,rusvid_lib=debug,rusvid_core=debug,rusvid_video_encoder=debug".into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let (_main_server, _metrics_server) =
-        tokio::join!(start_main_server(8080), start_metrics_server(8085));
+    let api_port = env_helper::api_port();
+    let metrics_port = env_helper::metrics_port();
+
+    let (_main_server, _metrics_server) = tokio::join!(
+        start_main_server(api_port),
+        start_metrics_server(metrics_port)
+    );
 }
 
 async fn start_main_server(port: u16) {
-    let access_key = "access_key_123";
-    let secret_key = "access_secret_key_123";
-    let redis_url = "redis://127.0.0.1/";
+    let access_key = env_helper::s3_access_key();
+    let secret_key = env_helper::s3_secret_key();
+    let redis_url = format!("redis://{}/", env_helper::redis_url());
 
     let client = Client::open(redis_url).unwrap();
     let pool = Pool::builder().build(client).unwrap();
 
     let bucket = Bucket::new(
-        "test-from-rust",
+        &env_helper::s3_bucket(),
         Region::Custom {
-            region: "home".to_string(),
-            endpoint: "http://localhost:9000".to_string(),
+            region: env_helper::s3_region(),
+            endpoint: format!("http://{}", env_helper::s3_url()),
         },
-        Credentials::new(Some(access_key), Some(secret_key), None, None, None).unwrap(),
+        Credentials::new(Some(&access_key), Some(&secret_key), None, None, None).unwrap(),
     )
     .unwrap()
     .with_path_style();
@@ -78,7 +84,7 @@ async fn start_main_server(port: u16) {
     }());
 
     let app = Router::new()
-        .route("/", get(|| async { "Hello, World!" }))
+        .route("/", get(|| async { "Hello from rusvid server" }))
         .route("/health", any(|| async { StatusCode::OK }))
         .nest("/status", routes::status::router(pool.clone()))
         .nest("/video", routes::video::router(tx, bucket, pool.clone()))
@@ -120,7 +126,7 @@ async fn start_main_server(port: u16) {
         .route_layer(middleware::from_fn(track_metrics))
         .fallback(|| async { ApiError::NotFound });
 
-    let addr: SocketAddr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port);
+    let addr: SocketAddr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), port);
     info!("main server listening on {}", addr);
 
     axum::Server::bind(&addr)
@@ -133,7 +139,7 @@ async fn start_metrics_server(port: u16) {
     let recorder_handle = setup_metrics_recorder();
     let app = Router::new().route("/metrics", get(move || ready(recorder_handle.render())));
 
-    let addr: SocketAddr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port);
+    let addr: SocketAddr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), port);
     info!("metrics server listening on {}", addr);
 
     axum::Server::bind(&addr)
