@@ -14,6 +14,10 @@ pub async fn list_all_items(redis_pool: Pool<Client>) -> Result<Json<ItemList>, 
     let mut connection = redis_pool.get()?;
     let keys: Vec<String> = connection.keys(format!("{}*", video_status_prefix()))?;
 
+    if keys.len() == 0 {
+        return Ok(Json(ItemList::default()));
+    }
+
     let mut new_list = ItemList::default();
 
     let out: Value = connection.mget(keys.clone())?;
