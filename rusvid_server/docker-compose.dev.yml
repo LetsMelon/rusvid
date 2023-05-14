@@ -17,3 +17,18 @@ services:
       - MINIO_ROOT_PASSWORD=myAdminPassword
     command: server /data --console-address ":9001"
     restart: unless-stopped
+
+  minio_config:
+    build:
+      context: .
+      dockerfile: Dockerfile.minio_conf
+    environment:
+      - STORAGE_URL=http://minio:9000
+      - STORAGE_ROOT_USER=myAdmin
+      - STORAGE_ROOT_PASSWORD=myAdminPassword
+      - STORAGE_ACCESS_KEY=access_key_123
+      - STORAGE_SECRET_KEY=access_secret_key_123
+    depends_on:
+      - minio
+    links:
+      - minio
