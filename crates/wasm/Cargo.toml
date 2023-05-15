@@ -18,6 +18,6 @@ js-sys = "0.3.60"
 lazy_static = "1.4.0"
 rusvid_core = { path = "../core", version = "0.2.0" }
 wasm-bindgen = "0.2.63"
-web-sys = { version = "0.3.60", default-features = false, features = [
+web-sys = { version = "0.3.62", default-features = false, features = [
     "console",
 ] }
