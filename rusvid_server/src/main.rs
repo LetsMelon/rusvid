@@ -37,12 +37,20 @@ mod util;
 
 #[tokio::main]
 async fn main() {
+    let tracer = opentelemetry_otlp::new_pipeline()
+        .tracing()
+        .with_exporter(opentelemetry_otlp::new_exporter().tonic())
+        .install_batch(opentelemetry::runtime::Tokio)
+        .unwrap();
+    let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
+
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "rusvid_server=debug,tower_http=debug,rusvid_lib=debug,rusvid_core=debug,rusvid_video_encoder=debug".into()),
         )
         .with(tracing_subscriber::fmt::layer())
+        .with(telemetry_layer)
         .init();
 
     let api_port = env_helper::api_port();
