@@ -9,7 +9,7 @@ default-run = "rusvid_server"
 name = "save_yaml"
 
 [dependencies]
-axum = { version = "0.6.12", features = ["multipart", "tracing"] }
+axum = { version = "0.6.18", features = ["multipart", "tracing"] }
 derive_more = "0.99.17"
 metrics = "0.21.0"
 metrics-exporter-prometheus = "0.12.1"
