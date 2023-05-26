@@ -13,6 +13,7 @@ use axum::routing::{any, get};
 use axum::{middleware, Router};
 use error::ApiError;
 use metrics_exporter_prometheus::{Matcher, PrometheusBuilder, PrometheusHandle};
+use opentelemetry_otlp::WithExportConfig;
 use r2d2::Pool;
 use s3::creds::Credentials;
 use s3::{Bucket, Region};
@@ -39,7 +40,11 @@ mod util;
 async fn main() {
     let tracer = opentelemetry_otlp::new_pipeline()
         .tracing()
-        .with_exporter(opentelemetry_otlp::new_exporter().tonic())
+        .with_exporter(
+            opentelemetry_otlp::new_exporter()
+                .tonic()
+                .with_endpoint(env_helper::exporter_endpoint()),
+        )
         .install_batch(opentelemetry::runtime::Tokio)
         .unwrap();
     let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);

@@ -62,3 +62,10 @@ generate_helper!(
 generate_helper!(s3_url, STORAGE_URL, "127.0.0.1:9000".to_string(), String);
 generate_helper!(s3_region, STORAGE_REGION, "home".to_string(), String);
 generate_helper!(redis_url, REDIS_URL, "127.0.0.1".to_string(), String);
+
+generate_helper!(
+    exporter_endpoint,
+    EXPORTER_URL,
+    "http://127.0.0.1:4317".to_string(),
+    String
+);
