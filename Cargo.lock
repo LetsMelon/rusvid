@@ -1078,8 +1078,9 @@ dependencies = [
 
 [[package]]
 name = "geo"
-version = "0.24.1"
-source = "git+https://github.com/georust/geo.git#c4ad568e88ffc90a46459e618712635bb77cadc4"
+version = "0.25.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c07ac450e9e7d8c08e58d2723d46bd0328bb6cc1d7b18f4f37a1e15a311098b0"
 dependencies = [
  "float_next_after",
  "geo-types",
