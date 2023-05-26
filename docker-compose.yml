@@ -13,6 +13,15 @@ services:
     command: server /data --console-address ":9001"
     restart: unless-stopped
 
+  collector:
+    image: jaegertracing/all-in-one:1.45
+    restart: always
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - 16686:16686
+
   rusvid:
     build:
       context: .
@@ -25,13 +34,17 @@ services:
     links:
       - redis
       - minio
+      - collector
     environment:
       - STORAGE_URL=minio:9000
       - REDIS_URL=redis
+      - EXPORTER_URL=http://collector:4317
+      - OTEL_SERVICE_NAME=rusvid_server
     depends_on:
       - redis
       - minio
       - config
+      - collector
 
   config:
     build:
