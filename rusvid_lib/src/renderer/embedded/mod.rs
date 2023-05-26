@@ -1,8 +1,8 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
-use log::{debug, info};
 use rusvid_video_encoder::Encoder;
+use tracing::{debug, info};
 
 use crate::composition::Composition;
 use crate::metrics::MetricsVideo;

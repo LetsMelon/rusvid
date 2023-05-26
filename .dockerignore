@@ -5,4 +5,6 @@ out/
 **.log
 **.json
 **.txt
-**Dockerfile
+**Dockerfile**
+**.mp4
+Makefile

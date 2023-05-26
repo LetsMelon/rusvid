@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      - MINIO_ROOT_USER=myAdmin
+      - MINIO_ROOT_PASSWORD=myAdminPassword
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+  collector:
+    image: jaegertracing/all-in-one:1.45
+    restart: always
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - 16686:16686
+
+  rusvid:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    image: rusvid_server:latest
+    ports:
+      - 8080:8080
+      - 8085:8085
+    restart: unless-stopped
+    links:
+      - redis
+      - minio
+      - collector
+    environment:
+      - STORAGE_URL=minio:9000
+      - REDIS_URL=redis
+      - EXPORTER_URL=http://collector:4317
+      - OTEL_SERVICE_NAME=rusvid_server
+    depends_on:
+      - redis
+      - minio
+      - config
+      - collector
+
+  config:
+    build:
+      context: ./rusvid_server
+      dockerfile: Dockerfile.minio_conf
+    image: rusvid_config:latest
+    environment:
+      - STORAGE_URL=http://minio:9000
+      - STORAGE_ROOT_USER=myAdmin
+      - STORAGE_ROOT_PASSWORD=myAdminPassword
+      - STORAGE_ACCESS_KEY=access_key_123
+      - STORAGE_SECRET_KEY=access_secret_key_123
+    links:
+      - minio
+    depends_on:
+      - minio

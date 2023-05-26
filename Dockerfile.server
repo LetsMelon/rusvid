@@ -1,0 +1,11 @@
+FROM rusvid:latest as base
+
+FROM ubuntu:22.10 as server
+
+RUN apt update \
+    && apt upgrade -y \
+    && apt install -y ffmpeg libavutil-dev libavformat-dev libswscale-dev openssl libssl-dev
+
+COPY --from=base /bin/rusvid_server /bin/rusvid_server
+
+ENTRYPOINT [ "rusvid_server" ]

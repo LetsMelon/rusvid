@@ -5,9 +5,9 @@ use std::thread;
 use std::time::Duration;
 
 use anyhow::{bail, Result};
-use log::info;
 use multipart::client::lazy::Multipart;
 use rusvid_core::server::{ItemStatus, ItemStatusResponse};
+use tracing::info;
 use ureq::AgentBuilder;
 use url::Url;
 

@@ -1,0 +1,12 @@
+FROM golang:1.20-alpine as builder
+
+RUN go install github.com/minio/mc@latest
+
+FROM alpine
+
+COPY --from=builder /go/bin/mc /bin/mc
+
+COPY minio_config.sh minio_policy.json /
+RUN chmod +x minio_config.sh
+
+ENTRYPOINT [ "/minio_config.sh" ]

@@ -1,7 +1,5 @@
-use std::path::PathBuf;
-
 use anyhow::Result;
-use log::debug;
+use tracing::debug;
 
 use crate::composition::CompositionBuilder;
 use crate::effect::EffectLogic;
@@ -74,7 +72,7 @@ impl Composition {
     }
 
     #[cfg(feature = "save_load")]
-    pub fn save_as_file(&self, path: impl Into<PathBuf>) -> Result<()> {
+    pub fn save_as_file(&self, path: impl Into<std::path::PathBuf>) -> Result<()> {
         use std::fs::File;
         use std::io::Write;
 
@@ -91,7 +89,7 @@ impl Composition {
     }
 
     #[cfg(feature = "save_load")]
-    pub fn load_from_file(path: impl Into<PathBuf>) -> Result<Self> {
+    pub fn load_from_file(path: impl Into<std::path::PathBuf>) -> Result<Self> {
         use bincode::deserialize;
         use miniz_oxide::inflate::decompress_to_vec;
 

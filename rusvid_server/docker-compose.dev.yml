@@ -17,3 +17,37 @@ services:
       - MINIO_ROOT_PASSWORD=myAdminPassword
     command: server /data --console-address ":9001"
     restart: unless-stopped
+
+  minio_config:
+    build:
+      context: .
+      dockerfile: Dockerfile.minio_conf
+    image: rusvid_config:latest
+    environment:
+      - STORAGE_URL=http://minio:9000
+      - STORAGE_ROOT_USER=myAdmin
+      - STORAGE_ROOT_PASSWORD=myAdminPassword
+      - STORAGE_ACCESS_KEY=access_key_123
+      - STORAGE_SECRET_KEY=access_secret_key_123
+    depends_on:
+      - minio
+    links:
+      - minio
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.45
+    restart: always
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 4317:4317
+      - 4318:4318
+      - 14250:14250
+      - 14268:14268
+      - 14269:14269
+      - 9411:9411

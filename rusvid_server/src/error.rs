@@ -6,18 +6,20 @@ use axum::Json;
 use derive_more::Display;
 use serde_json::json;
 use thiserror::Error;
+use tracing::{debug, info};
 
 use crate::render_task::Message;
 
 #[derive(Debug, Error, Display)]
 pub enum ApiError {
-    FileNotFound,
+    ResourceNotFound(String),
     HeaderParseError(#[from] axum::http::header::InvalidHeaderValue),
     IoError(#[from] std::io::Error),
     LockError,
     MultipartError(#[from] axum::extract::multipart::MultipartError),
     NotFound,
     ObjectStorageError(#[from] s3::error::S3Error),
+    UploadError(String),
     RedisError(#[from] redis::RedisError),
     R2D2Error(#[from] r2d2::Error),
     SendError(#[from] tokio::sync::mpsc::error::SendError<Message>),
@@ -30,13 +32,14 @@ pub enum ApiError {
 impl ApiError {
     fn to_status_code(&self) -> StatusCode {
         match self {
-            ApiError::FileNotFound => StatusCode::UNPROCESSABLE_ENTITY,
+            ApiError::ResourceNotFound(_) => StatusCode::NOT_FOUND,
             ApiError::HeaderParseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::IoError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::LockError => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::MultipartError(err) => err.status(),
             ApiError::NotFound => StatusCode::NOT_FOUND,
             ApiError::ObjectStorageError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::UploadError(_) => StatusCode::BAD_REQUEST,
             ApiError::RedisError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::R2D2Error(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::SendError(_) => StatusCode::INTERNAL_SERVER_ERROR,
@@ -52,12 +55,12 @@ impl ApiError {
             ApiError::UnknownError => "An internal server error occurred.".to_string(),
             ApiError::LockError => "An internal server error occurred. (LockError)".to_string(),
             ApiError::NotFound => "Oops! We can't find what you are searching fore!".to_string(),
-            ApiError::FileNotFound => {
-                "No multipart upload with name 'file' has been found.".to_string()
+            ApiError::ResourceNotFound(id) => {
+                format!("No resource with id '{}' has been found.", id)
             }
             ApiError::SendError(_) => "An internal server error occurred. (SendError)".to_string(),
             ApiError::YamlDeserializeError(err) => {
-                println!("{err:?}");
+                info!("ApiError::YamlDeserializeError: {:?}", err);
                 "Error while parsing YAML file.".to_string()
             }
             ApiError::MultipartError(err) => err.body_text(),
@@ -65,23 +68,24 @@ impl ApiError {
                 "Video is still being processed. You have to wait a little bit longer".to_string()
             }
             ApiError::IoError(err) => {
-                println!("{err:?}");
+                info!("ApiError::IoError: {:?}", err);
                 "An internal server error occurred. (IoError)".to_string()
             }
             ApiError::ObjectStorageError(err) => {
-                println!("{err:?}");
+                info!("ApiError::ObjectStorageError: {:?}", err);
                 "An internal server error occurred. (ObjectStorageError)".to_string()
             }
+            ApiError::UploadError(field) => format!("File must have the name {:?}", field),
             ApiError::R2D2Error(err) => {
-                println!("{err:?}");
+                info!("ApiError::R2D2Error: {:?}", err);
                 "An internal server error occurred. (RedisR2D2Error)".to_string()
             }
             ApiError::RedisError(err) => {
-                println!("{err:?}");
+                info!("ApiError::RedisError: {:?}", err);
                 "An internal server error occurred. (RedisError)".to_string()
             }
             ApiError::HeaderParseError(err) => {
-                println!("{err:?}");
+                info!("ApiError::HeaderParseError: {:?}", err);
                 "An internal server error occurred. (HeaderParseError)".to_string()
             }
             ApiError::VideoEncounteredError => "Composition encountered an error".to_string(),
@@ -98,6 +102,8 @@ impl IntoResponse for ApiError {
             "message": message,
             "status": status.as_str()
         });
+
+        debug!("ApiError: (status: {:?}, message: {:?})", status, message);
 
         (status, Json(body)).into_response()
     }
