@@ -17,8 +17,7 @@ approx = "0.5.1"
 concat-idents = "1.1.4"
 # TODO Maybe replace flo_curve with 'kurbo'
 flo_curves = "0.6.1"
-# TODO change back to version when 'geo' published a new release, 'geo' issue: https://github.com/georust/geo/issues/1010
-geo = { git = "https://github.com/georust/geo.git" }
+geo = "0.25.0"
 glam = { version = "0.22.0", features = ["approx"] }
 image = { version = "0.24", features = ["bmp", "jpeg"] }
 paste = "1.0.12"
