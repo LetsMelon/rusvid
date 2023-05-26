@@ -13,6 +13,9 @@ RUN apt install -y curl gcc pkg-config clang openssl libssl-dev \
 
 ENV PATH="$PATH:/root/.cargo/bin"
 
+# TODO move to line 11
+RUN apt install -y protobuf-compiler
+
 WORKDIR /rusvid
 
 COPY . .
