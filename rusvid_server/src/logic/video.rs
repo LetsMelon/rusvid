@@ -106,7 +106,7 @@ async fn download_video_function(
     let mut async_output_file = tokio::fs::File::create(&local_file_path).await?;
 
     bucket
-        .get_object_stream(format_s3_file_path(&id), &mut async_output_file)
+        .get_object_to_writer(format_s3_file_path(&id), &mut async_output_file)
         .await?;
 
     async_output_file.flush().await?;
