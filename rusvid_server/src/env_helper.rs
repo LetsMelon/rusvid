@@ -16,7 +16,7 @@ fn get_env_var<T: FromStr + Clone + Debug>(key: &str, default: T) -> T {
 }
 
 /// Helper macro to generate env helper functions.
-/// ```no_run
+/// ```not_rust
 /// generate_helper!(api_port, api_port, 8080, u16);
 ///
 /// // Expands to
