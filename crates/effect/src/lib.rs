@@ -1,5 +1,5 @@
 #![feature(int_roundings)]
-#![cfg_attr(coverage_nightly, feature(no_coverage))]
+// #![cfg_attr(coverage_nightly, feature(no_coverage))]
 
 use error::EffectError;
 use rusvid_core::plane::Plane;

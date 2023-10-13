@@ -6,7 +6,7 @@ use std::ops::{Index, IndexMut};
 pub struct Pixel([u8; 4]);
 
 impl std::fmt::Debug for Pixel {
-    #[cfg_attr(coverage_nightly, no_coverage)]
+    // #[cfg_attr(coverage_nightly, no_coverage)]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Pixel")
             .field("r", &self.0[0])
@@ -18,7 +18,7 @@ impl std::fmt::Debug for Pixel {
 }
 
 impl std::fmt::Display for Pixel {
-    #[cfg_attr(coverage_nightly, no_coverage)]
+    // #[cfg_attr(coverage_nightly, no_coverage)]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Pixel")
             .field("r", &self.0[0])

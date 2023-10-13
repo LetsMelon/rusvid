@@ -61,7 +61,7 @@ impl AsRef<[f64; 2]> for Point {
 impl AbsDiffEq for Point {
     type Epsilon = <f64 as AbsDiffEq>::Epsilon;
 
-    #[cfg_attr(coverage_nightly, no_coverage)]
+    // #[cfg_attr(coverage_nightly, no_coverage)]
     fn default_epsilon() -> Self::Epsilon {
         f64::default_epsilon()
     }
@@ -72,7 +72,7 @@ impl AbsDiffEq for Point {
 }
 
 impl RelativeEq for Point {
-    #[cfg_attr(coverage_nightly, no_coverage)]
+    // #[cfg_attr(coverage_nightly, no_coverage)]
     fn default_max_relative() -> Self::Epsilon {
         f64::default_max_relative()
     }
@@ -89,7 +89,7 @@ impl RelativeEq for Point {
 }
 
 impl UlpsEq for Point {
-    #[cfg_attr(coverage_nightly, no_coverage)]
+    // #[cfg_attr(coverage_nightly, no_coverage)]
     fn default_max_ulps() -> u32 {
         f64::default_max_ulps()
     }

@@ -28,7 +28,7 @@ impl FrameImageFormat {
 }
 
 impl Default for FrameImageFormat {
-    #[cfg_attr(coverage_nightly, no_coverage)]
+    // #[cfg_attr(coverage_nightly, no_coverage)]
     fn default() -> Self {
         FrameImageFormat::Png
     }

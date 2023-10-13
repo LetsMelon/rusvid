@@ -1,7 +1,7 @@
 #![feature(variant_count)]
 // TODO remove feature
 #![feature(is_some_and)]
-#![cfg_attr(coverage_nightly, feature(no_coverage))]
+// #![cfg_attr(coverage_nightly, feature(no_coverage))]
 
 #[macro_use]
 extern crate static_assertions;

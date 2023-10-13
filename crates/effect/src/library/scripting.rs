@@ -17,7 +17,7 @@ pub struct ScriptingEffect {
 }
 
 impl std::fmt::Debug for ScriptingEffect {
-    #[cfg_attr(coverage_nightly, no_coverage)]
+    // #[cfg_attr(coverage_nightly, no_coverage)]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ScriptingEffect")
             .field("id", &self.id)
