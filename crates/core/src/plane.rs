@@ -9,6 +9,14 @@ use thiserror::Error;
 use crate::frame_image_format::FrameImageFormat;
 use crate::pixel::Pixel;
 
+#[derive(Debug, Default)]
+pub enum ResizeMode {
+    #[default]
+    /// Uses the nearest neighbor
+    NearestNeighbor,
+    BinaryInterpolation,
+}
+
 #[derive(Error, Debug)]
 pub enum PlaneError {
     #[error("{0} must be greater than 0")]
@@ -457,6 +465,82 @@ impl Plane {
     pub fn save_as_jpg<P: AsRef<Path>>(self, path: P) -> PlaneResult<()> {
         let as_image = self.as_rgba_image()?;
         as_image.save_with_format(path, ImageFormat::Jpeg)?;
+
+        Ok(())
+    }
+
+    /// Copy a [`Plane`] into `self`. Resizes `source` with the specified mode.
+    pub fn copy_into(
+        &mut self,
+        source: &Plane,
+        position_x: SIZE,
+        position_y: SIZE,
+        size_x: SIZE,
+        size_y: SIZE,
+        mode: ResizeMode,
+    ) -> PlaneResult<()> {
+        let source_width = source.width() as f64 - 1.0;
+        let source_height = source.height() as f64 - 1.0;
+
+        let copy_width = size_x as f64 - 1.0;
+        let copy_height = size_y as f64 - 1.0;
+
+        for destination_delta_x in 0..size_x {
+            for destination_delta_y in 0..size_y {
+                let destination_x = position_x + destination_delta_x;
+                let destination_y = position_y + destination_delta_y;
+
+                let source_x = destination_delta_x as f64 / copy_width * source_width;
+                let source_y = destination_delta_y as f64 / copy_height * source_height;
+
+                let source_pixel = match mode {
+                    ResizeMode::NearestNeighbor => {
+                        let source_x = source_x.round() as u32;
+                        let source_y = source_y.round() as u32;
+
+                        source
+                            .pixel(source_x, source_y)
+                            .cloned()
+                            .ok_or(PlaneError::OutOfBound2d(source_x, source_y))?
+                    }
+                    ResizeMode::BinaryInterpolation => {
+                        // TODO check if this logic is right
+                        let source_x_floor = source_x.floor() as u32;
+                        let source_y_floor = source_y.floor() as u32;
+
+                        let source_x_ceil = source_x.ceil() as u32;
+                        let source_y_ceil = source_y.ceil() as u32;
+
+                        let source_pixel_floor = source
+                            .pixel(source_x_floor, source_y_floor)
+                            .ok_or(PlaneError::OutOfBound2d(source_x_floor, source_y_floor))?;
+
+                        let source_pixel_ceil = source
+                            .pixel(source_x_ceil, source_y_ceil)
+                            .ok_or(PlaneError::OutOfBound2d(source_x_ceil, source_y_ceil))?;
+
+                        let t_x = source_x - source_x_floor as f64;
+
+                        let r = ((1.0 - t_x) * source_pixel_floor.get_r() as f64
+                            + t_x * source_pixel_ceil.get_r() as f64)
+                            .round() as u8;
+                        let g = ((1.0 - t_x) * source_pixel_floor.get_g() as f64
+                            + t_x * source_pixel_ceil.get_g() as f64)
+                            .round() as u8;
+                        let b = ((1.0 - t_x) * source_pixel_floor.get_b() as f64
+                            + t_x * source_pixel_ceil.get_b() as f64)
+                            .round() as u8;
+                        let a = ((1.0 - t_x) * source_pixel_floor.get_a() as f64
+                            + t_x * source_pixel_ceil.get_a() as f64)
+                            .round() as u8;
+
+                        Pixel::new(r, g, b, a)
+                    }
+                };
+
+                self.put_pixel(destination_x, destination_y, source_pixel)?;
+            }
+        }
 
         Ok(())
     }
