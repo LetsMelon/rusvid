@@ -9,7 +9,7 @@ extern crate static_assertions;
 pub mod frame_image_format;
 pub mod holder;
 pub mod pixel;
-pub mod plane;
+pub mod plane_kind;
 pub mod point;
 #[cfg(feature = "server")]
 pub mod server;
@@ -19,6 +19,6 @@ pub mod prelude {
     // TODO
     pub use crate::holder;
     pub use crate::pixel::Pixel;
-    pub use crate::plane::*;
+    pub use crate::plane_kind::plane::*;
     pub use crate::point::*;
 }

@@ -4,10 +4,11 @@ use std::path::{Path, PathBuf};
 
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
 use resvg::tiny_skia::Pixmap;
-use thiserror::Error;
 
 use crate::frame_image_format::FrameImageFormat;
 use crate::pixel::Pixel;
+use crate::plane_kind::error::PlaneError;
+use crate::plane_kind::{PlaneResult, SIZE};
 
 #[derive(Debug, Default)]
 pub enum ResizeMode {
@@ -16,68 +17,6 @@ pub enum ResizeMode {
     NearestNeighbor,
     BinaryInterpolation,
 }
-
-#[derive(Error, Debug)]
-pub enum PlaneError {
-    #[error("{0} must be greater than 0")]
-    ValueGreaterZero(&'static str),
-
-    #[error("width * height must equal data.len()")]
-    ArrayCapacityError,
-
-    #[error("width * height must smaller than {}", SIZE::MAX)]
-    CapacityError,
-
-    #[error("Error in crate 'image': {0:?}")]
-    ImageError(#[from] image::ImageError),
-
-    #[error("Error in crate 'tiny-skia'")]
-    TinySkiaError,
-
-    #[error("Can't get item at coordinates x: {0}, y: {1}")]
-    OutOfBound2d(u32, u32),
-
-    #[error("Error from 'std::io': '{0:?}'")]
-    IoError(#[from] std::io::Error),
-
-    #[error("Encoding error: {0:?}")]
-    EncodingError(String),
-}
-
-impl PlaneError {
-    pub fn same_variant(&self, other: &PlaneError) -> bool {
-        match (self, other) {
-            (PlaneError::ValueGreaterZero(_), PlaneError::ValueGreaterZero(_))
-            | (PlaneError::ArrayCapacityError, PlaneError::ArrayCapacityError)
-            | (PlaneError::CapacityError, PlaneError::CapacityError)
-            | (PlaneError::ImageError(_), PlaneError::ImageError(_))
-            | (PlaneError::TinySkiaError, PlaneError::TinySkiaError)
-            | (PlaneError::OutOfBound2d(_, _), PlaneError::OutOfBound2d(_, _))
-            | (PlaneError::IoError(_), PlaneError::IoError(_))
-            | (PlaneError::EncodingError(_), PlaneError::EncodingError(_)) => true,
-            _ => false,
-        }
-    }
-}
-
-impl PartialEq for PlaneError {
-    fn eq(&self, other: &Self) -> bool {
-        self.same_variant(other)
-    }
-}
-
-impl Eq for PlaneError {}
-
-impl From<png::EncodingError> for PlaneError {
-    fn from(value: png::EncodingError) -> Self {
-        PlaneError::EncodingError(format!("{:?}", value))
-    }
-}
-
-pub type PlaneResult<T> = Result<T, PlaneError>;
-
-/// Used as resolution and coordinates
-pub type SIZE = u32;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
@@ -616,11 +555,11 @@ impl Iterator for CoordinateIterator {
 #[cfg(test)]
 mod tests {
     use crate::pixel::Pixel;
-    use crate::plane::{Plane, PlaneError};
+    use crate::plane_kind::plane::{Plane, PlaneError};
 
     #[test]
     fn position_to_index_test() {
-        use crate::plane::position_to_index;
+        use crate::plane_kind::plane::position_to_index;
 
         let width = 5;
         // could be used like this:
@@ -641,7 +580,7 @@ mod tests {
     }
 
     mod new {
-        use crate::plane::{Plane, PlaneError};
+        use crate::plane_kind::plane::{Plane, PlaneError};
 
         #[test]
         fn just_works() {
@@ -691,7 +630,7 @@ mod tests {
 
     mod get_pixel {
         use crate::pixel::Pixel;
-        use crate::plane::Plane;
+        use crate::plane_kind::plane::Plane;
 
         #[test]
         fn not_mutable() {
@@ -756,7 +695,7 @@ mod tests {
 
     mod put_pixel {
         use crate::pixel::Pixel;
-        use crate::plane::{Plane, PlaneError};
+        use crate::plane_kind::plane::{Plane, PlaneError};
 
         #[test]
         fn safe() {
@@ -782,7 +721,7 @@ mod tests {
 
     mod iterator {
         use crate::pixel::Pixel;
-        use crate::plane::Plane;
+        use crate::plane_kind::plane::Plane;
 
         #[test]
         fn just_works() {
@@ -810,7 +749,7 @@ mod tests {
 
     mod coordinate_iterator {
         use crate::pixel::Pixel;
-        use crate::plane::Plane;
+        use crate::plane_kind::plane::Plane;
 
         #[test]
         fn just_works() {
@@ -846,7 +785,7 @@ mod tests {
         use image::{Rgba, RgbaImage};
 
         use crate::pixel::Pixel;
-        use crate::plane::Plane;
+        use crate::plane_kind::plane::Plane;
 
         #[test]
         fn from() -> Result<()> {
@@ -920,7 +859,7 @@ mod tests {
 
     mod reader_writer {
         use crate::pixel::Pixel;
-        use crate::plane::Plane;
+        use crate::plane_kind::plane::Plane;
 
         #[test]
         fn png() {
