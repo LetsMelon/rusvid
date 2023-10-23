@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use image::{DynamicImage, ImageFormat, RgbImage, RgbaImage};
 use resvg::tiny_skia::Pixmap;
 
+use super::PlaneLogic;
 use crate::frame_image_format::FrameImageFormat;
 use crate::pixel::Pixel;
 use crate::plane_kind::error::PlaneError;
@@ -37,96 +38,6 @@ fn position_to_index(x: SIZE, y: SIZE, multi: SIZE) -> usize {
 
 /// Coordinate system used: <https://learn.adafruit.com/adafruit-gfx-graphics-library/coordinate-system-and-units>
 impl Plane {
-    /// Create a new [`Plane`] with the given resolution. Fills the item with only ZEROS.
-    ///
-    /// Warning: this method will allocate `width * height * 4` bytes in memory!
-    pub fn new(width: SIZE, height: SIZE) -> PlaneResult<Self> {
-        Self::new_with_fill(width, height, Pixel::ZERO)
-    }
-
-    /// Create a new [`Plane`] with the given resolution. Fills the item with the given `color`.
-    pub fn new_with_fill(width: SIZE, height: SIZE, color: Pixel) -> PlaneResult<Self> {
-        Self::from_data(
-            width,
-            height,
-            // wrapping_mul because I don't want to have a panic if the result would exceed u32 and `from_data` has checks to catch the overflow
-            vec![color; (width.wrapping_mul(height)) as usize],
-        )
-    }
-
-    /// Create a new [`Plane`] with the given resolution and fill it with the pixel information from `data`.
-    pub fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> PlaneResult<Self> {
-        const_assert_eq!(SIZE::MIN, 0);
-        if width == 0 {
-            return Err(PlaneError::ValueGreaterZero("Width"));
-        }
-        if height == 0 {
-            return Err(PlaneError::ValueGreaterZero("Height"));
-        }
-
-        let (_, overflow) = width.overflowing_mul(height);
-        if overflow {
-            return Err(PlaneError::CapacityError);
-        }
-
-        if width * height != data.len() as SIZE {
-            return Err(PlaneError::ArrayCapacityError);
-        }
-
-        Ok(Self::from_data_unchecked(width, height, data))
-    }
-
-    /// Create a new [`Plane`] with the given resolution and fill it with the pixel information from `data`. For more infos about the items inside `data` see [`Pixel`]
-    ///
-    /// Warning: this function doesn't check if `width * height == data.len()`, `width != 0` or `height != 0`.
-    /// It will accept any values!
-    ///
-    /// For a safe use, it's advised to use the [`from_data`](Plane::from_data) method to create a new [`Plane`] from data.
-    pub fn from_data_unchecked(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Self {
-        Plane {
-            width,
-            height,
-            data,
-        }
-    }
-
-    /// Returns a reference to the data. For more infos about the items see [`Pixel`]
-    pub fn as_data(&self) -> &Vec<Pixel> {
-        &self.data
-    }
-
-    /// Returns a mutable reference to the data. For more infos about the items see [`Pixel`]
-    pub fn as_data_mut(&mut self) -> &mut Vec<Pixel> {
-        &mut self.data
-    }
-
-    /// Returns the data but flatten. For more infos about the items see [`Pixel::to_raw`](Pixel::to_raw)
-    ///
-    /// ```rust
-    /// use rusvid_core::pixel::Pixel;
-    ///
-    /// let p = Pixel::new(255, 0, 0, 100);
-    ///
-    /// assert_eq!(p.to_raw(), [255, 0, 0, 100]);
-    /// ```
-    pub fn as_data_flatten(&self) -> Vec<u8> {
-        self.data.iter().flat_map(|p| p.to_raw()).collect()
-    }
-
-    /// Returns the data but flatten and packed. For more infos about the items see [`Pixel::to_raw_packed`](Pixel::to_raw_packed)
-    ///
-    /// ```rust
-    /// use rusvid_core::pixel::Pixel;
-    ///
-    /// let p = Pixel::new(0xFF, 0x00, 0xAA, 0x77);
-    ///
-    /// assert_eq!(p.to_raw_packed(), 0x77FF00AA);
-    /// //                            ^-- format: 0xAARRGGBB
-    /// ```
-    pub fn as_data_packed(&self) -> Vec<u32> {
-        self.data.iter().map(|p| p.to_raw_packed()).collect()
-    }
-
     /// Tries to create a [`Plane`] from [`image::RgbaImage`] or returns a [`PlaneError`].
     pub fn from_rgba_image(image: RgbaImage) -> PlaneResult<Self> {
         let width = image.width() as SIZE;
@@ -219,75 +130,6 @@ impl Plane {
         pixmap.data_mut()[..buf.len()].copy_from_slice(&buf[..]);
 
         Ok(pixmap)
-    }
-
-    /// Returns the plane's height as [`SIZE`]
-    pub fn width(&self) -> SIZE {
-        self.width
-    }
-
-    /// Returns the plane's width as [`SIZE`]
-    pub fn height(&self) -> SIZE {
-        self.height
-    }
-
-    /// Fill all pixels from the [`Plane`] with the given `color`. For more infos see [`Pixel`]
-    pub fn fill(&mut self, color: Pixel) {
-        self.data.fill(color)
-    }
-
-    /// Get the [`Pixel`] from the given coordinates. Returns `None` if the coordinates are invalid.
-    pub fn pixel(&self, x: SIZE, y: SIZE) -> Option<&Pixel> {
-        const_assert_eq!(SIZE::MIN, 0);
-
-        if x > self.width {
-            return None;
-        }
-        if y > self.height {
-            return None;
-        }
-
-        Some(self.pixel_unchecked(x, y))
-    }
-
-    /// Get the [`Pixel`] from the given coordinates. Panics if the coordinates are invalid.
-    /// For a more safer method see [`pixel`](Plane::pixel).
-    pub fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
-        unsafe { self.data.get_unchecked(position_to_index(x, y, self.width)) }
-    }
-
-    /// Get a mutable reference of the [`Pixel`] from the given coordinates. Returns `None` if the coordinates are invalid.
-    pub fn pixel_mut(&mut self, x: SIZE, y: SIZE) -> Option<&mut Pixel> {
-        if x > self.width {
-            return None;
-        }
-        if y > self.height {
-            return None;
-        }
-
-        Some(self.pixel_mut_unchecked(x, y))
-    }
-
-    /// Get a mutable reference of the [`Pixel`] from the given coordinates. Panics if the coordinates are invalid.
-    /// For a more safer method see [`pixel_mut`](Plane::pixel_mut).
-    pub fn pixel_mut_unchecked(&mut self, x: SIZE, y: SIZE) -> &mut Pixel {
-        unsafe {
-            self.data
-                .get_unchecked_mut(position_to_index(x, y, self.width))
-        }
-    }
-
-    /// Update the [`Pixel`] with the given coordinates with the `value`. Returns an [`PlaneError`] if the coordinates are invalid.
-    pub fn put_pixel(&mut self, x: SIZE, y: SIZE, value: Pixel) -> PlaneResult<()> {
-        *self.pixel_mut(x, y).ok_or(PlaneError::OutOfBound2d(x, y))? = value;
-
-        Ok(())
-    }
-
-    /// Update the [`Pixel`] with the given coordinates with the `value`. Panics if the coordinates are invalid.
-    /// For a more safer method see [`put_pixel`](Plane::put_pixel).
-    pub fn put_pixel_unchecked(&mut self, x: SIZE, y: SIZE, value: Pixel) {
-        *self.pixel_mut_unchecked(x, y) = value;
     }
 
     pub fn into_coordinate_iter(self) -> CoordinateIterator {
@@ -497,6 +339,47 @@ impl IntoIterator for Plane {
     }
 }
 
+impl PlaneLogic for Plane {
+    fn from_data_unchecked(width: SIZE, height: SIZE, data: Vec<Pixel>) -> Self {
+        Plane {
+            width,
+            height,
+            data,
+        }
+    }
+
+    fn as_data(&self) -> &Vec<Pixel> {
+        &self.data
+    }
+
+    fn as_data_mut(&mut self) -> &mut Vec<Pixel> {
+        &mut self.data
+    }
+
+    fn width(&self) -> SIZE {
+        self.width
+    }
+
+    fn height(&self) -> SIZE {
+        self.height
+    }
+
+    fn fill(&mut self, color: Pixel) {
+        self.data.fill(color)
+    }
+
+    fn pixel_unchecked(&self, x: SIZE, y: SIZE) -> &Pixel {
+        unsafe { self.data.get_unchecked(position_to_index(x, y, self.width)) }
+    }
+
+    fn pixel_mut_unchecked(&mut self, x: SIZE, y: SIZE) -> &mut Pixel {
+        unsafe {
+            self.data
+                .get_unchecked_mut(position_to_index(x, y, self.width))
+        }
+    }
+}
+
 pub struct PlaneIntoIterator {
     plane: Plane,
     index: usize,
@@ -556,6 +439,7 @@ impl Iterator for CoordinateIterator {
 mod tests {
     use crate::pixel::Pixel;
     use crate::plane_kind::plane::{Plane, PlaneError};
+    use crate::plane_kind::PlaneLogic;
 
     #[test]
     fn position_to_index_test() {
@@ -581,6 +465,7 @@ mod tests {
 
     mod new {
         use crate::plane_kind::plane::{Plane, PlaneError};
+        use crate::plane_kind::PlaneLogic;
 
         #[test]
         fn just_works() {
@@ -631,6 +516,7 @@ mod tests {
     mod get_pixel {
         use crate::pixel::Pixel;
         use crate::plane_kind::plane::Plane;
+        use crate::plane_kind::PlaneLogic;
 
         #[test]
         fn not_mutable() {
@@ -696,6 +582,7 @@ mod tests {
     mod put_pixel {
         use crate::pixel::Pixel;
         use crate::plane_kind::plane::{Plane, PlaneError};
+        use crate::plane_kind::PlaneLogic;
 
         #[test]
         fn safe() {
@@ -722,6 +609,7 @@ mod tests {
     mod iterator {
         use crate::pixel::Pixel;
         use crate::plane_kind::plane::Plane;
+        use crate::plane_kind::PlaneLogic;
 
         #[test]
         fn just_works() {
@@ -750,6 +638,7 @@ mod tests {
     mod coordinate_iterator {
         use crate::pixel::Pixel;
         use crate::plane_kind::plane::Plane;
+        use crate::plane_kind::PlaneLogic;
 
         #[test]
         fn just_works() {
@@ -786,6 +675,7 @@ mod tests {
 
         use crate::pixel::Pixel;
         use crate::plane_kind::plane::Plane;
+        use crate::plane_kind::PlaneLogic;
 
         #[test]
         fn from() -> Result<()> {
@@ -860,6 +750,7 @@ mod tests {
     mod reader_writer {
         use crate::pixel::Pixel;
         use crate::plane_kind::plane::Plane;
+        use crate::plane_kind::PlaneLogic;
 
         #[test]
         fn png() {
