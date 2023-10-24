@@ -11,22 +11,16 @@ pub type PlaneResult<T> = Result<T, PlaneError>;
 /// Used as resolution and coordinates
 pub type SIZE = u32;
 
-pub trait PlaneLogic {
+pub trait PlaneLogic: Sized {
     /// Create a new [`Self`] with the given resolution. Fills the item with only ZEROS.
     ///
     /// Warning: this method will allocate `width * height * 4` bytes in memory!
-    fn new(width: SIZE, height: SIZE) -> PlaneResult<Self>
-    where
-        Self: Sized,
-    {
+    fn new(width: SIZE, height: SIZE) -> PlaneResult<Self> {
         Self::new_with_fill(width, height, Pixel::ZERO)
     }
 
     /// Create a new [`Self`] with the given resolution. Fills the item with the given `color`.
-    fn new_with_fill(width: SIZE, height: SIZE, color: Pixel) -> PlaneResult<Self>
-    where
-        Self: Sized,
-    {
+    fn new_with_fill(width: SIZE, height: SIZE, color: Pixel) -> PlaneResult<Self> {
         Self::from_data(
             width,
             height,
@@ -36,10 +30,7 @@ pub trait PlaneLogic {
     }
 
     /// Create a new [`Self`] with the given resolution and fill it with the pixel information from `data`.
-    fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> PlaneResult<Self>
-    where
-        Self: Sized,
-    {
+    fn from_data(width: SIZE, height: SIZE, data: Vec<Pixel>) -> PlaneResult<Self> {
         const_assert_eq!(SIZE::MIN, 0);
         if width == 0 {
             return Err(PlaneError::ValueGreaterZero("Width"));
