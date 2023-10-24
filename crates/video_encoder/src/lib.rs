@@ -2,7 +2,8 @@ use std::path::PathBuf;
 
 use error::VideoEncoderError;
 use ffmpeg_sys_next::{AVPixelFormat, SWS_BICUBIC};
-use rusvid_core::plane::Plane;
+use rusvid_core::plane_kind::plane::Plane;
+use rusvid_core::plane_kind::PlaneLogic;
 
 pub mod error;
 pub mod status;

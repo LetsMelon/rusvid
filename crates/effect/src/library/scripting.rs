@@ -1,7 +1,8 @@
 use itertools::*;
 use rhai::{Dynamic, Engine, Func, OptimizationLevel, INT};
 use rusvid_core::pixel::Pixel;
-use rusvid_core::plane::Plane;
+use rusvid_core::plane_kind::plane::Plane;
+use rusvid_core::plane_kind::PlaneLogic;
 
 use crate::error::{EffectError, RhaiError};
 use crate::{EffectLogic, Element, ID};
@@ -104,7 +105,9 @@ impl EffectLogic for ScriptingEffect {
 #[cfg(test)]
 mod tests {
     use rusvid_core::pixel::Pixel;
-    use rusvid_core::plane::Plane;
+    use rusvid_core::plane_kind::error::PlaneError;
+    use rusvid_core::plane_kind::plane::Plane;
+    use rusvid_core::plane_kind::{PlaneLogic, SIZE};
 
     use super::ScriptingEffect;
     use crate::EffectLogic;
@@ -134,7 +137,9 @@ fn my_function(x, y) {
 
     mod get_pixel {
         use rusvid_core::pixel::Pixel;
-        use rusvid_core::plane::Plane;
+        use rusvid_core::plane_kind::error::PlaneError;
+        use rusvid_core::plane_kind::plane::Plane;
+        use rusvid_core::plane_kind::{PlaneLogic, SIZE};
 
         use crate::library::ScriptingEffect;
         use crate::EffectLogic;

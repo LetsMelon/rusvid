@@ -1,4 +1,5 @@
-use crate::plane::Plane;
+use crate::plane_kind::plane::Plane;
+use crate::plane_kind::PlaneLogic;
 use crate::point::Point;
 
 #[derive(Debug, PartialEq)]

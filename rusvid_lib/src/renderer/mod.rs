@@ -3,7 +3,7 @@ use std::path::Path;
 use std::process::Command;
 
 use anyhow::{bail, Result};
-use rusvid_core::plane::Plane;
+use rusvid_core::plane_kind::plane::Plane;
 
 use crate::composition::Composition;
 

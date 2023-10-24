@@ -7,7 +7,9 @@ use crate::holder::likes::types_like::TypesLike;
 use crate::holder::transform::{Transform, TransformError, TransformLogic};
 use crate::holder::utils;
 use crate::holder::utils::TranslateIntoResvgGeneric;
-use crate::plane::{Plane, PlaneError, SIZE};
+use crate::plane_kind::error::PlaneError;
+use crate::plane_kind::plane::Plane;
+use crate::plane_kind::{PlaneLogic, SIZE};
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize))]

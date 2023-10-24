@@ -706,46 +706,48 @@ mod tests {
         }
     }
     /*
-    mod save_as {
-        use itertools::*;
+        mod save_as {
+            use itertools::*;
 
-        use crate::plane::Plane;
+            use crate::plane_kind::error::PlaneError;
+    use crate::plane_kind::plane::Plane;
+    use crate::plane_kind::{PlaneLogic, SIZE};
 
-        #[test]
-        fn save_as_png() {
-            let size = 2_u32.pow(8);
+            #[test]
+            fn save_as_png() {
+                let size = 2_u32.pow(8);
 
-            let plane =
-                Plane::from_data(size, size, vec![[255, 100, 0, 255]; (size * size) as usize])
-                    .unwrap();
+                let plane =
+                    Plane::from_data(size, size, vec![[255, 100, 0, 255]; (size * size) as usize])
+                        .unwrap();
 
-            let saved = plane.clone().save_as_png("test_out.png");
-            assert!(saved.is_ok());
+                let saved = plane.clone().save_as_png("test_out.png");
+                assert!(saved.is_ok());
 
-            let read_plane = Plane::from_dynamic_image(
-                image::io::Reader::open("test_out.png")
-                    .unwrap()
-                    .decode()
-                    .unwrap(),
-            )
-            .unwrap();
+                let read_plane = Plane::from_dynamic_image(
+                    image::io::Reader::open("test_out.png")
+                        .unwrap()
+                        .decode()
+                        .unwrap(),
+                )
+                .unwrap();
 
-            let same_pixels = (0..size)
-                .cartesian_product(0..size)
-                .map(|(x, y)| {
-                    let p1 = plane.pixel_unchecked(x, y);
-                    let p2 = read_plane.pixel_unchecked(x, y);
+                let same_pixels = (0..size)
+                    .cartesian_product(0..size)
+                    .map(|(x, y)| {
+                        let p1 = plane.pixel_unchecked(x, y);
+                        let p2 = read_plane.pixel_unchecked(x, y);
 
-                    p1[0] == p2[0] && p1[1] == p2[1] && p1[2] == p2[2] && p1[3] == p2[3]
-                })
-                .fold(true, |mut acc, value| {
-                    acc &= value;
-                    acc
-                });
-            assert!(same_pixels)
+                        p1[0] == p2[0] && p1[1] == p2[1] && p1[2] == p2[2] && p1[3] == p2[3]
+                    })
+                    .fold(true, |mut acc, value| {
+                        acc &= value;
+                        acc
+                    });
+                assert!(same_pixels)
+            }
         }
-    }
-     */
+         */
 
     mod reader_writer {
         use crate::pixel::Pixel;

@@ -2,6 +2,7 @@ use rusvid_core::holder::likes::{ColorLike, TypesLike};
 use rusvid_core::holder::svg_item::SvgItem;
 use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::pixel::Pixel;
+use rusvid_core::plane_kind::PlaneLogic;
 use rusvid_core::point::Point;
 use rusvid_lib::composition::Composition;
 use rusvid_lib::figures::circle::circle;

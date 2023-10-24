@@ -1,7 +1,8 @@
 use anyhow::Result;
 use rayon::prelude::*;
 use rusvid_core::pixel::Pixel;
-use rusvid_core::plane::Plane;
+use rusvid_core::plane_kind::plane::Plane;
+use rusvid_core::plane_kind::PlaneLogic;
 
 use crate::effect::EffectLogic;
 
@@ -88,6 +89,8 @@ mod tests {
 
     use super::*;
     mod apply_effects {
+        use rusvid_core::plane_kind::PlaneLogic;
+
         use super::{apply_effects, generate_plane};
         use crate::effect::library::{BoxBlur, GrayscaleEffect};
 

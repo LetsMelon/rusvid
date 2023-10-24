@@ -2,7 +2,7 @@
 // #![cfg_attr(coverage_nightly, feature(no_coverage))]
 
 use error::EffectError;
-use rusvid_core::plane::Plane;
+use rusvid_core::plane_kind::plane::Plane;
 
 pub mod error;
 mod functions;

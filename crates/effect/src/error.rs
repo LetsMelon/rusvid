@@ -1,7 +1,7 @@
 use core::fmt::Debug;
 
 use rhai::{LexError, ParseError};
-use rusvid_core::plane::PlaneError;
+use rusvid_core::plane_kind::error::PlaneError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

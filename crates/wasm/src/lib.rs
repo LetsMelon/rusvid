@@ -10,6 +10,7 @@ use rusvid_core::holder::svg_holder::SvgHolder;
 use rusvid_core::holder::svg_item::SvgItem;
 use rusvid_core::holder::transform::{Transform, TransformLogic};
 use rusvid_core::pixel::Pixel;
+use rusvid_core::plane_kind::PlaneLogic;
 use rusvid_core::point::Point;
 use wasm_bindgen::prelude::*;
 use web_sys::console;

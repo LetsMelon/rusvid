@@ -1,7 +1,9 @@
 use rusvid_core::holder::image_holder::ImageHolder;
 use rusvid_core::holder::likes::types_like::TypesLike;
 use rusvid_core::holder::object::Object;
-use rusvid_core::plane::Plane;
+use rusvid_core::plane_kind::error::PlaneError;
+use rusvid_core::plane_kind::plane::Plane;
+use rusvid_core::plane_kind::{PlaneLogic, SIZE};
 use rusvid_core::point::Point;
 
 fn main() {

@@ -1,6 +1,7 @@
 use rayon::prelude::*;
 use rusvid_core::pixel::Pixel;
-use rusvid_core::plane::Plane;
+use rusvid_core::plane_kind::plane::Plane;
+use rusvid_core::plane_kind::PlaneLogic;
 
 use crate::error::EffectError;
 use crate::functions::color_palette::transform;
