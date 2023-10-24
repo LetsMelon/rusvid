@@ -1,6 +1,8 @@
 use crate::pixel::Pixel;
 use crate::plane_kind::error::PlaneError;
 
+#[cfg(target_arch = "wasm32")]
+pub mod canvas;
 pub mod error;
 pub mod plane;
 
