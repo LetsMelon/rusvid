@@ -490,59 +490,83 @@ impl Plane {
                 let destination_x = position_x + destination_delta_x;
                 let destination_y = position_y + destination_delta_y;
 
-                let source_x = destination_delta_x as f64 / copy_width * source_width;
-                let source_y = destination_delta_y as f64 / copy_height * source_height;
+                if self.is_inside(destination_x, destination_y) {
+                    let source_x = destination_delta_x as f64 / copy_width * source_width;
+                    let source_y = destination_delta_y as f64 / copy_height * source_height;
 
-                let source_pixel = match mode {
-                    ResizeMode::NearestNeighbor => {
-                        let source_x = source_x.round() as u32;
-                        let source_y = source_y.round() as u32;
+                    let source_pixel = match mode {
+                        ResizeMode::NearestNeighbor => {
+                            let source_x = source_x.round() as u32;
+                            let source_y = source_y.round() as u32;
 
-                        source
-                            .pixel(source_x, source_y)
-                            .cloned()
-                            .ok_or(PlaneError::OutOfBound2d(source_x, source_y))?
-                    }
-                    ResizeMode::BinaryInterpolation => {
-                        // TODO check if this logic is right
-                        let source_x_floor = source_x.floor() as u32;
-                        let source_y_floor = source_y.floor() as u32;
+                            source
+                                .pixel(source_x, source_y)
+                                .cloned()
+                                .ok_or(PlaneError::OutOfBound2d(source_x, source_y))?
+                        }
+                        ResizeMode::BinaryInterpolation => {
+                            // TODO check if this logic is right
+                            let source_x_floor = source_x.floor() as u32;
+                            let source_y_floor = source_y.floor() as u32;
 
-                        let source_x_ceil = source_x.ceil() as u32;
-                        let source_y_ceil = source_y.ceil() as u32;
+                            let source_x_ceil = source_x.ceil() as u32;
+                            let source_y_ceil = source_y.ceil() as u32;
 
-                        let source_pixel_floor = source
-                            .pixel(source_x_floor, source_y_floor)
-                            .ok_or(PlaneError::OutOfBound2d(source_x_floor, source_y_floor))?;
+                            let source_pixel_floor =
+                                source.pixel(source_x_floor, source_y_floor).ok_or(
+                                    PlaneError::OutOfBound2d(source_x_floor, source_y_floor),
+                                )?;
 
-                        let source_pixel_ceil = source
-                            .pixel(source_x_ceil, source_y_ceil)
-                            .ok_or(PlaneError::OutOfBound2d(source_x_ceil, source_y_ceil))?;
+                            let source_pixel_ceil = source
+                                .pixel(source_x_ceil, source_y_ceil)
+                                .ok_or(PlaneError::OutOfBound2d(source_x_ceil, source_y_ceil))?;
 
-                        let t_x = source_x - source_x_floor as f64;
+                            let t_x = source_x - source_x_floor as f64;
 
-                        let r = ((1.0 - t_x) * source_pixel_floor.get_r() as f64
-                            + t_x * source_pixel_ceil.get_r() as f64)
-                            .round() as u8;
-                        let g = ((1.0 - t_x) * source_pixel_floor.get_g() as f64
-                            + t_x * source_pixel_ceil.get_g() as f64)
-                            .round() as u8;
-                        let b = ((1.0 - t_x) * source_pixel_floor.get_b() as f64
-                            + t_x * source_pixel_ceil.get_b() as f64)
-                            .round() as u8;
-                        let a = ((1.0 - t_x) * source_pixel_floor.get_a() as f64
-                            + t_x * source_pixel_ceil.get_a() as f64)
-                            .round() as u8;
+                            let r = ((1.0 - t_x) * source_pixel_floor.get_r() as f64
+                                + t_x * source_pixel_ceil.get_r() as f64)
+                                .round() as u8;
+                            let g = ((1.0 - t_x) * source_pixel_floor.get_g() as f64
+                                + t_x * source_pixel_ceil.get_g() as f64)
+                                .round() as u8;
+                            let b = ((1.0 - t_x) * source_pixel_floor.get_b() as f64
+                                + t_x * source_pixel_ceil.get_b() as f64)
+                                .round() as u8;
+                            let a = ((1.0 - t_x) * source_pixel_floor.get_a() as f64
+                                + t_x * source_pixel_ceil.get_a() as f64)
+                                .round() as u8;
 
-                        Pixel::new(r, g, b, a)
-                    }
-                };
+                            Pixel::new(r, g, b, a)
+                        }
+                    };
 
-                self.put_pixel(destination_x, destination_y, source_pixel)?;
+                    self.put_pixel(destination_x, destination_y, source_pixel)?;
+                }
             }
         }
 
         Ok(())
+    }
+
+    /// Check if a given point is inside the plane or not.
+    ///
+    /// Returns only `true` if the position is inside the `Plane`.
+    #[inline]
+    pub fn is_inside(&self, position_x: SIZE, position_y: SIZE) -> bool {
+        // Let's hope that rustc removes the checks if position_* is greater than 0.0 in `Plane::is_inside_f64`
+        // I think it doest https://godbolt.org/z/Tb4MM7do7
+        self.is_inside_f64(position_x as f64, position_y as f64)
+    }
+
+    /// Check if a given point is inside the plane or not.
+    ///
+    /// Returns only `true` if the position is inside the `Plane`.
+    #[inline]
+    pub fn is_inside_f64(&self, position_x: f64, position_y: f64) -> bool {
+        position_x >= 0.0
+            && position_x < self.width() as f64
+            && position_y >= 0.0
+            && position_y < self.height() as f64
     }
 }
 
@@ -615,6 +639,8 @@ impl Iterator for CoordinateIterator {
 
 #[cfg(test)]
 mod tests {
+    use itertools::Itertools;
+
     use crate::pixel::Pixel;
     use crate::plane::{Plane, PlaneError};
 
@@ -935,5 +961,25 @@ mod tests {
 
             assert_eq!(plane, decoded_plane);
         }
+    }
+
+    #[test]
+    fn is_inside() {
+        let plane = Plane::new(10, 10).unwrap();
+
+        (0..plane.width())
+            .cartesian_product(0..plane.height())
+            .for_each(|(x, y)| assert!(plane.is_inside(x, y), "{:?}", (x, y)));
+
+        assert!(!plane.is_inside(plane.width(), plane.height()));
+
+        (0..(plane.width() * 100))
+            .cartesian_product(0..(plane.height() * 100))
+            .map(|(x, y)| (x as f64 / 100.0, y as f64 / 100.0))
+            .for_each(|(x, y)| assert!(plane.is_inside_f64(x, y), "({:.3}, {:.3})", x, y));
+
+        assert!(!plane.is_inside_f64(plane.width() as f64, plane.height() as f64));
+        assert!(!plane.is_inside_f64(-1.0, plane.height() as f64));
+        assert!(!plane.is_inside_f64(plane.width() as f64, -1.0));
     }
 }
