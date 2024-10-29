@@ -13,11 +13,9 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-console_error_panic_hook = "0.1.7"
-js-sys = "0.3.60"
-lazy_static = "1.4.0"
+console_error_panic_hook = { workspace = true }
+js-sys = { workspace = true }
+lazy_static = { workspace = true }
 rusvid_core = { path = "../core", version = "0.2.0" }
-wasm-bindgen = "0.2.63"
-web-sys = { version = "0.3.60", default-features = false, features = [
-    "console",
-] }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["console"] }

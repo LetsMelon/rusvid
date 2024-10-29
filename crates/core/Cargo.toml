@@ -13,35 +13,34 @@ repository.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-approx = "0.5.1"
-cairo-rs = { version = "0.17.0", optional = true }
-concat-idents = "1.1.4"
-# TODO Maybe replace flo_curve with 'kurbo'
-flo_curves = "0.6.1"
-geo = "0.24.1"
-glam = { version = "0.22.0", features = ["approx"] }
-image = { version = "0.24", features = ["bmp", "jpeg"] }
-itertools = "0.10.5"
-paste = "1.0.12"
-png = "0.17.7"
-rand = "0.8.5"
-redis = { version = "0.23.0", optional = true }
-resvg = { version = "0.32.0", optional = true, default-features = false }
-rhai = { version = "1.12.0", optional = true }
-serde = { version = "1.0.159", optional = true }
-static_assertions = "1.1.0"
+approx = { workspace = true }
+cairo-rs = { workspace = true, optional = true }
+concat-idents = { workspace = true }
+flo_curves = { workspace = true } # TODO Maybe replace flo_curve with 'kurbo'
+geo = { workspace = true }
+glam = { workspace = true, features = ["approx"] }
+image = { workspace = true, features = ["bmp", "jpeg"] }
+itertools = { workspace = true }
+paste = { workspace = true }
+png = { workspace = true }
+rand = { workspace = true }
+redis = { workspace = true, optional = true }
+resvg = { workspace = true, optional = true }
+rhai = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+static_assertions = { workspace = true }
 thiserror = { workspace = true }
-uuid = { version = "1.2.2", default-features = false, features = [
+uuid = { workspace = true, features = [
     "v4",
     "fast-rng",
     "js",
-] }
+] } # TODO remove this features for default
 
 [dev-dependencies]
 anyhow = { workspace = true }
-image-compare = "0.2.3"
-itertools = "0.10.5"
-strum = { version = "0.24", features = ["derive"] }
+image-compare = { workspace = true }
+itertools = { workspace = true }
+strum = { workspace = true, features = ["derive"] }
 
 [features]
 default = ["resvg"]

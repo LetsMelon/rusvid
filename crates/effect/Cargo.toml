@@ -13,16 +13,16 @@ repository.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-itertools = "0.10.5"
-log = "0.4.17"
-rayon = "1.7.0"
-rhai = { version = "1.12.0", optional = true }
+itertools = { workspace = true }
+log = { workspace = true }
+rayon = { workspace = true }
+rhai = { workspace = true, optional = true }
 rusvid_core = { path = "../core", version = "0.2.0" }
 thiserror = { workspace = true }
 
 [dev-dependencies]
-criterion = "0.4"
-rand = "0.8.5"
+criterion = { workspace = true }
+rand = { workspace = true }
 
 [features]
 default = ["scripting"]

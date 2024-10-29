@@ -10,9 +10,9 @@ repository.workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
-chrono = "0.4.24"
-fern = "0.6.1"
-log = "0.4"
+chrono = { workspace = true }
+fern = { workspace = true }
+log = { workspace = true }
 rusvid_lib = { path = "../rusvid_lib", version = "0.2.0", features = [
     "remote_renderer",
     "save_load",
