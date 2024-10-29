@@ -15,6 +15,12 @@ use rusvid_core::point::Point;
 
 const SIZE: u32 = 300;
 
+#[cfg(not(feature = "cairo"))]
+fn main() {
+    eprintln!("Could not perform the because the feature 'cairo' must be enabled")
+}
+
+#[cfg(feature = "cairo")]
 fn main() {
     let mut svg = SvgHolder::new();
 
