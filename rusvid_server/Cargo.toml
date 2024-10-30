@@ -40,7 +40,7 @@ tokio = { version = "1.28.0", features = [
     "parking_lot",
 ] }
 tokio-util = "0.7.7"
-tower = { version = "0.4.13" }
+tower = { version = "0.5.0" }
 tower-http = { version = "0.4.0", features = [
     "compression-full",
     "cors",
