@@ -46,7 +46,7 @@ uuid = { version = "1.2.2", default-features = false, features = [
 [dev-dependencies]
 anyhow = { workspace = true }
 image-compare = "0.2.3"
-itertools = "0.10.5"
+itertools = "0.14.0"
 strum = { version = "0.24", features = ["derive"] }
 
 [features]
